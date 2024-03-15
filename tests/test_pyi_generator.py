@@ -35,7 +35,8 @@ class TestPyiGenerator:
         pyi_generator.reset()
 
     @pytest.mark.parametrize(
-        "file, expected_mypy_success", (["ok.py", True], ["not_ok.py", False])
+        "file, expected_mypy_success",
+        (["ok.py", True], ["key_missing.py", False], ["wrong_value_type", False]),
     )
     def test(self, file: str, expected_mypy_success: bool, mypy: Mypy) -> None:
         """
