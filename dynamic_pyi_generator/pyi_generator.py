@@ -143,6 +143,7 @@ class PyiGenerator:
 
     @final
     def _add_overload_to_this_file_pyi(self, new_class: str) -> None:
+        # First time the function is called it will attach an extra @overload decorator
         if not self.this_file_pyi.search_decorator("overload"):
             method_name = "load"
             idx = self.this_file_pyi.search_method(

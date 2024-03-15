@@ -13,7 +13,8 @@ def parse(dct: Mapping[str, Any], new_class: str) -> str:
     Returns:
         str: The string representation of the generated TypedDict class.
     """
-    header = "from typing import TypedDict"
+    header = "from __future__ import annotations\n"
+    header += "from typing import TypedDict"
     return header + _parse(dct, new_class)
 
 

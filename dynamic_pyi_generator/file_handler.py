@@ -68,7 +68,6 @@ class FileHandler:
     def search_method(
         self, method_name: str, *, return_index_above_decorator: bool = True
     ) -> List[int]:
-        print("CALLED")
         lst: List[int] = []
         for idx, line in enumerate(self.lines):
             if line.strip().startswith(f"def {method_name}") and not self.it_is_string(

@@ -238,7 +238,6 @@ if TYPE_CHECKING:
         file_handler.replace_assignement(label, value)
 
         if isinstance(label, str):
-            print(label)
             assignments = file_handler.search_assignment(label)
             if not assignments:
                 raise ValueError("No assignments were found")
