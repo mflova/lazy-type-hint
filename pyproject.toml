@@ -8,8 +8,6 @@ packages = [{include = "dynamic_pyi_generator"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pyyaml = "^6.0.1"
-pytest-clarity = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.9.0"
@@ -18,6 +16,7 @@ pytest = "7.4.4"  # Testing
 codespell = "2.2.6"  # Spell checker
 black = "23.12.1"  # Autoformatter
 typing_extensions = "*"
+pytest-clarity = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -30,6 +29,7 @@ target-version = ["py38"]
 
 [tool.mypy]
 ignore_missing_imports = true
+exclude = ["build"]
 python_version = "3.8"
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -41,7 +41,7 @@ strict_equality = true  # If a comparison does not make sense from the point of 
 line-length = 90
 target-version = "py38"
 lint.select = ["F", "E", "I", "N", "D", "UP", "YTT", "ASYNC", "BLE", "B", "A", "C4", "T10", "DJ", "EXE", "ISC", "ICN", "G", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "INT", "ARG", "FIX", "PD", "PGH", "PL", "FLY", "NPY", "AIR", "RUF"]
-lint.ignore = ["FIX002", "SIM102", "EM101", "PLR", "D100", "D103", "C419", "D104", "D105", "D212", "PGH003", "RUF001", "D101", "PD901", "C405", "UP015", "PLC0414", "I001", "NPY002", "D102", "D107", "PT023", "B027", "UP007", "PIE808", "PD011", "SIM115"]
+lint.ignore = ["FIX002", "SIM102", "EM101", "PLR", "D100", "D103", "C419", "D104", "D105", "D212", "PGH003", "RUF001", "D101", "PD901", "C405", "UP015", "PLC0414", "I001", "NPY002", "D102", "D107", "PT023", "B027", "UP007", "PIE808", "PD011", "SIM115", "PT006", "PT007", "F811"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Docstring convention. Accepts: "google", "numpy", or "pep257".
