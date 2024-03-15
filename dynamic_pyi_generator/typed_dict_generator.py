@@ -1,9 +1,21 @@
 from collections.abc import Mapping
-from typing import Any, Set, List, Tuple
+from typing import Any, List, Tuple
+
 
 def parse(dct: Mapping[str, Any], new_class: str) -> str:
+    """
+    Parses a dictionary and generates a string representation of a TypedDict class.
+
+    Args:
+        dct (Mapping[str, Any]): The dictionary to parse.
+        new_class (str): The name of the new TypedDict class.
+
+    Returns:
+        str: The string representation of the generated TypedDict class.
+    """
     header = "from typing import TypedDict"
     return header + _parse(dct, new_class)
+
 
 def _parse(dct: Mapping[str, Any], new_class: str) -> str:
     tab = "    "

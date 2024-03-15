@@ -1,12 +1,23 @@
+import importlib
 import os
-import shutil
-from collections.abc import Mapping
 import re
+import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Final, Literal, Union, final, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Final,
+    Literal,  # noqa: F401
+    Set,
+    TypeVar,
+    Union,  # noqa: F401
+    final,
+    overload,  # noqa: F401
+)
 
-
+import dynamic_pyi_generator
 from dynamic_pyi_generator.typed_dict_generator import parse
+from dynamic_pyi_generator.typed_dict_validator import validate_dict
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -14,8 +25,10 @@ if TYPE_CHECKING:
 THIS_DIR = Path(__file__).parent
 
 
-class PyiGeneratorError(Exception):
-    ...
+class PyiGeneratorError(Exception): ...
+
+
+MappingT = TypeVar("MappingT", bound=dict)
 
 
 class PyiGenerator:
@@ -33,7 +46,7 @@ class PyiGenerator:
         else:
             self.loaded_pyi_content = self.loader_pyi_path.read_text(encoding="utf-8")
 
-    def get_classes_added(self) -> set[str]:
+    def get_classes_added(self) -> Set[str]:
         to_find = "classes_created"
         for line in self.loaded_pyi_content.split("\n"):
             if "classes_created" in line:
@@ -44,23 +57,38 @@ class PyiGenerator:
         value = line.split("=")[-1].strip()
         if value == "Any":
             return set()
-        else:
-            pattern = r'"(.*?)"'
-            matches = re.findall(pattern, value)
-            return set(matches)
+        pattern = r'"(.*?)"'
+        matches = re.findall(pattern, value)
+        return set(matches)
 
     @staticmethod
-    def _find_line_idx(string: str,*, keyword: str) -> int:
+    def _find_line_idx(string: str, *, keyword: str) -> int:
         for idx, line in enumerate(string.split("\n")):
             if keyword in line:
                 return idx
-        raise PyiGeneratorError(f"It was not possible to find {keyword} among the lines of the given string.")
+        raise PyiGeneratorError(
+            f"It was not possible to find {keyword} among the lines of the given string."
+        )
 
-    def load(self, dct: Mapping[str, Any], class_type: str) -> Any:
+    def load(self, dct: MappingT, class_type: str) -> MappingT:
         if class_type not in self.get_classes_added():
-            string = parse(dct, new_class=class_type)
-            self.create_custom_class_pyi(string, class_type)
+            typed_dict_representation = parse(dct, new_class=class_type)
+            self.create_custom_class_pyi(typed_dict_representation, class_type)
             self.add_new_class_to_loader_pyi(class_type)
+        else:
+            modulo = importlib.import_module(
+                f"{dynamic_pyi_generator.__name__}.{self.custom_class_dir}.{class_type}"
+            )
+            typed_dict_class = getattr(modulo, class_type)
+            if not validate_dict(dct, typed_dict_class):
+                raise PyiGeneratorError(
+                    f"An attempt to load a dictionary with an already existing class "
+                    f"type ({class_type}) has been made. However, the given dictionary"
+                    " is not compliant with the given class type. Possible solutions:"
+                    " 1) Create a new interface by modifying `class_type` input "
+                    "argument, 2) reset all the interfaces with `reset` or 3) make the"
+                    " dictionary compliant."
+                )
         return dct
 
     def reset(self) -> None:
@@ -70,11 +98,11 @@ class PyiGenerator:
     @final
     def generate_loader_pyi(self) -> str:
         content = Path(__file__).read_text()
-        
+
         # Prepend @overload decorator to load function
         idx = self._find_line_idx(content, keyword="def load(")
         lines = content.split("\n")
-        
+
         lines.insert(idx, f"{self.tab}@overload")
         return "\n".join(lines)
 
@@ -83,7 +111,7 @@ class PyiGenerator:
         if not custom_class_dir.exists():
             os.makedirs(custom_class_dir)
 
-        path = custom_class_dir / f"{class_name}.pyi"
+        path = custom_class_dir / f"{class_name}.py"
         path.write_text(string)
 
     @final
@@ -113,7 +141,10 @@ class PyiGenerator:
 
     @final
     def _add_overload_to_loader_pyi(self, new_class: str) -> None:
-        string = f"""{self.tab}@overload\n{self.tab}def load(self, dct: Mapping[str, Any], class_type: Literal["{new_class}"]) -> {new_class}:\n{self.tab*2}...\n"""
+        string = (
+            f"{self.tab}@overload\n{self.tab}def load(self, dct: Mapping[str, Any], "
+            f'class_type: Literal["{new_class}"]) -> {new_class}:\n{self.tab*2}...\n'
+        )
 
         lines = self.loaded_pyi_content.split("\n")
         # If there are not any overloads:
@@ -123,7 +154,9 @@ class PyiGenerator:
 
         # If there are existing overloads:
         else:
-            line_found = self._find_line_idx(self.loaded_pyi_content, keyword="def load(") - 1
+            line_found = (
+                self._find_line_idx(self.loaded_pyi_content, keyword="def load(") - 1
+            )
         lines.insert(line_found, string)
         self.loaded_pyi_content = "\n".join(lines)
         self.update_loader_pyi()
@@ -151,8 +184,8 @@ class PyiGenerator:
         new_line = lines[idx_line_found].split("=")
         new_line[-1] = f"= {value}"
 
-        new_line = "".join(new_line)
-        lines[idx] = new_line
+        new_line_ = "".join(new_line)
+        lines[idx] = new_line_
         self.loaded_pyi_content = "\n".join(lines)
         self.update_loader_pyi()
 
