@@ -1,0 +1,50 @@
+# Tools that `check_code.py` will run. Keys that can be defined:
+# tool [MANDATORY]: Tool that will bee used. Must be in dev dependencies from poetry.
+# tool_desc: Description of the tool that will be printed.
+# suggestions: Suggestions about what to do it tool fails
+# extra_args: Extra arguments that will be passed after {tool} keyword.
+# ignore: From the returned string when the tool fails, lines that have these words will be removed from the output.
+# only_include: From the returned string when the tool fails, only these lines containing these strings will be
+#   included.
+# pass_if_output_contains: Although the return code might be ERROR, it will be considered OK if the output string
+#   contains any of these strings.
+
+- tool: codespell
+  path: tests dynamic_pyi_generator
+  tool_desc: Check for typos
+  suggestions: Fix typos found by the tool
+
+- tool: black
+  path: .
+  extra_args: --check
+  tool_desc: Check format of the Python code
+  suggestions: Run `poetry run black .` before calling the script to reformat code and fix it automatically
+  ignore:  # These lines were just too verbosed, so they are just ignored
+    - Skipping .ipynb
+    - You can fix this by running
+    - Oh no
+
+- tool: ruff
+  path: .
+  extra_args: check
+  tool_desc: Statically check Python code
+  suggestions:
+    [
+      "Address all problems highlighted by the tool",
+      "If you need a description for the rule, call `poetry run ruff rule <RULE_CODE>`",
+      "If it is a false positive, add `# noqa: <RULE_CODE>` next to the triggering line",
+    ]
+
+- tool: mypy
+  path: .
+  tool_desc: Check type coherency within the Python code
+  suggestions:
+    [
+      "There seems to be type inconsistencies",
+      "If it is a false positive, add `# type: ignore` next to the triggering line",
+    ]
+
+- tool: pytest
+  extra_args: --tb=line
+  tool_desc: Launch all tests in the repository
+  suggestions: Not all tests passed. Run `poetry run pytest -vv` to get a better colored output

@@ -214,10 +214,12 @@ if TYPE_CHECKING:
         in_type_checking_block: bool,
         expected_string: str,
     ) -> None:
-        file_handler = FileHandler("""import C
+        file_handler = FileHandler(
+            """import C
 
 if TYPE_CHECKING:
-    import D""")
+    import D"""
+        )
         file_handler.add_imports(imports, in_type_checking_block=in_type_checking_block)
         assert str(file_handler) == expected_string
 

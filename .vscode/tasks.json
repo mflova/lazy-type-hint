@@ -1,0 +1,154 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run all tools (linting + testing)",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "check_code.py"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run black formatter",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m",
+                "poetry",
+                "run",
+                "black",
+                ".",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run only testing tools",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "check_code.py",
+                "--only-run-tools",
+                "pytest",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run linting tools",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m",
+                "poetry",
+                "run",
+                "python",
+                "check_code.py",
+                "--single-tool",
+                "${input:linters}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+): (.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                }
+            },
+            "isBackground": false,
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "Automated linting before pushing",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m",
+                "poetry",
+                "run",
+                "python",
+                "check_code.py",
+                "--auto-linting",
+                "${input:hook_options}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+): (.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                }
+            },
+            "isBackground": false,
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+    ],
+    "inputs": [
+        {
+            "id": "linters",
+            "type": "pickString",
+            "description": "Select an option",
+            "options": [
+                "All linters below",
+                "Ruff (check code by syntax)",
+                "Mypy (check Python type hints coherency)",
+                "Black (check format of the python files)",
+                "Codespell (check for typos)",
+            ]
+        },
+        {
+            "id": "hook_options",
+            "type": "pickString",
+            "description": "Select an option",
+            "options": [
+                "Enable",
+                "Disable",
+            ]
+        },
+    ]
+}

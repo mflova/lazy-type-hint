@@ -7,7 +7,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
-    Literal,  # noqa: F401
+    Literal,
     Set,
     TypeVar,
     Union,  # noqa: F401
@@ -17,7 +17,7 @@ from typing import (
 
 import dynamic_pyi_generator
 from dynamic_pyi_generator.file_handler import FileHandler
-from dynamic_pyi_generator.typed_dict_generator import parse
+from dynamic_pyi_generator.typed_dict_generator import Parser
 from dynamic_pyi_generator.typed_dict_validator import validate_dict
 
 if TYPE_CHECKING:
@@ -26,7 +26,8 @@ if TYPE_CHECKING:
 THIS_DIR = Path(__file__).parent
 
 
-class PyiGeneratorError(Exception): ...
+class PyiGeneratorError(Exception):
+    ...
 
 
 MappingT = TypeVar("MappingT", bound=dict)
@@ -74,11 +75,29 @@ class PyiGenerator:
             f"It was not possible to find {keyword} among the lines of the given string."
         )
 
-    def load(self, dct: MappingT, class_type: str) -> MappingT:
+    @classmethod
+    def from_dct(
+        cls,
+        dct: MappingT,
+        class_type: str,
+        *,
+        type_hint_lists_as_sequences: bool = False,
+        type_hint_strategy_for_list_elements: Literal["Any", "object", "Union"] = "Union",
+        type_hint_strategy_for_tuple_elements: Literal[
+            "Any", "object", "fix size"
+        ] = "fix size",
+    ) -> MappingT:
+        self = cls()
         if class_type not in self.get_classes_added():
-            typed_dict_representation = parse(dct, new_class=class_type)
+            typed_dict_representation = Parser(
+                type_hint_lists_as_sequences=type_hint_lists_as_sequences,
+                type_hint_strategy_for_list_elements=type_hint_strategy_for_list_elements,
+                type_hint_strategy_for_tuple_elements=type_hint_strategy_for_tuple_elements,
+            ).parse(dct, new_class=class_type)
             self.create_custom_class_pyi(typed_dict_representation, class_type)
-            self.add_new_class_to_loader_pyi(class_type)
+            self.add_new_class_to_loader_pyi(
+                new_class=class_type, method_name=self.from_dct.__name__
+            )
         else:
             module = importlib.import_module(
                 f"{dynamic_pyi_generator.__name__}.{self.custom_class_dir}.{class_type}"
@@ -95,7 +114,9 @@ class PyiGenerator:
                 )
         return dct
 
-    def reset(self) -> None:
+    @classmethod
+    def reset(cls) -> None:
+        self = cls()
         self.reset_custom_class_pyi()
         self.reset_loader_pyi()
 
@@ -117,10 +138,10 @@ class PyiGenerator:
         path.write_text(string)
 
     @final
-    def add_new_class_to_loader_pyi(self, new_class: str) -> None:
+    def add_new_class_to_loader_pyi(self, *, new_class: str, method_name: str) -> None:
         self._add_class_created_to_this_file_pyi(new_class)
         self._add_import_to_this_file_pyi(new_class)
-        self._add_overload_to_this_file_pyi(new_class)
+        self._add_overload_to_this_file_pyi(new_class=new_class, method_name=method_name)
 
     @final
     def reset_loader_pyi(self) -> None:
@@ -142,10 +163,9 @@ class PyiGenerator:
         self.update_this_file_pyi()
 
     @final
-    def _add_overload_to_this_file_pyi(self, new_class: str) -> None:
+    def _add_overload_to_this_file_pyi(self, *, new_class: str, method_name: str) -> None:
         # First time the function is called it will attach an extra @overload decorator
         if not self.this_file_pyi.search_decorator("overload"):
-            method_name = "load"
             idx = self.this_file_pyi.search_method(
                 method_name, return_index_above_decorator=True
             )
@@ -155,14 +175,14 @@ class PyiGenerator:
             self.this_file_pyi.add_line(idx[-1], f"{self.tab}@overload")
 
         string = (
-            f"{self.tab}@overload\n{self.tab}def load(self, dct: MappingT, "
-            f'class_type: Literal["{new_class}"]) -> {new_class}:\n{self.tab*2}...\n'
+            f"{self.tab}@overload\n{self.tab}@classmethod\n{self.tab}def {method_name}"
+            f'(self, dct: MappingT, class_type: Literal["{new_class}"]) -> '
+            f"{new_class}:\n{self.tab*2}...\n"
         )
 
         lines_found = self.this_file_pyi.search_method(
-            "load", return_index_above_decorator=True
+            method_name, return_index_above_decorator=True
         )
-
         self.this_file_pyi.add_line(lines_found[-1], string)
         self.update_this_file_pyi()
 

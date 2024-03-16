@@ -6,5 +6,5 @@ dct = {
     "nested_dict": {"key1": "value1", "key2": "value2"},
 }
 
-data = PyiGenerator().load(dct, class_type="Example")
-"a" + data["int"]  # Mypy should raise error here
+data = PyiGenerator.from_dct(dct, class_type="Example")
+data["new_key"]  # Mypy should raise error here

@@ -24,12 +24,12 @@ class FileHandler:
     @overload
     def search_assignment(
         self, variable: str, only_values: Literal[False] = False
-    ) -> List[Tuple[int, str]]: ...
+    ) -> List[Tuple[int, str]]:
+        ...
 
     @overload
-    def search_assignment(
-        self, variable: str, only_values: Literal[True]
-    ) -> List[str]: ...
+    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
+        ...
 
     def search_assignment(
         self, variable: str, only_values: bool = False
@@ -75,7 +75,7 @@ class FileHandler:
             ):
                 if return_index_above_decorator:
                     while "@" in self.lines[idx - 1]:
-                        idx = idx - 1
+                        idx = idx - 1  # noqa: PLW2901
                 lst.append(idx)
         return lst
 

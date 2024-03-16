@@ -17,6 +17,8 @@ codespell = "2.2.6"  # Spell checker
 black = "23.12.1"  # Autoformatter
 typing_extensions = "*"
 pytest-clarity = "^1.0.1"
+pyyaml = "*"  # Used by the `check_code.py` script
+types-pyyaml = "*"
 
 [build-system]
 requires = ["poetry-core"]
@@ -26,10 +28,14 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 90
 target-version = ["py38"]
+include = 'dynamic_pyi_generator/.*\.py$|tests/.*\.py$|check_code\.py$'
+force_exclude = """test_files/"""
+exclude = """test_files/"""
+
 
 [tool.mypy]
 ignore_missing_imports = true
-exclude = ["build"]
+exclude = ["build", "test_files"]
 python_version = "3.8"
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -41,7 +47,7 @@ strict_equality = true  # If a comparison does not make sense from the point of 
 line-length = 90
 target-version = "py38"
 lint.select = ["F", "E", "I", "N", "D", "UP", "YTT", "ASYNC", "BLE", "B", "A", "C4", "T10", "DJ", "EXE", "ISC", "ICN", "G", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "INT", "ARG", "FIX", "PD", "PGH", "PL", "FLY", "NPY", "AIR", "RUF"]
-lint.ignore = ["FIX002", "SIM102", "EM101", "PLR", "D100", "D103", "C419", "D104", "D105", "D212", "PGH003", "RUF001", "D101", "PD901", "C405", "UP015", "PLC0414", "I001", "NPY002", "D102", "D107", "PT023", "B027", "UP007", "PIE808", "PD011", "SIM115", "PT006", "PT007", "F811"]
+lint.ignore = ["FIX002", "SIM102", "EM101", "PLR", "D100", "D103", "C419", "D104", "D105", "D212", "PGH003", "RUF001", "D101", "PD901", "C405", "UP015", "PLC0414", "I001", "NPY002", "D102", "D107", "PT023", "B027", "UP007", "PIE808", "PD011", "SIM115", "PT006", "PT007", "F811", "UP006", "RET505", "PLW1510"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Docstring convention. Accepts: "google", "numpy", or "pep257".
