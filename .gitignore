@@ -1,5 +1,4 @@
 *.lock
 *.venv
 *.pyc
-*.pyi
 *build

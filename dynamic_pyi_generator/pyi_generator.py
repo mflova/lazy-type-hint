@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 from pathlib import Path
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -11,12 +12,14 @@ from typing import (
     Literal,  # noqa: F401
     Mapping,
     Sequence,
+    Tuple,
     TypeVar,
     Union,  # noqa: F401
     final,
     overload,  # noqa: F401
 )
 
+import dynamic_pyi_generator
 from dynamic_pyi_generator.file_handler import FileHandler
 from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.type_aliases import (
@@ -32,8 +35,7 @@ if TYPE_CHECKING:
 THIS_DIR = Path(__file__).parent
 
 
-class PyiGeneratorError(Exception):
-    ...
+class PyiGeneratorError(Exception): ...
 
 
 # DataT = TypeVar("MappingT", bound=dict)
@@ -48,12 +50,15 @@ class PyiGenerator:
     """.pyi representation of this same module."""
     this_file_pyi_path: Path
     """Path to the .pyi file associated to this same module."""
+    custom_classes_dir: Tuple[Union[ModuleType, str], ...]
+    """Hold the information where the class interfaces will be created.
+    
+    First one is `ModuleType`. Following ones are strings. At least one must be provided.
+    """
 
     # Constants that should not be modified
     classes_created: "TypeAlias" = Any
     """Classes created by the class. Do not modify."""
-    custom_class_dir_name: Final = "build"
-    """Name of the direcotry that will contain all the generated stubs."""
     tab: Final = "    "
     """Tabs used whenever an indent is needed."""
     methods_to_be_overloaded: Final = ("from_data", "from_file")
@@ -66,7 +71,15 @@ class PyiGenerator:
         type_hint_lists_as_sequences: LIST_STRATEGIES = "list",
         type_hint_strategy_for_list_elements: LIST_ELEMENT_STRATEGIES = "Union",
         type_hint_strategy_for_tuple_elements: TUPLE_STRATEGIES = "fix size",
+        generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...] = (
+            dynamic_pyi_generator,
+            "build",
+        ),
     ) -> None:
+        # Validation
+        self._validate_classes_custom_dir(generated_classes_custom_dir)
+        self.custom_classes_dir = generated_classes_custom_dir
+
         self.this_file_pyi_path = Path(__file__).with_suffix(".pyi")
         if not self.this_file_pyi_path.exists():
             self.this_file_pyi = self._generate_this_file_pyi()
@@ -82,6 +95,34 @@ class PyiGenerator:
             )
         )
 
+    @staticmethod
+    def _validate_classes_custom_dir(
+        generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...],
+    ) -> None:
+        arg_name = "generated_classes_custom_dir"
+        if not isinstance(generated_classes_custom_dir[0], ModuleType):
+            raise PyiGeneratorError(
+                f"First element of `{arg_name}` must be a `ModuleType` that can be imported within your current Python environment."
+            )
+        if len(generated_classes_custom_dir) == 1:
+            raise PyiGeneratorError(
+                f"`{arg_name}` must have at least first element of type `ModuleType` and a second one being a string."
+            )
+        if not all(
+            isinstance(element, str) for element in generated_classes_custom_dir[1:]
+        ):
+            raise PyiGeneratorError(
+                f"All elements of `{arg_name}` (but the first one) must be strings."
+            )
+
+        if any(
+            re.compile(r"[^a-zA-Z0-9_]").search(str(string))
+            for string in generated_classes_custom_dir[1:]
+        ):
+            raise PyiGeneratorError(
+                f"All strings provided in `{arg_name}` must contain only alphanumeric or underscores. They must be compliant with the Python module naming rules."
+            )
+
     def _get_classes_added(self) -> Mapping[str, Path]:
         to_find = "classes_created"
         values = self.this_file_pyi.search_assignment("classes_created", only_values=True)
@@ -89,16 +130,16 @@ class PyiGenerator:
             raise PyiGeneratorError(f"No `{to_find}` was found in this file.")
 
         if values[0] == "Any":
-            return set()
+            return {}
         matches = re.findall(r'"(.*?)"', values[0])
 
-        dct: Dict[str, str] = {}
+        dct: Dict[str, Path] = {}
         for match in matches:
-            path = Path(self._custom_class_dir / f"{match}.py")
+            path = Path(self._custom_class_dir_path / f"{match}.py")
             if not path.exists():
                 raise PyiGeneratorError(
                     f"A class `{match}` was apparently created but cannot find its "
-                    f"corresponding source code within {self._custom_class_dir}"
+                    f"corresponding source code within {self._custom_class_dir_path}"
                 )
             dct[match] = path
         return dct
@@ -162,14 +203,17 @@ class PyiGenerator:
         return file_handler
 
     @property
-    def _custom_class_dir(self) -> Path:
-        return Path(__file__).parent / self.custom_class_dir_name
+    def _custom_class_dir_path(self) -> Path:
+        path = Path(self.custom_classes_dir[0].__path__[0])
+        for string in self.custom_classes_dir[1:]:
+            path = path / string
+        return path
 
     def _create_custom_class_pyi(self, string: str, class_name: str) -> None:
-        if not self._custom_class_dir.exists():
-            os.makedirs(self._custom_class_dir)
+        if not self._custom_class_dir_path.exists():
+            os.makedirs(self._custom_class_dir_path)
 
-        path = self._custom_class_dir / f"{class_name}.py"
+        path = self._custom_class_dir_path / f"{class_name}.py"
         path.write_text(string)
 
     @final
@@ -183,14 +227,14 @@ class PyiGenerator:
 
     @final
     def _reset_custom_class_pyi(self) -> None:
-        path = Path(__file__).parent / self.custom_class_dir_name
-        if path.exists():
-            shutil.rmtree(path)
+        if self._custom_class_dir_path.exists():
+            shutil.rmtree(self._custom_class_dir_path)
 
     @final
     def _add_import_to_this_file_pyi(self, new_class: str) -> None:
+        import_statement = f"from {self.custom_classes_dir[0].__name__}.{'.'.join(self.custom_classes_dir[1:])}.{new_class} import {new_class}"
         self.this_file_pyi.add_imports(
-            f"from .build.{new_class} import {new_class}",
+            import_statement,
             in_type_checking_block=True,
         )
         self._update_this_file_pyi()
@@ -203,13 +247,13 @@ class PyiGenerator:
         if not self.this_file_pyi.search_decorator(
             decorator_name="overload", method_name=method_name
         ):
-            idx = self.this_file_pyi.search_method(
+            idx_lst = self.this_file_pyi.search_method(
                 method_name, return_index_above_decorator=True
             )
-            if not idx:
+            if not idx_lst:
                 raise PyiGeneratorError(f"No method `{method_name}` could be found")
 
-            self.this_file_pyi.add_line(idx[-1], f"{self.tab}@overload")
+            self.this_file_pyi.add_line(idx_lst[-1], f"{self.tab}@overload")
 
         signature, _ = self.this_file_pyi.get_signature(method_name)
 
