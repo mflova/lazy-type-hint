@@ -1,8 +1,6 @@
-import importlib
 import os
 import re
 import shutil
-from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -10,18 +8,15 @@ from typing import (
     Callable,
     Dict,
     Final,
-    List,
-    Literal,
+    Literal,  # noqa: F401
     Mapping,
     Sequence,
-    Set,
     TypeVar,
     Union,  # noqa: F401
     final,
     overload,  # noqa: F401
 )
 
-import dynamic_pyi_generator
 from dynamic_pyi_generator.file_handler import FileHandler
 from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.type_aliases import (
@@ -30,7 +25,6 @@ from dynamic_pyi_generator.type_aliases import (
     TUPLE_STRATEGIES,
 )
 from dynamic_pyi_generator.typed_dict_generator import Parser
-from dynamic_pyi_generator.typed_dict_validator import validate_dict
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -38,7 +32,8 @@ if TYPE_CHECKING:
 THIS_DIR = Path(__file__).parent
 
 
-class PyiGeneratorError(Exception): ...
+class PyiGeneratorError(Exception):
+    ...
 
 
 # DataT = TypeVar("MappingT", bound=dict)
@@ -102,7 +97,8 @@ class PyiGenerator:
             path = Path(self._custom_class_dir / f"{match}.py")
             if not path.exists():
                 raise PyiGeneratorError(
-                    f"A class `{match}` was apparently created but cannot find its corresponding source code within {self._custom_class_dir}"
+                    f"A class `{match}` was apparently created but cannot find its "
+                    f"corresponding source code within {self._custom_class_dir}"
                 )
             dct[match] = path
         return dct

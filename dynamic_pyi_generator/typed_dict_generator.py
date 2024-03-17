@@ -1,8 +1,8 @@
+from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import (
     Any,
     Callable,
-    Dict,
     FrozenSet,
     Iterable,
     List,
@@ -22,6 +22,7 @@ from dynamic_pyi_generator.strategies import Strategies
 class Parser:
     strategies: Strategies
     imports: Set[str] = field(default_factory=set, init=False)
+    tab: str = field(default="    ", init=False)
 
     def parse(self, data: Union[Mapping[str, Any], Sequence[Any]], new_class: str) -> str:
         """
@@ -42,31 +43,128 @@ class Parser:
     def _parse(
         self, data: Union[Mapping[str, Any], Sequence[Any]], new_class: str
     ) -> str:
-        if not isinstance(data, dict):
-            data = cast(Sequence[object], data)
-            if self._sequence_contains_same_dicts(data):
-                element_type = f"{new_class}Key"
-                string = self._parse(data[0], new_class=element_type)  # type: ignore
-                string += f"\n\n{new_class} = {self._get_type_hint_sequence(data, override_element_type=element_type)}"
-                return string
-            else:
-                return f"\n\n{new_class}= {self._get_type_hint(data)}"
+        if isinstance(data, dict):
+            return self._parse_dict(data, new_class=new_class)
+        return self._parse_list(data, new_class=new_class)  # type: ignore
 
-        tab = "    "
+    def _parse_list(self, data: Sequence[Mapping[str, Any]], new_class: str) -> str:
+        """
+        Parses a list of data and generates the corresponding code for a TypedDict.
+
+        If some keys are not present in all elements within the sequence, these would be
+        type hinted as `NotRequired`
+
+        Args:
+            data (Sequence[Any]): The list of data to be parsed.
+            new_class (str): The name of the new class to be created.
+
+        Returns:
+            str: The generated code for the TypedDict.
+
+        """
+        if self._sequence_contains_same_dicts(data):
+            element_type = f"{new_class}Key"
+            string = self._parse(data[0], new_class=element_type)
+            type_hint_sequence = self._get_type_hint_sequence(
+                data, override_element_type=element_type
+            )
+            string += f"\n\n{new_class} = {type_hint_sequence}"
+            return string
+        else:  # Create TypedDict with NotRequired keys
+            string = f"\n\nclass {new_class}(TypedDict):"
+            to_process: List[Tuple[str, Mapping[str, Any]]] = []
+
+            required_keys = self.get_keys_in_common(data)
+            not_required_keys = self.get_keys_not_in_common(data)
+
+            for key in required_keys:
+                value = data[0][key]
+                if not isinstance(value, dict):
+                    string += f"\n{self.tab}{key}: {self._get_type_hint(value)}"
+                else:
+                    class_to_be_created = new_class + key.capitalize()
+                    string += f"\n{self.tab}{key}: {class_to_be_created}"
+                    to_process.append((class_to_be_created, data[0][key]))
+
+            for key in not_required_keys:
+                for element in data:
+                    with suppress(KeyError):
+                        value = element[key]
+                        break
+
+                self.imports.add("from typing_extensions import NotRequired")
+                if not isinstance(value, dict):
+                    string += (
+                        f"\n{self.tab}{key}: NotRequired[{self._get_type_hint(value)}]"
+                    )
+                else:
+                    class_to_be_created = new_class + key.capitalize()
+                    string += f"\n{self.tab}{key}: NotRequired[{class_to_be_created}]"
+                    to_process.append((class_to_be_created, data[0][key]))
+        return string
+
+    def _parse_dict(self, data: Mapping[str, Any], new_class: str) -> str:
+        """
+        Parses a dictionary and generates a string representation of a TypedDict class.
+
+        Args:
+            data (Mapping[str, Any]): The dictionary to be parsed.
+            new_class (str): The name of the new TypedDict class to be generated.
+
+        Returns:
+            str: A string representation of the generated TypedDict class.
+        """
         string = f"\n\nclass {new_class}(TypedDict):"
         to_process: List[Tuple[str, Mapping[str, Any]]] = []
 
         for key, value in data.items():
             if not isinstance(value, dict):
-                string += f"\n{tab}{key}: {self._get_type_hint(value)}"
+                string += f"\n{self.tab}{key}: {self._get_type_hint(value)}"
             else:
                 class_to_be_created = new_class + key.capitalize()
-                string += f"\n{tab}{key}: {class_to_be_created}"
+                string += f"\n{self.tab}{key}: {class_to_be_created}"
                 to_process.append((class_to_be_created, data[key]))
 
         for class_to_be_created, data in to_process:
             string += self._parse(data, class_to_be_created)
         return string
+
+    @staticmethod
+    def get_keys_not_in_common(data: Sequence[Mapping[str, Any]]) -> Set[str]:
+        """
+        Set of keys that are not present in all the dictionaries in the given data.
+
+        Args:
+            data (Sequence[Mapping[str, Any]]): A sequence of dictionaries.
+
+        Returns:
+            Set[str]: A set of keys that are not present in all the dictionaries.
+
+        """
+        keys_in_common = Parser.get_keys_in_common(data)
+        output: Set[str] = set()
+        for dct in data:
+            for key in dct:
+                if key not in keys_in_common:
+                    output.add(key)
+        return output
+
+    @staticmethod
+    def get_keys_in_common(data: Sequence[Mapping[str, Any]]) -> Set[str]:
+        """
+        Returns a set of keys that are common across all mappings in the given data.
+
+        Args:
+            data (Sequence[Mapping[str, Any]]): A sequence of mappings.
+
+        Returns:
+            Set[str]: A set of keys that are common across all mappings.
+
+        """
+        keys = set(data[0].keys())
+        for item in data[1:]:
+            keys.intersection(item.keys())
+        return set(keys)
 
     @staticmethod
     def _sequence_contains_same_dicts(data: Sequence[Any]) -> bool:
@@ -77,7 +175,8 @@ class Parser:
             data (Sequence[object]): The sequence to check.
 
         Returns:
-            bool: True if all elements in the sequence are dictionaries with the same keys, False otherwise.
+            bool: True if all elements in the sequence are dictionaries with the same
+                keys, False otherwise.
         """
         if any(not isinstance(element, dict) for element in data):
             return False
@@ -88,6 +187,15 @@ class Parser:
         return all(element.keys() == first_element_keys for element in data[1:])
 
     def _get_type_hint(self, value: object) -> str:
+        """
+        Returns the type hint for the given value.
+
+        Args:
+            value (object): The value for which to determine the type hint.
+
+        Returns:
+            str: The type hint for the given value.
+        """
         functions: Mapping[object, Callable[[Any], str]] = {
             list: self._get_type_hint_list,
             tuple: self._get_type_hint_tuple,

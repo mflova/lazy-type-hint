@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 LIST_STRATEGIES = Literal["Sequence", "list"]
 LIST_ELEMENT_STRATEGIES = Literal["Any", "object", "Union"]

@@ -1,8 +1,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from types import MappingProxyType
-from typing import Any, Sequence
+from typing import Any, Final
 
 import pytest
 
@@ -27,8 +26,8 @@ class TestTypedDictGenerator:
         data_test_dir: Path = field(
             default=Path(__file__).parent / "test_files", init=False
         )
-        dct: Mapping[str, Any] = MappingProxyType(
-            {
+        dct: Mapping[str, Any] = field(
+            default_factory=lambda: {
                 "name": "John",
                 "age": 25,
                 "kids": ["Joan", "Peter"],
@@ -106,10 +105,32 @@ class TestTypedDictGenerator:
             f"The generated string is not MYPY compliant: {mypy_output.errors_as_str()}"
         )
         assert mypy_output.success, error
-        assert (
-            generated_str == params_test.get_expected_str()
-        ), "The generated string representation is not same as the expected one"
+        error = (
+            "The generated string representation is not same as the expected one (see "
+            f"{params_test.expected_result})"
+        )
+        assert generated_str == params_test.get_expected_str(), error
 
     def _update_files(self, string: str, params_test: ParamsTest):
         """Method used for developers."""
         Path(params_test.data_test_dir / params_test.expected_result).write_text(string)
+
+
+class TestHelpers:
+    DATA: Final = [
+        {
+            "name": "Manu",
+            "age": 12,
+        },
+        {
+            "name": "Manu",
+            "age": 12,
+            "new_key": "str",
+        },
+    ]
+
+    def test_get_keys_not_in_common(self):
+        assert Parser.get_keys_in_common(self.DATA) == {"name", "age"}
+
+    def test_get_keys_in_common(self):
+        assert Parser.get_keys_not_in_common(self.DATA) == {"new_key"}

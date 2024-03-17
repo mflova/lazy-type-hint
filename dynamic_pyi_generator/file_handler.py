@@ -24,12 +24,12 @@ class FileHandler:
     @overload
     def search_assignment(
         self, variable: str, only_values: Literal[False] = False
-    ) -> List[Tuple[int, str]]: ...
+    ) -> List[Tuple[int, str]]:
+        ...
 
     @overload
-    def search_assignment(
-        self, variable: str, only_values: Literal[True]
-    ) -> List[str]: ...
+    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
+        ...
 
     def search_assignment(
         self, variable: str, only_values: bool = False
@@ -77,8 +77,7 @@ class FileHandler:
                 if f"@{decorator_name}" in self.lines[idx - 1]:
                     output.append(idx - 1)
                     break
-                else:
-                    break
+                break
         return output
 
     def search_method(
@@ -155,7 +154,8 @@ class FileHandler:
         Replaces the value of an assignment line identified by the given label or index.
 
         Args:
-            label (Union[int, str]): The label or index of the assignment line to be replaced.
+            label (Union[int, str]): The label or index of the assignment line to be
+                replaced.
             value (str): The new value to be assigned.
         """
         if not isinstance(label, int):
@@ -279,7 +279,8 @@ class FileHandler:
             lines (Union[str, Sequence[str]]): The import statements to add. It can
                 be a single string or a sequence of strings.
             in_type_checking_block (bool, optional): Specifies whether the import
-                statements should be added inside a type checking block. Defaults to False.
+                statements should be added inside a type checking block.
+                Defaults to False.
         """
         idx = 0
         if isinstance(lines, str):

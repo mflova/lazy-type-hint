@@ -13,7 +13,7 @@ class NewClass(TypedDict):
     kids: List[str]
     favourite_colors: Set[str]
     random_data: List[Union[str, int]]
-    tuple_example: Tuple[Any]
+    tuple_example: Tuple[Any, ...]
     address: NewClassAddress
 
 class NewClassAddress(TypedDict):
