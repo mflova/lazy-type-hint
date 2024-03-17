@@ -71,7 +71,7 @@ class PyiGenerator:
     ) -> None:
         self.this_file_pyi_path = Path(__file__).with_suffix(".pyi")
         if not self.this_file_pyi_path.exists():
-            self.this_file_pyi = self.generate_this_file_pyi()
+            self.this_file_pyi = self._generate_this_file_pyi()
         else:
             self.this_file_pyi = FileHandler(
                 self.this_file_pyi_path.read_text(encoding="utf-8")
@@ -84,7 +84,7 @@ class PyiGenerator:
             )
         )
 
-    def get_classes_added(self) -> Mapping[str, Path]:
+    def _get_classes_added(self) -> Mapping[str, Path]:
         to_find = "classes_created"
         values = self.this_file_pyi.search_assignment("classes_created", only_values=True)
         if not values:
@@ -96,10 +96,10 @@ class PyiGenerator:
 
         dct: Dict[str, str] = {}
         for match in matches:
-            path = Path(self.custom_class_dir / f"{match}.py")
+            path = Path(self._custom_class_dir / f"{match}.py")
             if not path.exists():
                 raise PyiGeneratorError(
-                    f"A class `{match}` was apparently created but cannot find its corresponding source code within {self.custom_class_dir}"
+                    f"A class `{match}` was apparently created but cannot find its corresponding source code within {self._custom_class_dir}"
                 )
             dct[match] = path
         return dct
@@ -130,10 +130,10 @@ class PyiGenerator:
         class_type: str,
     ) -> MappingT:
         typed_dict_representation = self.parser.parse(dct, new_class=class_type)
-        classes_added = self.get_classes_added()
+        classes_added = self._get_classes_added()
         if class_type not in classes_added:
-            self.create_custom_class_pyi(typed_dict_representation, class_type)
-            self.add_new_class_to_loader_pyi(new_class=class_type)
+            self._create_custom_class_pyi(typed_dict_representation, class_type)
+            self._add_new_class_to_loader_pyi(new_class=class_type)
         else:
             if typed_dict_representation != classes_added[class_type].read_text():
                 raise PyiGeneratorError(
@@ -147,31 +147,34 @@ class PyiGenerator:
         return dct
 
     def reset(self) -> None:
-        self.reset_custom_class_pyi()
-        self.reset_loader_pyi()
+        self._reset_custom_class_pyi()
+        self.this_file_pyi = self._generate_this_file_pyi()
+        self._update_this_file_pyi()
 
     @final
-    def generate_this_file_pyi(self) -> FileHandler:
+    def _generate_this_file_pyi(self) -> FileHandler:
         content = Path(__file__).read_text()
 
         # Prepend @overload decorator to load function
         file_handler = FileHandler(content)
         file_handler.remove_all_method_bodies()
+        file_handler.remove_all_private_methods()
+        file_handler.remove_all_instance_variables(class_name=(type(self)).__name__)
         return file_handler
 
     @property
-    def custom_class_dir(self) -> Path:
+    def _custom_class_dir(self) -> Path:
         return Path(__file__).parent / self.custom_class_dir_name
 
-    def create_custom_class_pyi(self, string: str, class_name: str) -> None:
-        if not self.custom_class_dir.exists():
-            os.makedirs(self.custom_class_dir)
+    def _create_custom_class_pyi(self, string: str, class_name: str) -> None:
+        if not self._custom_class_dir.exists():
+            os.makedirs(self._custom_class_dir)
 
-        path = self.custom_class_dir / f"{class_name}.py"
+        path = self._custom_class_dir / f"{class_name}.py"
         path.write_text(string)
 
     @final
-    def add_new_class_to_loader_pyi(self, *, new_class: str) -> None:
+    def _add_new_class_to_loader_pyi(self, *, new_class: str) -> None:
         self._add_class_created_to_this_file_pyi(new_class)
         self._add_import_to_this_file_pyi(new_class)
         for method_name in self.methods_to_be_overloaded:
@@ -180,12 +183,7 @@ class PyiGenerator:
             )
 
     @final
-    def reset_loader_pyi(self) -> None:
-        if self.this_file_pyi_path.exists():
-            os.remove(self.this_file_pyi_path)
-
-    @final
-    def reset_custom_class_pyi(self) -> None:
+    def _reset_custom_class_pyi(self) -> None:
         path = Path(__file__).parent / self.custom_class_dir_name
         if path.exists():
             shutil.rmtree(path)
@@ -196,7 +194,7 @@ class PyiGenerator:
             f"from .build.{new_class} import {new_class}",
             in_type_checking_block=True,
         )
-        self.update_this_file_pyi()
+        self._update_this_file_pyi()
 
     @final
     def _add_overload_to_this_file_pyi(
@@ -238,7 +236,7 @@ class PyiGenerator:
             method_name=method_name, return_index_above_decorator=True
         )[-1]
         self.this_file_pyi.add_line(idx, signature)
-        self.update_this_file_pyi()
+        self._update_this_file_pyi()
 
     @final
     def _add_class_created_to_this_file_pyi(self, new_class: str) -> None:
@@ -255,8 +253,8 @@ class PyiGenerator:
             value = value.replace("], Any]", f', "{new_class}"], Any]')
 
         self.this_file_pyi.replace_assignement(label, value)
-        self.update_this_file_pyi()
+        self._update_this_file_pyi()
 
     @final
-    def update_this_file_pyi(self) -> None:
+    def _update_this_file_pyi(self) -> None:
         self.this_file_pyi_path.write_text(str(self.this_file_pyi))

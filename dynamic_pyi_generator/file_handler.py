@@ -198,6 +198,77 @@ class FileHandler:
                 node.body = [ast.Ellipsis()]  # type: ignore
         self.lines = ast.unparse(tree).strip().split("\n")  # type: ignore
 
+    def remove_all_private_methods(self) -> None:
+        """
+        Removes all private methods from the file.
+
+        This method iterates through the lines of the file and removes any lines
+        that define a private method. A private method is defined as a method that
+        starts with an underscore (_) character.
+
+        Note: This method modifies the object in-place.
+        """
+        lines_to_remove: List[int] = []
+        for idx, line in enumerate(self.lines):
+            line_ = line.strip()
+            if line_.startswith("def _") and not line_.startswith("def __"):
+                idx_ = idx - 1
+                # Remove all decorators
+                if "@" in self.lines[idx_]:
+                    while "@" in self.lines[idx_]:
+                        lines_to_remove.append(idx_)
+                        idx_ -= 1
+
+                # Remove main function
+                lines_to_remove.append(idx)
+
+                idx_ = idx
+                # Remove all arguments if they are in multiple lines
+                while "):" not in self.lines[idx_] and "->" not in self.lines[idx_]:
+                    idx_ += 1
+                    lines_to_remove.append(idx_)
+
+                # Remove body of the method
+                # Count tabs
+                spaces = 0
+                for char in line:
+                    if char.isspace():
+                        spaces += 1
+                    else:
+                        break
+
+                idx_ += 1
+                while (
+                    len(self.lines) > idx_
+                    and len(self.lines[idx_]) > spaces
+                    and self.lines[idx_][spaces].isspace()
+                ):
+                    lines_to_remove.append(idx_)
+                    idx_ += 1
+                if len(self.lines) > idx_:
+                    lines_to_remove.append(idx_)
+
+        for idx in sorted(lines_to_remove)[::-1]:
+            self.lines.pop(idx)
+
+    def remove_all_instance_variables(self, class_name: str):
+        """
+        Removes all instance variables from a class.
+
+        Args:
+            class_name (str): The name of the class.
+        """
+        upper_idx = self.search_line(f"class {class_name}:") + 1
+
+        lower_idx = self.search_method("__init__", return_index_above_decorator=True)[-1]
+        for idx in list(range(upper_idx, lower_idx))[::-1]:
+            if (
+                "classes_created" in self.lines[idx]
+                or "classes_created" in self.lines[idx - 1]
+            ):
+                continue
+            self.lines.pop(idx)
+
     def add_imports(
         self, lines: Union[str, Sequence[str]], *, in_type_checking_block: bool = False
     ) -> None:

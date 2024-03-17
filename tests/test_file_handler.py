@@ -290,14 +290,29 @@ def method1():
 def method2(value: int):
     return 2+2
 
+def _method2(value: int):...
+
 class PyiGenerator:
+
+    @overload
+    def _method3(self, a: int) -> None: 
+        pass
+
+    @overload
+    def _method4(self, a: int): 
+        pass
+
+    def _method5(self,
+        a: int,
+    ): 
+        pass
 
     @overload
     def method3(self):
         pass"""
         return FileHandler(representation)
 
-    def test_remove_methods(
+    def test_remove_method_bodies(
         self,
         file_handler: FileHandler,
     ) -> None:
@@ -306,8 +321,38 @@ class PyiGenerator:
 
 def method2(value: int):...
 
+def _method2(value: int):...
+
 class PyiGenerator:
 
     @overload
+    def _method3(self, a: int) -> None:...
+
+    @overload
+    def _method4(self, a: int):...
+
+    def _method5(self, a: int):...
+
+    @overload
     def method3(self):..."""
+        assert str(file_handler) == expected_string
+
+    def test_remove_private_methods(
+        self,
+        file_handler: FileHandler,
+    ) -> None:
+        file_handler.remove_all_private_methods()
+        expected_string = """
+
+def method1():
+    pass
+
+def method2(value: int):
+    return 2+2
+
+class PyiGenerator:
+
+    @overload
+    def method3(self):
+        pass"""
         assert str(file_handler) == expected_string
