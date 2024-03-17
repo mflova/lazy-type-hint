@@ -1,7 +1,6 @@
 # TODO
 
 - Create `TypedDict` with docstrings if those are present
-- Create a `from_file` classmethod.
-- Make validator compatible with `Sequence` or any other subtype from list or tuple
+- Make it compatible with plain lists instead of dictionaries
 - Make API
-- `def _add_overload_to_this_file_pyi` make it more robust
+- Give the chance to store the custom class interfaces as local

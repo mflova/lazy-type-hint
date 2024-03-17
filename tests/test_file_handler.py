@@ -64,18 +64,28 @@ def run():
         return FileHandler(representation)
 
     @pytest.mark.parametrize(
-        "decorator_name, expected_idx",
+        "decorator_name, method_name, expected_idx",
         [
-            ("staticmethod", [31, 35]),
-            ("overload", [45, 49]),
-            ("final", [7]),
-            ("new", []),
+            ("staticmethod", "test", [31]),
+            ("overload", "run", [45, 49]),
+            ("new_decorator", "run", []),
+            ("final", "__init__", [7]),
+            ("final", "new_method", []),
         ],
     )
     def test_search_decorator(
-        self, decorator_name: str, expected_idx: List[int], file_handler: FileHandler
+        self,
+        decorator_name: str,
+        expected_idx: List[int],
+        file_handler: FileHandler,
+        method_name: str,
     ) -> None:
-        assert file_handler.search_decorator(decorator_name) == expected_idx
+        assert (
+            file_handler.search_decorator(
+                decorator_name=decorator_name, method_name=method_name
+            )
+            == expected_idx
+        )
 
     @pytest.mark.parametrize(
         "method_name, return_index_above_decorator, expected_idx",
@@ -247,6 +257,24 @@ if TYPE_CHECKING:
         else:
             idx = label
         assert file_handler.lines[idx].split("=")[-1].strip() == value
+
+    @pytest.mark.parametrize(
+        "method_name, expected_output",
+        (
+            ["__init__", ("@final\ndef __init__(self) -> None:", slice(7, 9))],
+            [
+                "get_classes_added",
+                ("def get_classes_added(self) -> Set[str]:", slice(15, 16)),
+            ],
+        ),
+    )
+    def test_get_signature(
+        self,
+        file_handler: FileHandler,
+        method_name: str,
+        expected_output: Tuple[str, slice],
+    ) -> None:
+        assert expected_output == file_handler.get_signature(method_name)
 
 
 class TestFileHandlerRemoval:

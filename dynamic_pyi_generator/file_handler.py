@@ -24,12 +24,12 @@ class FileHandler:
     @overload
     def search_assignment(
         self, variable: str, only_values: Literal[False] = False
-    ) -> List[Tuple[int, str]]:
-        ...
+    ) -> List[Tuple[int, str]]: ...
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
-        ...
+    def search_assignment(
+        self, variable: str, only_values: Literal[True]
+    ) -> List[str]: ...
 
     def search_assignment(
         self, variable: str, only_values: bool = False
@@ -57,17 +57,44 @@ class FileHandler:
                     lst.append((idx, value))
         return lst
 
-    def search_decorator(self, decorator_name: str) -> List[int]:
-        lst: List[int] = []
-        for idx, line in enumerate(self.lines):
-            if "@" in line and f"@{decorator_name}" in line.strip():
-                if not self.it_is_string(line, "@"):
-                    lst.append(idx)
-        return lst
+    def search_decorator(self, *, decorator_name: str, method_name: str) -> List[int]:
+        """
+        Searches for a specific decorator in the lines of code preceding a method.
+
+        Args:
+            decorator_name (str): The name of the decorator to search for.
+            method_name (str): The name of the method to search for.
+
+        Returns:
+            List[int]: A list of line numbers where the decorator is found.
+        """
+        lst = self.search_method(
+            method_name=method_name, return_index_above_decorator=False
+        )
+        output: List[int] = []
+        for idx in lst:
+            while "@" in self.lines[idx - 1]:
+                if f"@{decorator_name}" in self.lines[idx - 1]:
+                    output.append(idx - 1)
+                    break
+                else:
+                    break
+        return output
 
     def search_method(
         self, method_name: str, *, return_index_above_decorator: bool = True
     ) -> List[int]:
+        """
+        Search for a method in the lines of the file and return its location (indices).
+
+        Args:
+            method_name (str): The name of the method to search for.
+            return_index_above_decorator (bool, optional): Whether to return the index
+                above the decorator if found. Defaults to True.
+
+        Returns:
+            List[int]: A list of indices where the method is found.
+        """
         lst: List[int] = []
         for idx, line in enumerate(self.lines):
             if line.strip().startswith(f"def {method_name}") and not self.it_is_string(
@@ -86,20 +113,51 @@ class FileHandler:
         return False
 
     def add_line(self, idx: int, line: Union[str, Sequence[str]]) -> None:
+        """
+        Add a line or multiple lines at the specified index.
+
+        Args:
+            idx (int): The index at which to insert the line(s).
+            line (Union[str, Sequence[str]]): The line(s) to be added. It can be a
+                single string or a sequence of strings.
+        """
         if not isinstance(line, str):
             line = "\n".join(line)
         self.lines.insert(idx, line)
 
     def search_line(self, keyword: str) -> int:
+        """
+        Searches for a line containing the specified keyword within the file.
+
+        Args:
+            keyword (str): The keyword to search for.
+
+        Returns:
+            int: The index of the line containing the keyword.
+        """
         for idx, line in enumerate(self.lines):
             if keyword in line:
                 return idx
         raise ValueError(f"Line with `{keyword}` could not be found within the file.")
 
     def replace_line(self, idx: int, line: str) -> None:
+        """
+        Replaces the line at the specified index with the given line.
+
+        Args:
+            idx (int): The index of the line to be replaced.
+            line (str): The new line to replace the existing line.
+        """
         self.lines[idx] = line
 
     def replace_assignement(self, label: Union[int, str], value: str) -> None:
+        """
+        Replaces the value of an assignment line identified by the given label or index.
+
+        Args:
+            label (Union[int, str]): The label or index of the assignment line to be replaced.
+            value (str): The new value to be assigned.
+        """
         if not isinstance(label, int):
             assignment_idx = self.search_assignment(label)
             if not assignment_idx:
@@ -121,6 +179,19 @@ class FileHandler:
         self.lines[idx] = "=".join(symbols)
 
     def remove_all_method_bodies(self) -> None:
+        """
+        Removes the bodies of all methods in the file.
+
+        This method parses the file's contents using the `ast` module and walks through
+        the abstract syntax tree (AST) to find all function definitions. For each function
+        definition found, the body of the function is replaced with an `Ellipsis` object,
+        effectively removing the method body.
+
+        After modifying the AST, the updated code is converted back to a string and split
+        into lines, which are then stored in the `lines` attribute of the object.
+
+        Note: This method modifies the object in-place.
+        """
         tree = ast.parse(str(self))
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
@@ -130,6 +201,15 @@ class FileHandler:
     def add_imports(
         self, lines: Union[str, Sequence[str]], *, in_type_checking_block: bool = False
     ) -> None:
+        """
+        Adds import statements to the file.
+
+        Args:
+            lines (Union[str, Sequence[str]]): The import statements to add. It can
+                be a single string or a sequence of strings.
+            in_type_checking_block (bool, optional): Specifies whether the import
+                statements should be added inside a type checking block. Defaults to False.
+        """
         idx = 0
         if isinstance(lines, str):
             lines = [lines]
@@ -139,3 +219,25 @@ class FileHandler:
             lines = [f"{self.tab}{line}" for line in lines]
         for line in lines[::-1]:
             self.lines.insert(idx, line)
+
+    def get_signature(self, method_name: str) -> Tuple[str, slice]:
+        """
+        Retrieves the signature of a method.
+
+        Args:
+            method_name (str): The name of the method.
+
+        Returns:
+            Tuple[str, slice]: A tuple containing the method signature as a string and a
+                slice object representing the range of lines in the file that contain
+                the signature.
+        """
+        upper_idx = self.search_method(method_name, return_index_above_decorator=True)[-1]
+        bottom_idx = upper_idx
+
+        while ")" not in self.lines[bottom_idx] and ":" not in self.lines[bottom_idx]:
+            bottom_idx += 1
+
+        return "\n".join(self.lines[upper_idx : bottom_idx + 1]), slice(
+            upper_idx, bottom_idx + 1
+        )

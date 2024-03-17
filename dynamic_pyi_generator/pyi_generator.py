@@ -2,12 +2,16 @@ import importlib
 import os
 import re
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
+    Dict,
     Final,
     Literal,
+    Mapping,
     Set,
     TypeVar,
     Union,  # noqa: F401
@@ -17,6 +21,12 @@ from typing import (
 
 import dynamic_pyi_generator
 from dynamic_pyi_generator.file_handler import FileHandler
+from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.type_aliases import (
+    LIST_ELEMENT_STRATEGIES,
+    LIST_STRATEGIES,
+    TUPLE_STRATEGIES,
+)
 from dynamic_pyi_generator.typed_dict_generator import Parser
 from dynamic_pyi_generator.typed_dict_validator import validate_dict
 
@@ -26,27 +36,39 @@ if TYPE_CHECKING:
 THIS_DIR = Path(__file__).parent
 
 
-class PyiGeneratorError(Exception):
-    ...
+class PyiGeneratorError(Exception): ...
 
 
 MappingT = TypeVar("MappingT", bound=dict)
 
 
 class PyiGenerator:
+    # Utils
+    parser: Parser
+    """Generates string representation for the interface of the provided structure."""
     this_file_pyi: FileHandler
     """.pyi representation of this same module."""
     this_file_pyi_path: Path
     """Path to the .pyi file associated to this same module."""
+
+    # Constants that should not be modified
     classes_created: "TypeAlias" = Any
     """Classes created by the class. Do not modify."""
-    custom_class_dir: Final = "build"
+    custom_class_dir_name: Final = "build"
     """Name of the direcotry that will contain all the generated stubs."""
     tab: Final = "    "
     """Tabs used whenever an indent is needed."""
+    methods_to_be_overloaded: Final = ("from_dct", "from_file")
+    """Methods that will be modified in the PYI interface when new classes are added."""
 
     @final
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        type_hint_lists_as_sequences: LIST_STRATEGIES = "list",
+        type_hint_strategy_for_list_elements: LIST_ELEMENT_STRATEGIES = "Union",
+        type_hint_strategy_for_tuple_elements: TUPLE_STRATEGIES = "fix size",
+    ) -> None:
         self.this_file_pyi_path = Path(__file__).with_suffix(".pyi")
         if not self.this_file_pyi_path.exists():
             self.this_file_pyi = self.generate_this_file_pyi()
@@ -54,8 +76,15 @@ class PyiGenerator:
             self.this_file_pyi = FileHandler(
                 self.this_file_pyi_path.read_text(encoding="utf-8")
             )
+        self.parser = Parser(
+            Strategies(
+                list_strategy=type_hint_lists_as_sequences,
+                list_elements_strategy=type_hint_strategy_for_list_elements,
+                tuple_elements_strategy=type_hint_strategy_for_tuple_elements,
+            )
+        )
 
-    def get_classes_added(self) -> Set[str]:
+    def get_classes_added(self) -> Mapping[str, Path]:
         to_find = "classes_created"
         values = self.this_file_pyi.search_assignment("classes_created", only_values=True)
         if not values:
@@ -64,7 +93,16 @@ class PyiGenerator:
         if values[0] == "Any":
             return set()
         matches = re.findall(r'"(.*?)"', values[0])
-        return set(matches)
+
+        dct: Dict[str, str] = {}
+        for match in matches:
+            path = Path(self.custom_class_dir / f"{match}.py")
+            if not path.exists():
+                raise PyiGeneratorError(
+                    f"A class `{match}` was apparently created but cannot find its corresponding source code within {self.custom_class_dir}"
+                )
+            dct[match] = path
+        return dct
 
     @staticmethod
     def _find_line_idx(string: str, *, keyword: str) -> int:
@@ -75,48 +113,40 @@ class PyiGenerator:
             f"It was not possible to find {keyword} among the lines of the given string."
         )
 
-    @classmethod
+    def from_file(
+        self,
+        loader: Callable[[str], MappingT],
+        path: str,
+        class_type: str,
+    ) -> MappingT:
+        return self.from_dct(
+            loader(path),
+            class_type=class_type,
+        )
+
     def from_dct(
-        cls,
+        self,
         dct: MappingT,
         class_type: str,
-        *,
-        type_hint_lists_as_sequences: bool = False,
-        type_hint_strategy_for_list_elements: Literal["Any", "object", "Union"] = "Union",
-        type_hint_strategy_for_tuple_elements: Literal[
-            "Any", "object", "fix size"
-        ] = "fix size",
     ) -> MappingT:
-        self = cls()
-        if class_type not in self.get_classes_added():
-            typed_dict_representation = Parser(
-                type_hint_lists_as_sequences=type_hint_lists_as_sequences,
-                type_hint_strategy_for_list_elements=type_hint_strategy_for_list_elements,
-                type_hint_strategy_for_tuple_elements=type_hint_strategy_for_tuple_elements,
-            ).parse(dct, new_class=class_type)
+        typed_dict_representation = self.parser.parse(dct, new_class=class_type)
+        classes_added = self.get_classes_added()
+        if class_type not in classes_added:
             self.create_custom_class_pyi(typed_dict_representation, class_type)
-            self.add_new_class_to_loader_pyi(
-                new_class=class_type, method_name=self.from_dct.__name__
-            )
+            self.add_new_class_to_loader_pyi(new_class=class_type)
         else:
-            module = importlib.import_module(
-                f"{dynamic_pyi_generator.__name__}.{self.custom_class_dir}.{class_type}"
-            )
-            typed_dict_class = getattr(module, class_type)
-            if not validate_dict(dct, typed_dict_class):
+            if typed_dict_representation != classes_added[class_type].read_text():
                 raise PyiGeneratorError(
                     f"An attempt to load a dictionary with an already existing class "
                     f"type ({class_type}) has been made. However, the given dictionary"
-                    " is not compliant with the given class type. Possible solutions:"
+                    f" is not compliant with `{class_type}` type. Possible solutions:"
                     " 1) Create a new interface by modifying `class_type` input "
                     "argument, 2) reset all the interfaces with `reset` or 3) make the"
-                    " dictionary compliant."
+                    " input dictionary compliant."
                 )
         return dct
 
-    @classmethod
-    def reset(cls) -> None:
-        self = cls()
+    def reset(self) -> None:
         self.reset_custom_class_pyi()
         self.reset_loader_pyi()
 
@@ -129,28 +159,34 @@ class PyiGenerator:
         file_handler.remove_all_method_bodies()
         return file_handler
 
-    def create_custom_class_pyi(self, string: str, class_name: str) -> None:
-        custom_class_dir = Path(__file__).parent / self.custom_class_dir
-        if not custom_class_dir.exists():
-            os.makedirs(custom_class_dir)
+    @property
+    def custom_class_dir(self) -> Path:
+        return Path(__file__).parent / self.custom_class_dir_name
 
-        path = custom_class_dir / f"{class_name}.py"
+    def create_custom_class_pyi(self, string: str, class_name: str) -> None:
+        if not self.custom_class_dir.exists():
+            os.makedirs(self.custom_class_dir)
+
+        path = self.custom_class_dir / f"{class_name}.py"
         path.write_text(string)
 
     @final
-    def add_new_class_to_loader_pyi(self, *, new_class: str, method_name: str) -> None:
+    def add_new_class_to_loader_pyi(self, *, new_class: str) -> None:
         self._add_class_created_to_this_file_pyi(new_class)
         self._add_import_to_this_file_pyi(new_class)
-        self._add_overload_to_this_file_pyi(new_class=new_class, method_name=method_name)
+        for method_name in self.methods_to_be_overloaded:
+            self._add_overload_to_this_file_pyi(
+                new_class=new_class, method_name=method_name
+            )
 
     @final
     def reset_loader_pyi(self) -> None:
-        self.this_file_pyi = self.generate_this_file_pyi()
-        self.update_this_file_pyi()
+        if self.this_file_pyi_path.exists():
+            os.remove(self.this_file_pyi_path)
 
     @final
     def reset_custom_class_pyi(self) -> None:
-        path = Path(__file__).parent / self.custom_class_dir
+        path = Path(__file__).parent / self.custom_class_dir_name
         if path.exists():
             shutil.rmtree(path)
 
@@ -163,9 +199,13 @@ class PyiGenerator:
         self.update_this_file_pyi()
 
     @final
-    def _add_overload_to_this_file_pyi(self, *, new_class: str, method_name: str) -> None:
+    def _add_overload_to_this_file_pyi(
+        self, *, new_class: str, method_name: str, input_argument: str = "class_type"
+    ) -> None:
         # First time the function is called it will attach an extra @overload decorator
-        if not self.this_file_pyi.search_decorator("overload"):
+        if not self.this_file_pyi.search_decorator(
+            decorator_name="overload", method_name=method_name
+        ):
             idx = self.this_file_pyi.search_method(
                 method_name, return_index_above_decorator=True
             )
@@ -174,16 +214,30 @@ class PyiGenerator:
 
             self.this_file_pyi.add_line(idx[-1], f"{self.tab}@overload")
 
-        string = (
-            f"{self.tab}@overload\n{self.tab}@classmethod\n{self.tab}def {method_name}"
-            f'(self, dct: MappingT, class_type: Literal["{new_class}"]) -> '
-            f"{new_class}:\n{self.tab*2}...\n"
+        signature, _ = self.this_file_pyi.get_signature(method_name)
+
+        # At this point idx is the index of the line where the input argument was found
+        first_idx = signature.find(input_argument)
+        first_idx += len(input_argument)
+        last_idx = first_idx
+        while signature[last_idx] not in (",", ")"):
+            last_idx += 1
+        # The type hint of the input argument to modify is between first_idx and last_idx
+        signature = (
+            signature[: first_idx + 1] + f' Literal["{new_class}"]' + signature[last_idx:]
         )
 
-        lines_found = self.this_file_pyi.search_method(
-            method_name, return_index_above_decorator=True
+        # Modifying returned value
+        last_idx = signature.rfind(":")
+        first_idx = signature.rfind("->")
+        signature = (
+            signature[: first_idx + len("->") + 1] + new_class + signature[last_idx:]
         )
-        self.this_file_pyi.add_line(lines_found[-1], string)
+
+        idx = self.this_file_pyi.search_method(
+            method_name=method_name, return_index_above_decorator=True
+        )[-1]
+        self.this_file_pyi.add_line(idx, signature)
         self.update_this_file_pyi()
 
     @final

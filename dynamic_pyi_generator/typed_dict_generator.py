@@ -6,21 +6,18 @@ from typing import (
     FrozenSet,
     Iterable,
     List,
-    Literal,
     Set,
     Tuple,
     Type,
     Union,
 )
 
+from dynamic_pyi_generator.strategies import Strategies
+
 
 @dataclass(frozen=True)
 class Parser:
-    type_hint_lists_as_sequences: bool = False
-    type_hint_strategy_for_list_elements: Literal["Any", "object", "Union"] = "Union"
-    type_hint_strategy_for_tuple_elements: Literal[
-        "Any", "object", "fix size"
-    ] = "fix size"
+    strategies: Strategies
     imports: Set[str] = field(default_factory=set, init=False)
 
     def parse(self, dct: Mapping[str, Any], new_class: str) -> str:
@@ -69,17 +66,17 @@ class Parser:
         return functions[type(value)](value)
 
     def _get_type_hint_list(self, value: List[object]) -> str:
-        if self.type_hint_lists_as_sequences:
+        if self.strategies.list_strategy == "Sequence":
             self.imports.add("from typing import Sequence")
             container = "Sequence[{elements}]"
         else:
             self.imports.add("from typing import List")
             container = "List[{elements}]"
 
-        if self.type_hint_strategy_for_list_elements == "Any":
+        if self.strategies.list_elements_strategy == "Any":
             self.imports.add("from typing import Any")
             return container.format(elements="Any")
-        elif self.type_hint_strategy_for_list_elements == "object":
+        elif self.strategies.list_elements_strategy == "object":
             return container.format(elements="object")
         else:
             types_found = set(map(type, value))
@@ -92,10 +89,10 @@ class Parser:
     def _get_type_hint_tuple(self, value: Tuple[object, ...]) -> str:
         self.imports.add("from typing import Tuple")
         container = "Tuple[{elements}]"
-        if self.type_hint_strategy_for_tuple_elements == "Any":
+        if self.strategies.tuple_elements_strategy == "Any":
             self.imports.add("from typing import Any")
             return container.format(elements="Any")
-        elif self.type_hint_strategy_for_tuple_elements == "object":
+        elif self.strategies.tuple_elements_strategy == "object":
             return container.format(elements="object")
         else:
             types_found = tuple(map(type, value))

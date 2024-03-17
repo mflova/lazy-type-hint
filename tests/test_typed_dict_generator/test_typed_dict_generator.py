@@ -2,10 +2,11 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Sequence
 
 import pytest
 
+from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.testing_tools import Mypy
 from dynamic_pyi_generator.typed_dict_generator import Parser
 
@@ -49,35 +50,35 @@ class TestTypedDictGenerator:
         "params_test",
         [
             ParamsTest(
-                parser=Parser(type_hint_lists_as_sequences=True),
+                parser=Parser(Strategies(list_strategy="Sequence")),
                 expected_result="lists_as_sequences.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_lists_as_sequences=False),
+                parser=Parser(Strategies(list_strategy="list")),
                 expected_result="lists_as_lists.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_strategy_for_list_elements="Any"),
+                parser=Parser(Strategies(list_elements_strategy="Any")),
                 expected_result="lists_any.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_strategy_for_list_elements="object"),
+                parser=Parser(Strategies(list_elements_strategy="object")),
                 expected_result="lists_object.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_strategy_for_list_elements="Union"),
+                parser=Parser(Strategies(list_elements_strategy="Union")),
                 expected_result="lists_union.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_strategy_for_tuple_elements="Any"),
+                parser=Parser(Strategies(tuple_elements_strategy="Any")),
                 expected_result="tuples_any.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_strategy_for_tuple_elements="fix size"),
+                parser=Parser(Strategies(tuple_elements_strategy="fix size")),
                 expected_result="tuples_fix_size.py",
             ),
             ParamsTest(
-                parser=Parser(type_hint_strategy_for_tuple_elements="object"),
+                parser=Parser(Strategies(tuple_elements_strategy="object")),
                 expected_result="tuples_object.py",
             ),
         ],
@@ -101,7 +102,9 @@ class TestTypedDictGenerator:
         # self._update_files(generated_str, params_test=params_test)
 
         mypy_output = mypy.run(file=tmp_path, strict=True)
-        error = f"The generated string is not MYPY compliant: {mypy_output.stdout}"
+        error = (
+            f"The generated string is not MYPY compliant: {mypy_output.errors_as_str()}"
+        )
         assert mypy_output.success, error
         assert (
             generated_str == params_test.get_expected_str()
