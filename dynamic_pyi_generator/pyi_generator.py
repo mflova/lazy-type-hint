@@ -10,8 +10,10 @@ from typing import (
     Callable,
     Dict,
     Final,
+    List,
     Literal,
     Mapping,
+    Sequence,
     Set,
     TypeVar,
     Union,  # noqa: F401
@@ -39,7 +41,8 @@ THIS_DIR = Path(__file__).parent
 class PyiGeneratorError(Exception): ...
 
 
-MappingT = TypeVar("MappingT", bound=dict)
+# DataT = TypeVar("MappingT", bound=dict)
+DataT = TypeVar("DataT", Sequence[Any], Mapping[str, Any])
 
 
 class PyiGenerator:
@@ -58,7 +61,7 @@ class PyiGenerator:
     """Name of the direcotry that will contain all the generated stubs."""
     tab: Final = "    "
     """Tabs used whenever an indent is needed."""
-    methods_to_be_overloaded: Final = ("from_dct", "from_file")
+    methods_to_be_overloaded: Final = ("from_data", "from_file")
     """Methods that will be modified in the PYI interface when new classes are added."""
 
     @final
@@ -115,21 +118,21 @@ class PyiGenerator:
 
     def from_file(
         self,
-        loader: Callable[[str], MappingT],
+        loader: Callable[[str], DataT],
         path: str,
         class_type: str,
-    ) -> MappingT:
-        return self.from_dct(
+    ) -> DataT:
+        return self.from_data(
             loader(path),
             class_type=class_type,
         )
 
-    def from_dct(
+    def from_data(
         self,
-        dct: MappingT,
+        data: DataT,
         class_type: str,
-    ) -> MappingT:
-        typed_dict_representation = self.parser.parse(dct, new_class=class_type)
+    ) -> DataT:
+        typed_dict_representation = self.parser.parse(data, new_class=class_type)
         classes_added = self._get_classes_added()
         if class_type not in classes_added:
             self._create_custom_class_pyi(typed_dict_representation, class_type)
@@ -144,7 +147,7 @@ class PyiGenerator:
                     "argument, 2) reset all the interfaces with `reset` or 3) make the"
                     " input dictionary compliant."
                 )
-        return dct
+        return data
 
     def reset(self) -> None:
         self._reset_custom_class_pyi()

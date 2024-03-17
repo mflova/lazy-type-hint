@@ -23,7 +23,13 @@ class TestPyiGenerator:
 
     @pytest.mark.parametrize(
         "file, expected_mypy_success",
-        (["ok.py", True], ["key_missing.py", False], ["wrong_value_type.py", False]),
+        (
+            ["ok_list.py", True],
+            ["ok_dict.py", True],
+            ["not_ok_list.py", False],
+            ["key_missing.py", False],
+            ["wrong_value_type.py", False],
+        ),
     )
     def test_generated_interface_is_ok(
         self, file: str, expected_mypy_success: bool, mypy: Mypy
