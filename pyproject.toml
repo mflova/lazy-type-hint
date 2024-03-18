@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "dynamic_pyi_generator"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8, <=3.12"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.9.0"

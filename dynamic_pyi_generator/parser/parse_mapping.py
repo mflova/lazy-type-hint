@@ -16,7 +16,10 @@ class ParserMapping(Parser[Mapping[object, object]]):
         return all(isinstance(key, str) for key in data)
 
     def _parse(self, data: Mapping[object, object], *, class_name: str) -> ParseOutput:
-        if self._all_keys_are_string(data):
+        if (
+            self._all_keys_are_string(data)
+            and self.strategies.mapping_strategy == "TypedDict"
+        ):
             string = self._parse_typed_dict(data, class_name=class_name)
         else:
             string = self._parse_dict(data, class_name=class_name)

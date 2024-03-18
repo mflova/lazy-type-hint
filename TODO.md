@@ -5,7 +5,6 @@
 - Setup pipelines
 - Setup branch protection
 - Edit README.md
-- Fix Pyhton version in `pyproject.toml`
 - Check behaviour with a dict with multiple lists (equal and different ones)
 - Make it easier to import for users
 - Make it compatible with keys that have special symbols like whitespaces or $

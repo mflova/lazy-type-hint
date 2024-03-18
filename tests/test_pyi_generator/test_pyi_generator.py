@@ -1,6 +1,6 @@
 from contextlib import suppress
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, ValuesView
 
 import pytest
 
@@ -15,6 +15,14 @@ class TestPyiGenerator:
     def pyi_generator(self) -> PyiGenerator:
         return PyiGenerator()
 
+    def expected_mypy_succes(self, file: str) -> bool:
+        if file.startswith("ok"):
+            return True
+        elif file.startswith("nok"):
+            return False
+        else:
+            raise ValueError(f"File must be start with nok or ok. Given one is: {file}")
+
     @pytest.fixture(autouse=True)
     def _teardown(self, pyi_generator: PyiGenerator) -> Any:
         pyi_generator.reset()
@@ -22,32 +30,36 @@ class TestPyiGenerator:
         pyi_generator.reset()
 
     @pytest.mark.parametrize(
-        "file, expected_mypy_success",
+        "file",
         (
-            ["ok_list.py", True],
-            ["ok_dict.py", True],
-            ["ok_str.py", True],
-            ["ok_float.py", True],
-            ["ok_int.py", True],
-            ["ok_set.py", True],
-            ["ok_frozenset.py", True],
-            ["ok_nested_list.py", True],
-            ["not_ok_list.py", False],
-            ["key_missing.py", False],
-            ["wrong_value_type.py", False],
+            "ok_list.py",
+            "ok_append_list_as_any_or_object.py",
+            "ok_list.py",
+            "ok_dict.py",
+            "ok_str.py",
+            "ok_float.py",
+            "ok_int.py",
+            "ok_set.py",
+            "ok_frozenset.py",
+            "ok_nested_list.py",
+            "nok_append_list_wrong_type.py",
+            "nok_append_sequence.py",
+            "nok_frozen_set.py",
+            "nok_key_missing.py",
+            "nok_list.py",
+            "nok_modify_mapping.py",
+            "nok_list.py",
         ),
     )
-    def test_generated_interface_is_ok(
-        self, file: str, expected_mypy_success: bool, mypy: Mypy
-    ) -> None:
+    def test_generated_interface_is_ok(self, file: str, mypy: Mypy) -> None:
         """
         Test the given file by executing its content, using mypy and assert the result.
 
         Args:
             file (str): The path to the file to be tested.
-            expected_mypy_success (bool): The expected result of mypy's success.
             mypy (Mypy): The Mypy instance used to run mypy.
         """
+        expected_mypy_success = self.expected_mypy_succes(file)
         file_path = self.DATA_TEST_DIR / file
 
         if expected_mypy_success:
@@ -58,7 +70,7 @@ class TestPyiGenerator:
         result = mypy.run(file_path, ignore_errors="Overloaded")
         assert result.success == expected_mypy_success, str(result)
 
-    @pytest.mark.parametrize("file", (["non_compliant_dictionary.py"]))
+    @pytest.mark.parametrize("file", (["nok_non_compliant_dictionary.py"]))
     def test_exceptions_raised(self, file: str) -> None:
         file_path = self.DATA_TEST_DIR / file
         with pytest.raises(PyiGeneratorError):

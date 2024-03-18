@@ -179,7 +179,7 @@ class PyiGenerator:
         self,
         loader: Callable[[str], ObjectT],
         path: str,
-        class_type: str,
+        class_name: str,
     ) -> ObjectT:
         return self.from_data(
             loader(path),
@@ -268,7 +268,7 @@ class PyiGenerator:
 
     @final
     def _add_overload_to_this_file_pyi(
-        self, *, new_class: str, method_name: str, input_argument: str = "class_type"
+        self, *, new_class: str, method_name: str, input_argument: str = "class_name"
     ) -> None:
         # First time the function is called it will attach an extra @overload decorator
         if not self.this_file_pyi.search_decorator(
@@ -286,6 +286,10 @@ class PyiGenerator:
 
         # At this point idx is the index of the line where the input argument was found
         first_idx = signature.find(input_argument)
+        if first_idx == -1:
+            raise PyiGeneratorError(
+                f"No {input_argument} could be found within the signature {signature}"
+            )
         first_idx += len(input_argument)
         last_idx = first_idx
         while signature[last_idx] not in (",", ")"):
