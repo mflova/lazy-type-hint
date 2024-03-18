@@ -5,6 +5,7 @@
 - Setup pipelines
 - Setup branch protection
 - Edit README.md
-- FIx Pyhton version inn `pyproject.toml`
+- Fix Pyhton version in `pyproject.toml`
 - Make it easier to import for users
 - Make it compatible with keys that have special symbols like whitespaces or $
+- Make it work for all type of built-in objects

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 THIS_DIR = Path(__file__).parent
 
 class PyiGeneratorError(Exception):
-    ...
+    """Raised by `PyiGenerator` class."""
 DataT = TypeVar('DataT', Sequence[Any], Mapping[str, Any])
 
 class PyiGenerator:
