@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Final, List, Literal, Tuple, Union
 if TYPE_CHECKING:
     from typing_extensions import overload
 else:
-    overload = lambda x: x  # noqa: E731
+    overload = lambda x: x
 
 
 class FileHandler:
@@ -251,7 +251,7 @@ class FileHandler:
         for idx in sorted(lines_to_remove)[::-1]:
             self.lines.pop(idx)
 
-    def remove_all_instance_variables(self, class_name: str):
+    def remove_all_instance_variables(self, class_name: str) -> None:
         """
         Removes all instance variables from a class.
 

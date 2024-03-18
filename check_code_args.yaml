@@ -37,6 +37,7 @@
 
 - tool: mypy
   path: .
+  extra_args: --strict
   tool_desc: Check type coherency within the Python code
   suggestions:
     [

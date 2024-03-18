@@ -1,21 +1,23 @@
-from __future__ import annotations
-
-from typing import TypedDict
 from typing import Sequence
 from typing import Set
 from typing import Tuple
+from typing import TypedDict
 from typing import Union
 
-class NewClass(TypedDict):
-    name: str
-    age: int
-    kids: Sequence[str]
-    favourite_colors: Set[str]
-    random_data: Sequence[Union[str, int]]
-    tuple_example: Tuple[int, str]
-    address: NewClassAddress
-
+NewClassKids = Sequence[str]
+NewClassFavouriteColors = Set[str]
+NewClassRandomData = Sequence[Union[int, str]]
+NewClassTupleExample = Tuple[int, str]
 class NewClassAddress(TypedDict):
     street: str
     city: str
     state: str
+
+class NewClass(TypedDict):
+    name: str
+    age: int
+    kids: NewClassKids
+    favourite_colors: NewClassFavouriteColors
+    random_data: NewClassRandomData
+    tuple_example: NewClassTupleExample
+    address: NewClassAddress

@@ -27,8 +27,11 @@ class Mypy:
                 lines.append(f"{idx} {line}")
             return "\n".join(lines)
 
-        def __str__(self):
-            return f"{self.errors_as_str()}\n\nFile scanned ({self.file_scanned.name}): \n{self.file_content_with_lineno()}"
+        def __str__(self) -> str:
+            return (
+                f"{self.errors_as_str()}\n\nFile scanned ({self.file_scanned.name}): "
+                f"\n{self.file_content_with_lineno()}"
+            )
 
     def run(
         self,
@@ -63,11 +66,12 @@ class Mypy:
             raise ValueError(f"Mypy could not run: {result.stderr}")
 
         error_lst = [line for line in result.stdout.split("\n") if "error: " in line]
-        error_lst = [
-            line
-            for line in error_lst
-            if not all(ignore_error in line for ignore_error in ignore_errors)
-        ]
+        if ignore_errors:
+            error_lst = [
+                line
+                for line in error_lst
+                if not all(ignore_error in line for ignore_error in ignore_errors)
+            ]
         return self.Result(
             success=not bool(error_lst),
             errors=error_lst,

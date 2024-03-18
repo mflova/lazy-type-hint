@@ -13,5 +13,5 @@ lst = [
     },
 ]
 
-data = PyiGenerator().from_data(lst, class_type="Example")
+data = PyiGenerator().from_data(lst, class_name="Example")
 data[0]["number"]

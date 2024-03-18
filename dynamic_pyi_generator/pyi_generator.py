@@ -11,6 +11,7 @@ from typing import (
     Final,
     Literal,  # noqa: F401
     Mapping,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -19,12 +20,15 @@ from typing import (
 )
 
 import dynamic_pyi_generator
-from dynamic_pyi_generator.class_generator import Parser
 from dynamic_pyi_generator.file_handler import FileHandler
+from dynamic_pyi_generator.parser import Parser
 from dynamic_pyi_generator.strategies import (
     LIST_ELEMENT_STRATEGIES,
     LIST_STRATEGIES,
-    TUPLE_STRATEGIES,
+    MAPPING_STRATEGIES,
+    SET_STRATEGIES,
+    TUPLE_ELEMENT_STRATEGIES,
+    TUPLE_SIZE_STRATEGIES,
     Strategies,
 )
 
@@ -43,7 +47,7 @@ ObjectT = TypeVar("ObjectT")
 
 class PyiGenerator:
     # Utils
-    parser: Parser
+    parser: Parser[Any]
     """Generates string representation for the interface of the provided structure."""
     this_file_pyi: FileHandler
     """.pyi representation of this same module."""
@@ -69,7 +73,10 @@ class PyiGenerator:
         *,
         type_hint_lists_as_sequences: LIST_STRATEGIES = "list",
         type_hint_strategy_for_list_elements: LIST_ELEMENT_STRATEGIES = "Union",
-        type_hint_strategy_for_tuple_elements: TUPLE_STRATEGIES = "fix size",
+        type_hint_strategy_for_tuple_size: TUPLE_SIZE_STRATEGIES = "fixed",
+        type_hint_strategy_for_tuple_elements: TUPLE_ELEMENT_STRATEGIES = "Union",
+        type_hint_strategy_for_set_elements: SET_STRATEGIES = "Union",
+        type_hint_strategy_for_mapping: MAPPING_STRATEGIES = "TypedDict",
         generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...] = (
             dynamic_pyi_generator,
             "build",
@@ -86,8 +93,11 @@ class PyiGenerator:
         self.parser = Parser(
             Strategies(
                 list_strategy=type_hint_lists_as_sequences,
-                list_elements_strategy=type_hint_strategy_for_list_elements,
+                sequence_elements_strategy=type_hint_strategy_for_list_elements,
                 tuple_elements_strategy=type_hint_strategy_for_tuple_elements,
+                tuple_size_strategy=type_hint_strategy_for_tuple_size,
+                set_elements_strategy=type_hint_strategy_for_set_elements,
+                mapping_strategy=type_hint_strategy_for_mapping,
             )
         )
         # Validation
@@ -173,25 +183,25 @@ class PyiGenerator:
     ) -> ObjectT:
         return self.from_data(
             loader(path),
-            class_type=class_type,
+            class_name=class_type,
         )
 
     def from_data(
         self,
         data: ObjectT,
-        class_type: str,
+        class_name: str,
     ) -> ObjectT:
-        typed_dict_representation = self.parser.parse(data, new_class=class_type)
+        typed_dict_representation = self.parser.parse(data, class_name=class_name)
         classes_added = self._get_classes_added()
-        if class_type not in classes_added:
-            self._create_custom_class_pyi(typed_dict_representation, class_type)
-            self._add_new_class_to_loader_pyi(new_class=class_type)
+        if class_name not in classes_added:
+            self._create_custom_class_pyi(typed_dict_representation, class_name)
+            self._add_new_class_to_loader_pyi(new_class=class_name)
         else:
-            if typed_dict_representation != classes_added[class_type].read_text():
+            if typed_dict_representation != classes_added[class_name].read_text():
                 raise PyiGeneratorError(
                     f"An attempt to load a dictionary with an already existing class "
-                    f"type ({class_type}) has been made. However, the given dictionary"
-                    f" is not compliant with `{class_type}` type. Possible solutions:"
+                    f"type ({class_name}) has been made. However, the given dictionary"
+                    f" is not compliant with `{class_name}` type. Possible solutions:"
                     " 1) Create a new interface by modifying `class_type` input "
                     "argument, 2) reset all the interfaces with `reset` or 3) make the"
                     " input dictionary compliant."
@@ -216,10 +226,12 @@ class PyiGenerator:
 
     @property
     def _custom_class_dir_path(self) -> Path:
-        path = Path(self.custom_classes_dir[0].__path__[0])
-        for string in self.custom_classes_dir[1:]:
-            path = path / string
-        return path
+        package_path: Path = Path(self.custom_classes_dir[0].__path__[0])  # type: ignore
+        sub_paths: Sequence[Path] = self.custom_classes_dir[1:]  # type: ignore
+
+        for string in sub_paths:
+            package_path = package_path / string
+        return package_path
 
     def _create_custom_class_pyi(self, string: str, class_name: str) -> None:
         if not self._custom_class_dir_path.exists():
@@ -245,8 +257,8 @@ class PyiGenerator:
     @final
     def _add_import_to_this_file_pyi(self, new_class: str) -> None:
         import_statement = (
-            f"from {self.custom_classes_dir[0].__name__}."
-            f"{'.'.join(self.custom_classes_dir[1:])}.{new_class} import {new_class}"
+            f"from {self.custom_classes_dir[0].__name__}."  # type: ignore
+            f"{'.'.join(self.custom_classes_dir[1:])}.{new_class} import {new_class}"  # type: ignore
         )
         self.this_file_pyi.add_imports(
             import_statement,

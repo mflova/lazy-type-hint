@@ -1,6 +1,6 @@
 from contextlib import suppress
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 import pytest
 
@@ -16,7 +16,7 @@ class TestPyiGenerator:
         return PyiGenerator()
 
     @pytest.fixture(autouse=True)
-    def _teardown(self, pyi_generator: PyiGenerator):
+    def _teardown(self, pyi_generator: PyiGenerator) -> Any:
         pyi_generator.reset()
         yield
         pyi_generator.reset()
