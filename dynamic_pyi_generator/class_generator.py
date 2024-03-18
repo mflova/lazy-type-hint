@@ -18,18 +18,22 @@ from typing import (
 from dynamic_pyi_generator.strategies import Strategies
 
 
+class ParserError(Exception):
+    """Errors raised by `Parser`."""
+
+
 @dataclass(frozen=True)
 class Parser:
     strategies: Strategies
     imports: Set[str] = field(default_factory=set, init=False)
     tab: str = field(default="    ", init=False)
 
-    def parse(self, data: Union[Mapping[str, Any], Sequence[Any]], new_class: str) -> str:
+    def parse(self, data: object, new_class: str) -> str:
         """
         Parses a dictionary and generates a string representation of a TypedDict class.
 
         Args:
-            data (Mapping[str, Any]): The dictionary to parse.
+            data (object): Object to parse
             new_class (str): The name of the new TypedDict class.
 
         Returns:
@@ -40,14 +44,31 @@ class Parser:
         typed_dicts_representation = self._parse(data, new_class)
         return header + "\n".join(sorted(self.imports)) + typed_dicts_representation
 
-    def _parse(
-        self, data: Union[Mapping[str, Any], Sequence[Any]], new_class: str
-    ) -> str:
+    def _parse(self, data: object, new_class: str) -> str:
         if isinstance(data, dict):
             return self._parse_dict(data, new_class=new_class)
-        return self._parse_list(data, new_class=new_class)  # type: ignore
+        if isinstance(data, (list, tuple)):
+            return self._parse_sequence(data, new_class=new_class)
+        if isinstance(data, (str, int, float)):
+            return self._parse_str(new_class)
+        if isinstance(data, (int, float)):
+            return self._parse_number(data, new_class)
+        if isinstance(data, (set, frozenset)):
+            return self._parse_set(data, new_class=new_class)
+        raise ParserError(
+            f"The given type object cannot be converted: {type(data).__name__}"
+        )
 
-    def _parse_list(self, data: Sequence[Mapping[str, Any]], new_class: str) -> str:
+    def _parse_str(self, new_class: str) -> str:
+        return f"\n\n{new_class} = str"
+
+    def _parse_number(self, data: float, new_class: str) -> str:
+        return f"\n\n{new_class} = {type(data).__name__}"
+
+    def _parse_set(self, data: Union[FrozenSet[Any], Set[Any]], new_class: str) -> str:
+        return f"\n\n{new_class} = {self._get_type_hint_set(data)}"
+
+    def _parse_sequence(self, data: Sequence[Any], new_class: str) -> str:
         """
         Parses a list of data and generates the corresponding code for a TypedDict.
 

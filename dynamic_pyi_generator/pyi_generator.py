@@ -11,7 +11,6 @@ from typing import (
     Final,
     Literal,  # noqa: F401
     Mapping,
-    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -20,14 +19,14 @@ from typing import (
 )
 
 import dynamic_pyi_generator
+from dynamic_pyi_generator.class_generator import Parser
 from dynamic_pyi_generator.file_handler import FileHandler
-from dynamic_pyi_generator.strategies import Strategies
-from dynamic_pyi_generator.type_aliases import (
+from dynamic_pyi_generator.strategies import (
     LIST_ELEMENT_STRATEGIES,
     LIST_STRATEGIES,
     TUPLE_STRATEGIES,
+    Strategies,
 )
-from dynamic_pyi_generator.typed_dict_generator import Parser
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -39,8 +38,7 @@ class PyiGeneratorError(Exception):
     """Raised by `PyiGenerator` class."""
 
 
-# DataT = TypeVar("MappingT", bound=dict)
-DataT = TypeVar("DataT", Sequence[Any], Mapping[str, Any])
+ObjectT = TypeVar("ObjectT")
 
 
 class PyiGenerator:
@@ -169,10 +167,10 @@ class PyiGenerator:
 
     def from_file(
         self,
-        loader: Callable[[str], DataT],
+        loader: Callable[[str], ObjectT],
         path: str,
         class_type: str,
-    ) -> DataT:
+    ) -> ObjectT:
         return self.from_data(
             loader(path),
             class_type=class_type,
@@ -180,9 +178,9 @@ class PyiGenerator:
 
     def from_data(
         self,
-        data: DataT,
+        data: ObjectT,
         class_type: str,
-    ) -> DataT:
+    ) -> ObjectT:
         typed_dict_representation = self.parser.parse(data, new_class=class_type)
         classes_added = self._get_classes_added()
         if class_type not in classes_added:

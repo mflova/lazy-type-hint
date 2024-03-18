@@ -5,12 +5,12 @@ from typing import Any, Final
 
 import pytest
 
+from dynamic_pyi_generator.class_generator import Parser
 from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.testing_tools import Mypy
-from dynamic_pyi_generator.typed_dict_generator import Parser
 
 
-class TestTypedDictGenerator:
+class TestClassGenerator:
     @dataclass
     class ParamsTest:
         """

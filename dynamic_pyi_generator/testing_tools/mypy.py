@@ -16,9 +16,19 @@ class Mypy:
 
         success: bool
         errors: List[str]
+        file_scanned: Path
 
         def errors_as_str(self) -> str:
             return "\n".join(self.errors)
+
+        def file_content_with_lineno(self) -> str:
+            lines: List[str] = []
+            for idx, line in enumerate(self.file_scanned.read_text().split("\n")):
+                lines.append(f"{idx} {line}")
+            return "\n".join(lines)
+
+        def __str__(self):
+            return f"{self.errors_as_str()}\n\nFile scanned ({self.file_scanned.name}): \n{self.file_content_with_lineno()}"
 
     def run(
         self,
@@ -61,4 +71,5 @@ class Mypy:
         return self.Result(
             success=not bool(error_lst),
             errors=error_lst,
+            file_scanned=Path(file),
         )

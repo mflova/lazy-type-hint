@@ -26,6 +26,12 @@ class TestPyiGenerator:
         (
             ["ok_list.py", True],
             ["ok_dict.py", True],
+            ["ok_str.py", True],
+            ["ok_float.py", True],
+            ["ok_int.py", True],
+            ["ok_set.py", True],
+            ["ok_frozenset.py", True],
+            ["ok_nested_list.py", True],
             ["not_ok_list.py", False],
             ["key_missing.py", False],
             ["wrong_value_type.py", False],
@@ -50,7 +56,7 @@ class TestPyiGenerator:
             with suppress(Exception):
                 exec(file_path.read_text())
         result = mypy.run(file_path, ignore_errors="Overloaded")
-        assert result.success == expected_mypy_success, result.errors_as_str()
+        assert result.success == expected_mypy_success, str(result)
 
     @pytest.mark.parametrize("file", (["non_compliant_dictionary.py"]))
     def test_exceptions_raised(self, file: str) -> None:
