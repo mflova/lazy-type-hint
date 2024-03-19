@@ -10,7 +10,7 @@ from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.testing_tools import Mypy
 
 
-class TestClassGenerator:
+class TestParser:
     @dataclass
     class ParamsTest:
         """
@@ -33,6 +33,7 @@ class TestClassGenerator:
                 "numbers": [12, 1.0],
                 "numbers_tuple": (12, 1.0),
                 "kids": ["Joan", "Peter"],
+                "random_dict": {"1$": 2, "2 3": 2.1},
                 "favourite_colors": {"red", "blue"},
                 "random_data": [1, "Blue"],
                 "tuple_example": (2, "Name"),

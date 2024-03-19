@@ -95,7 +95,7 @@ class Parser(Generic[DataT_contra]):
             imports.update(output.imports)
         string = "\n".join(sorted(imports))
         string += "\n\n"
-        string += "\n".join(
+        string += "\n\n".join(
             output.string_representation for output in outputs_collected[::-1]
         )
         return string

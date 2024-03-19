@@ -6,11 +6,25 @@ from typing import TypedDict
 from typing import Union
 
 NewClassNumbers = List[float]
+
 NewClassNumbersTuple = Tuple[Any, ...]
+
 NewClassKids = List[str]
+
+NewClassRandomDict = TypedDict(
+    "NewClassRandomDict",
+    {
+        "1$": int,
+        "2 3": float,
+    },
+)
+
 NewClassFavouriteColors = Set[str]
+
 NewClassRandomData = List[Union[int, str]]
+
 NewClassTupleExample = Tuple[Any, ...]
+
 class NewClassAddress(TypedDict):
     street: str
     city: str
@@ -22,6 +36,7 @@ class NewClass(TypedDict):
     numbers: NewClassNumbers
     numbers_tuple: NewClassNumbersTuple
     kids: NewClassKids
+    random_dict: NewClassRandomDict
     favourite_colors: NewClassFavouriteColors
     random_data: NewClassRandomData
     tuple_example: NewClassTupleExample

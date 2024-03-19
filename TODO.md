@@ -4,7 +4,6 @@ feat:
 
 - Create `TypedDict` with docstrings if those are present within a file
 - Check behaviour with a dict with multiple lists (equal and different ones)
-- Make it compatible with keys that have special symbols like whitespaces or $
 - Generating `.py` files locally:
   - Allow different subfolders
   - Think from a collaborative point of view: Think that the `.pyi` file will not be up

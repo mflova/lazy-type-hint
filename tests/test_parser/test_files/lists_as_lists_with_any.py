@@ -5,11 +5,25 @@ from typing import Tuple
 from typing import TypedDict
 
 NewClassNumbers = List[Any]
+
 NewClassNumbersTuple = Tuple[float, int]
+
 NewClassKids = List[Any]
+
+NewClassRandomDict = TypedDict(
+    "NewClassRandomDict",
+    {
+        "1$": int,
+        "2 3": float,
+    },
+)
+
 NewClassFavouriteColors = Set[str]
+
 NewClassRandomData = List[Any]
+
 NewClassTupleExample = Tuple[int, str]
+
 class NewClassAddress(TypedDict):
     street: str
     city: str
@@ -21,6 +35,7 @@ class NewClass(TypedDict):
     numbers: NewClassNumbers
     numbers_tuple: NewClassNumbersTuple
     kids: NewClassKids
+    random_dict: NewClassRandomDict
     favourite_colors: NewClassFavouriteColors
     random_data: NewClassRandomData
     tuple_example: NewClassTupleExample
