@@ -1,4 +1,5 @@
 from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from contextlib import suppress
 
 lst = [
     {
@@ -14,4 +15,5 @@ lst = [
 ]
 
 data = PyiGenerator().from_data(lst, class_name="Example")
-data[0]["number"]
+with suppress(KeyError):
+    data[0]["number"]

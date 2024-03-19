@@ -9,7 +9,7 @@ from typing import (
     Callable,
     Dict,
     Final,
-    Literal,  # noqa: F401
+    Literal,
     Mapping,
     Sequence,
     Tuple,
@@ -25,7 +25,7 @@ from dynamic_pyi_generator.parser import Parser
 from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.utils import (
     TAB,
-    compare_strings_via_ast,
+    compare_str_via_ast,
     is_string_python_keyword_compatible,
 )
 
@@ -55,8 +55,12 @@ class PyiGenerator:
     
     First one is `ModuleType`. Following ones are strings. At least one must be provided.
     """
+    if_interface_exists: Literal["overwrite", "validate"]
+    """Strategy to follow if a requested class has been found as existing."""
 
     # Constants that should not be modified
+    header: Final = "# Class automatically generated. DO NOT MODIFY."
+    """Header that will be prepended to all new classes created."""
     classes_created: "TypeAlias" = Any
     """Classes created by the class. Do not modify."""
     methods_to_be_overloaded: Final = ("from_data", "from_file")
@@ -74,6 +78,8 @@ class PyiGenerator:
         ),
     ) -> None:
         self.custom_classes_dir = generated_classes_custom_dir
+        self.if_interface_exists = if_interface_exists
+
         self.this_file_pyi_path = Path(__file__).with_suffix(".pyi")
         if not self.this_file_pyi_path.exists():
             self.this_file_pyi = self._generate_this_file_pyi()
@@ -81,16 +87,7 @@ class PyiGenerator:
             self.this_file_pyi = FileHandler(
                 self.this_file_pyi_path.read_text(encoding="utf-8")
             )
-        self.parser = Parser(
-            Strategies(
-                list_strategy=type_hint_lists_as_sequences,
-                sequence_elements_strategy=type_hint_strategy_for_list_elements,
-                tuple_elements_strategy=type_hint_strategy_for_tuple_elements,
-                tuple_size_strategy=type_hint_strategy_for_tuple_size,
-                set_elements_strategy=type_hint_strategy_for_set_elements,
-                mapping_strategy=type_hint_strategy_for_mapping,
-            )
-        )
+        self.parser = Parser(strategies=strategies)
         # Validation
         self._validate_classes_custom_dir(self.custom_classes_dir)
 
@@ -174,7 +171,7 @@ class PyiGenerator:
     ) -> ObjectT:
         return self.from_data(
             loader(path),
-            class_name=class_type,
+            class_name=class_name,
         )
 
     def from_data(
@@ -188,14 +185,18 @@ class PyiGenerator:
                 f"conventions: {class_name}"
             )
         string_representation = self.parser.parse(data, class_name=class_name)
-        string_representation = self.header + string_representation
+        string_representation = self.header + "\n" + string_representation
         classes_added = self._get_classes_added()
         if class_name not in classes_added:
-            self._create_custom_class_pyi(typed_dict_representation, class_name)
+            self._create_custom_class_py(string_representation, class_name)
             self._add_new_class_to_loader_pyi(new_class=class_name)
+        elif self.if_interface_exists == "overwrite":
+            self._create_custom_class_py(string_representation, class_name)
         else:
-            if not compare_strings_via_ast(
-                classes_added[class_name].read_text(), string_representation
+            if not compare_str_via_ast(
+                classes_added[class_name].read_text(),
+                string_representation,
+                ignore_imports=True,
             ):
                 raise PyiGeneratorError(
                     f"An attempt to load a dictionary with an already existing class "
@@ -232,7 +233,7 @@ class PyiGenerator:
             package_path = package_path / string
         return package_path
 
-    def _create_custom_class_pyi(self, string: str, class_name: str) -> None:
+    def _create_custom_class_py(self, string: str, class_name: str) -> None:
         if not self._custom_class_dir_path.exists():
             os.makedirs(self._custom_class_dir_path)
 

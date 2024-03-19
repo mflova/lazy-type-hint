@@ -3,6 +3,8 @@ from typing import Set
 from typing import Tuple
 from typing import TypedDict
 
+NewClassNumbers = Sequence[object]
+NewClassNumbersTuple = Tuple[float, int]
 NewClassKids = Sequence[object]
 NewClassFavouriteColors = Set[str]
 NewClassRandomData = Sequence[object]
@@ -15,6 +17,8 @@ class NewClassAddress(TypedDict):
 class NewClass(TypedDict):
     name: str
     age: int
+    numbers: NewClassNumbers
+    numbers_tuple: NewClassNumbersTuple
     kids: NewClassKids
     favourite_colors: NewClassFavouriteColors
     random_data: NewClassRandomData

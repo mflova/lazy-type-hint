@@ -1,23 +1,14 @@
 from typing import List
+from typing import Mapping
 from typing import Set
 from typing import Tuple
-from typing import TypedDict
 from typing import Union
 
-NewClassKids = List[str]
-NewClassFavouriteColors = Set[str]
-NewClassRandomData = List[Union[int, str]]
-NewClassTupleExample = Tuple[int, str]
-class NewClassAddress(TypedDict):
-    street: str
-    city: str
-    state: str
-
-class NewClass(TypedDict):
-    name: str
-    age: int
-    kids: NewClassKids
-    favourite_colors: NewClassFavouriteColors
-    random_data: NewClassRandomData
-    tuple_example: NewClassTupleExample
-    address: NewClassAddress
+NewClassList = List[float]
+NewClassTuple = Tuple[float, int]
+NewClassList_0 = List[str]
+NewClassSet = Set[str]
+NewClassList_1 = List[Union[int, str]]
+NewClassTuple_0 = Tuple[int, str]
+NewClassDict = Mapping[str, str]
+NewClass = Mapping[str, Union[NewClassDict, NewClassList, NewClassList_0, NewClassList_1, NewClassSet, NewClassTuple, NewClassTuple_0, int, str]]

@@ -2,8 +2,6 @@
 
 feat:
 
-- Use _1, _2 to indicate the presence of repeated classes
-- Simplify all Union[float, int] to just float
 - Create `TypedDict` with docstrings if those are present within a file
 - Check behaviour with a dict with multiple lists (equal and different ones)
 - Make it compatible with keys that have special symbols like whitespaces or $

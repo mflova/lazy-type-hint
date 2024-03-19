@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import (
     Any,
     ClassVar,
-    Container,
     Dict,
     Final,
     Generic,
@@ -24,7 +23,8 @@ from typing import (
 from dynamic_pyi_generator.strategies import Strategies
 
 
-class ParserError(Exception): ...
+class ParserError(Exception):
+    ...
 
 
 @dataclass
@@ -117,7 +117,7 @@ class Parser(Generic[DataT_contra]):
     def process_elements(
         self, data: Iterable[Any], *, class_name: str, include_repeated: bool = False
     ) -> List[str]:
-        subtypes: Container[str] = [] if include_repeated else set()
+        subtypes: Union[List[str], Set[str]] = [] if include_repeated else set()
 
         def add_subtype(value: str) -> None:
             if include_repeated:
@@ -138,7 +138,7 @@ class Parser(Generic[DataT_contra]):
 
         if "float" in subtypes and "int" in subtypes and not include_repeated:
             subtypes.remove("int")
-        return sorted(subtypes)  # type: ignore
+        return sorted(subtypes)
 
     def _build_union_elements(self, elements: Union[Set[str], Sequence[str]]) -> str:
         if len(elements) == 1:

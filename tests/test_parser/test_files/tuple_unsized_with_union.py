@@ -4,6 +4,8 @@ from typing import Tuple
 from typing import TypedDict
 from typing import Union
 
+NewClassNumbers = List[float]
+NewClassNumbersTuple = Tuple[float, ...]
 NewClassKids = List[str]
 NewClassFavouriteColors = Set[str]
 NewClassRandomData = List[Union[int, str]]
@@ -16,6 +18,8 @@ class NewClassAddress(TypedDict):
 class NewClass(TypedDict):
     name: str
     age: int
+    numbers: NewClassNumbers
+    numbers_tuple: NewClassNumbersTuple
     kids: NewClassKids
     favourite_colors: NewClassFavouriteColors
     random_data: NewClassRandomData

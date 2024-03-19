@@ -7,6 +7,7 @@ from dynamic_pyi_generator.pyi_generator import PyiGenerator, PyiGeneratorError
 from dynamic_pyi_generator.testing_tools import Mypy
 
 
+@pytest.mark.usefixtures("_serial")
 class TestPyiGenerator:
     DATA_TEST_DIR: Final = Path(__file__).parent / "test_files"
 
@@ -22,18 +23,11 @@ class TestPyiGenerator:
         else:
             raise ValueError(f"File must be start with nok or ok. Given one is: {file}")
 
-    @pytest.fixture(autouse=True)
-    def _teardown(self, pyi_generator: PyiGenerator) -> Any:
-        pyi_generator.reset()
-        yield
-        pyi_generator.reset()
-
     @pytest.mark.parametrize(
         "file",
         (
             "ok_list.py",
             "ok_append_list_as_any_or_object.py",
-            "ok_list.py",
             "ok_dict.py",
             "ok_str.py",
             "ok_float.py",
@@ -47,7 +41,6 @@ class TestPyiGenerator:
             "nok_key_missing.py",
             "nok_list.py",
             "nok_modify_mapping.py",
-            "nok_list.py",
         ),
     )
     def test_generated_interface(self, file: str, mypy: Mypy) -> None:
@@ -61,11 +54,7 @@ class TestPyiGenerator:
         expected_mypy_success = self.expected_mypy_succes(file)
         file_path = self.DATA_TEST_DIR / file
 
-        if expected_mypy_success:
-            exec(file_path.read_text())
-        else:
-            with suppress(Exception):
-                exec(file_path.read_text())
+        exec(file_path.read_text())
         result = mypy.run(file_path, ignore_errors="Overloaded")
         assert result.success == expected_mypy_success, str(result)
 
