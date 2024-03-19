@@ -1,6 +1,8 @@
 import ast
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Final, List, Literal, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Tuple, Union
+
+from dynamic_pyi_generator.utils import TAB
 
 if TYPE_CHECKING:
     from typing_extensions import overload
@@ -10,7 +12,6 @@ else:
 
 class FileHandler:
     lines: List[str]
-    tab: Final = "    "
 
     def __init__(self, representation: str) -> None:
         self.lines = representation.split("\n")
@@ -24,12 +25,12 @@ class FileHandler:
     @overload
     def search_assignment(
         self, variable: str, only_values: Literal[False] = False
-    ) -> List[Tuple[int, str]]:
-        ...
+    ) -> List[Tuple[int, str]]: ...
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
-        ...
+    def search_assignment(
+        self, variable: str, only_values: Literal[True]
+    ) -> List[str]: ...
 
     def search_assignment(
         self, variable: str, only_values: bool = False
@@ -288,7 +289,7 @@ class FileHandler:
 
         if in_type_checking_block:
             idx = self.search_line("if TYPE_CHECKING:") + 1
-            lines = [f"{self.tab}{line}" for line in lines]
+            lines = [f"{TAB}{line}" for line in lines]
         for line in lines[::-1]:
             self.lines.insert(idx, line)
 

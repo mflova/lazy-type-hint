@@ -10,7 +10,6 @@ from typing import (
     Generic,
     Iterable,
     List,
-    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -20,7 +19,6 @@ from typing import (
     TypeVar,
     Union,
     final,
-    overload,
 )
 
 from dynamic_pyi_generator.strategies import Strategies
@@ -45,7 +43,9 @@ class Parser(Generic[DataT_contra]):
     this_one_parses: ClassVar[Union[Type[object], Tuple[Type[object], ...]]] = object
     to_process: list[Tuple[str, object]]
     strategies: Strategies
-    tab: Final = "    "
+
+    # Constants
+    suffix_repeated_classes: Final = "_{idx}"
 
     def __init__(self, strategies: Optional[Strategies] = None):
         self.to_process = []
@@ -136,6 +136,8 @@ class Parser(Generic[DataT_contra]):
                 new_class_name = type(object_).__name__
             add_subtype(new_class_name)
 
+        if "float" in subtypes and "int" in subtypes and not include_repeated:
+            subtypes.remove("int")
         return sorted(subtypes)  # type: ignore
 
     def _build_union_elements(self, elements: Union[Set[str], Sequence[str]]) -> str:
@@ -145,9 +147,8 @@ class Parser(Generic[DataT_contra]):
             self.imports.add("from typing import Union")
             return f"Union[{', '.join(elements)}]"
 
-    @staticmethod
     def _get_elements_info(
-        data: Iterable[Any], *, current_class_name: str
+        self, data: Iterable[Any], *, current_class_name: str
     ) -> Mapping[str, object]:
         # key: new hypotehtic name.
         # value: object itself
@@ -158,7 +159,7 @@ class Parser(Generic[DataT_contra]):
             modified_name = name
             count = 0
             while modified_name in dct:
-                modified_name = name + str(count)
+                modified_name = name + self.suffix_repeated_classes.format(idx=count)
                 count += 1
             dct[modified_name] = element
         return dct

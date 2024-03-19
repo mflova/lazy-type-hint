@@ -4,6 +4,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeGuard
 
 from dynamic_pyi_generator.parser.parser import ParseOutput, Parser
+from dynamic_pyi_generator.utils import TAB
 
 
 class ParserMapping(Parser[Mapping[object, object]]):
@@ -32,15 +33,15 @@ class ParserMapping(Parser[Mapping[object, object]]):
         for key, value in data.items():
             if isinstance(value, dict):
                 type_value = f"{class_name}{self.to_camel_case(key)}"
-                string += f"{self.tab}{key}: {type_value}\n"
+                string += f"{TAB}{key}: {type_value}\n"
                 self.to_process.append((type_value, value))
             else:
                 if type(value) in self.simple_types:
-                    string += f"{self.tab}{key}: {type(value).__name__}\n"
+                    string += f"{TAB}{key}: {type(value).__name__}\n"
                 else:
                     name = f"{class_name}{self.to_camel_case(key)}"
                     self.to_process.append((name, value))
-                    string += f"{self.tab}{key}: {name}\n"
+                    string += f"{TAB}{key}: {name}\n"
         return string
 
     def _parse_dict(self, data: Mapping[object, Any], *, class_name: str) -> str:

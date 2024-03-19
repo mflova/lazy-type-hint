@@ -1,6 +1,5 @@
-from contextlib import suppress
 from pathlib import Path
-from typing import Any, Final, ValuesView
+from typing import Final
 
 import pytest
 
@@ -51,7 +50,7 @@ class TestPyiGenerator:
             "nok_list.py",
         ),
     )
-    def test_generated_interface_is_ok(self, file: str, mypy: Mypy) -> None:
+    def test_generated_interface(self, file: str, mypy: Mypy) -> None:
         """
         Test the given file by executing its content, using mypy and assert the result.
 

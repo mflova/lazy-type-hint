@@ -22,14 +22,11 @@ from typing import (
 import dynamic_pyi_generator
 from dynamic_pyi_generator.file_handler import FileHandler
 from dynamic_pyi_generator.parser import Parser
-from dynamic_pyi_generator.strategies import (
-    LIST_ELEMENT_STRATEGIES,
-    LIST_STRATEGIES,
-    MAPPING_STRATEGIES,
-    SET_STRATEGIES,
-    TUPLE_ELEMENT_STRATEGIES,
-    TUPLE_SIZE_STRATEGIES,
-    Strategies,
+from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.utils import (
+    TAB,
+    compare_strings_via_ast,
+    is_string_python_keyword_compatible,
 )
 
 if TYPE_CHECKING:
@@ -62,8 +59,6 @@ class PyiGenerator:
     # Constants that should not be modified
     classes_created: "TypeAlias" = Any
     """Classes created by the class. Do not modify."""
-    tab: Final = "    "
-    """Tabs used whenever an indent is needed."""
     methods_to_be_overloaded: Final = ("from_data", "from_file")
     """Methods that will be modified in the PYI interface when new classes are added."""
 
@@ -71,12 +66,8 @@ class PyiGenerator:
     def __init__(
         self,
         *,
-        type_hint_lists_as_sequences: LIST_STRATEGIES = "list",
-        type_hint_strategy_for_list_elements: LIST_ELEMENT_STRATEGIES = "Union",
-        type_hint_strategy_for_tuple_size: TUPLE_SIZE_STRATEGIES = "fixed",
-        type_hint_strategy_for_tuple_elements: TUPLE_ELEMENT_STRATEGIES = "Union",
-        type_hint_strategy_for_set_elements: SET_STRATEGIES = "Union",
-        type_hint_strategy_for_mapping: MAPPING_STRATEGIES = "TypedDict",
+        strategies: Strategies = Strategies(),  # noqa: B008
+        if_interface_exists: Literal["overwrite", "validate"] = "validate",
         generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...] = (
             dynamic_pyi_generator,
             "build",
@@ -126,7 +117,7 @@ class PyiGenerator:
             )
 
         if any(
-            re.compile(r"[^a-zA-Z0-9_]").search(str(string))
+            not is_string_python_keyword_compatible(string)  # type: ignore
             for string in generated_classes_custom_dir[1:]
         ):
             raise PyiGeneratorError(
@@ -191,13 +182,21 @@ class PyiGenerator:
         data: ObjectT,
         class_name: str,
     ) -> ObjectT:
-        typed_dict_representation = self.parser.parse(data, class_name=class_name)
+        if not is_string_python_keyword_compatible(class_name):
+            raise PyiGeneratorError(
+                "Given class_name is not compatible with Python class naming "
+                f"conventions: {class_name}"
+            )
+        string_representation = self.parser.parse(data, class_name=class_name)
+        string_representation = self.header + string_representation
         classes_added = self._get_classes_added()
         if class_name not in classes_added:
             self._create_custom_class_pyi(typed_dict_representation, class_name)
             self._add_new_class_to_loader_pyi(new_class=class_name)
         else:
-            if typed_dict_representation != classes_added[class_name].read_text():
+            if not compare_strings_via_ast(
+                classes_added[class_name].read_text(), string_representation
+            ):
                 raise PyiGeneratorError(
                     f"An attempt to load a dictionary with an already existing class "
                     f"type ({class_name}) has been made. However, the given dictionary"
@@ -280,7 +279,7 @@ class PyiGenerator:
             if not idx_lst:
                 raise PyiGeneratorError(f"No method `{method_name}` could be found")
 
-            self.this_file_pyi.add_line(idx_lst[-1], f"{self.tab}@overload")
+            self.this_file_pyi.add_line(idx_lst[-1], f"{TAB}@overload")
 
         signature, _ = self.this_file_pyi.get_signature(method_name)
 

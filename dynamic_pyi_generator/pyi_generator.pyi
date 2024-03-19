@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Final, Literal, Mapping, 
 import dynamic_pyi_generator
 from dynamic_pyi_generator.file_handler import FileHandler
 from dynamic_pyi_generator.parser import Parser
-from dynamic_pyi_generator.strategies import LIST_ELEMENT_STRATEGIES, LIST_STRATEGIES, MAPPING_STRATEGIES, SET_STRATEGIES, TUPLE_ELEMENT_STRATEGIES, TUPLE_SIZE_STRATEGIES, Strategies
+from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.utils import TAB, compare_strings_via_ast, is_string_python_keyword_compatible
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 THIS_DIR = Path(__file__).parent

@@ -30,6 +30,8 @@ class TestClassGenerator:
             default_factory=lambda: {
                 "name": "John",
                 "age": 25,
+                "numbers": [12, 1.0],
+                "numbers_tuple": (12, 1.0),
                 "kids": ["Joan", "Peter"],
                 "favourite_colors": {"red", "blue"},
                 "random_data": [1, "Blue"],
