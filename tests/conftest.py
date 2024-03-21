@@ -27,7 +27,7 @@ def lock(tmp_path_factory: pytest.TempPathFactory) -> Any:
 @pytest.fixture
 def _serial(lock: BaseFileLock) -> Any:
     """Use this fixture to execute tests in a serial manner."""
-    with lock.acquire(poll_intervall=0.1):
+    with lock.acquire(poll_interval=0.1):
         PyiGenerator().reset()
         yield
         PyiGenerator().reset()

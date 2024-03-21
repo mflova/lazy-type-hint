@@ -1,5 +1,7 @@
 import ast
+import os
 import re
+import subprocess
 from itertools import zip_longest
 from typing import Any, Final, List, Protocol, TypeVar, Union, cast
 
@@ -121,3 +123,17 @@ def cache_returned_value(method: _AnyMethodT) -> _AnyMethodT:
             return result
 
     return cast(_AnyMethodT, wrapper)
+
+
+def check_if_comand_available(tool: str) -> bool:
+    """
+    Check if a command is available.
+
+    Args:
+        tool (str): The name of the command to check.
+
+    Returns:
+        bool: True if the command is available, False otherwise.
+    """
+    result = subprocess.run(f"{tool} --help", stdout=open(os.devnull, "wb"), stderr=open(os.devnull, "wb"), shell=True)
+    return bool(not result.returncode)

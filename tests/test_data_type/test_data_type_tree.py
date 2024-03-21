@@ -1,4 +1,5 @@
 import itertools
+import subprocess
 from collections import defaultdict
 from dataclasses import dataclass, fields
 from pathlib import Path
@@ -18,6 +19,7 @@ import pytest
 
 from dynamic_pyi_generator.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.utils import check_if_comand_available
 
 
 @dataclass(frozen=True)
@@ -56,10 +58,12 @@ class TestIntegration:
     test_files: Final = ("dictionary.py", "list.py", "set.py")
     test_files_dir: Final = Path(__file__).parent / "test_files"
 
-    @pytest.mark.xfail(reason="Exec not working well")
+    @pytest.mark.skipif(not check_if_comand_available("python"), reason="Python must be available within the terminal.")
     @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
     @pytest.mark.parametrize("data_type", ["frozenset", "set", "list", "tuple", "dictionary", "mapping"])
-    def test_integration(self, strategies: Strategies, create_sample: Callable[[str], str], data_type: str) -> None:
+    def test_integration(
+        self, strategies: Strategies, create_sample: Callable[[str], str], data_type: str, tmp_path: str
+    ) -> None:
         data = create_sample(data_type)
         cls = DataTypeTree.get_data_type_tree_for_type(type(data))
         strings = cls(data, name="Example", strategies=strategies).get_strs_recursive_py(include_imports=True)
@@ -67,17 +71,21 @@ class TestIntegration:
         self.assert_no_unused_classes(strings)
         self.assert_no_redefined_classes(strings)
 
-        self.assert_no_broken_string_representation(strings)
+        self.assert_no_broken_string_representation(strings, tmp_path=tmp_path)
 
     @staticmethod
-    def assert_no_broken_string_representation(strings: Tuple[str, ...]) -> None:
-        full_string = "\n".join(strings)
-        try:
-            exec(full_string)
-        except Exception as error:  # noqa: BLE001
-            pytest.fail(
-                f"The produced file could not be read by a Python interpreter. Error: {error}. Full string: \n{full_string}"
-            )
+    def assert_no_broken_string_representation(strings: Tuple[str, ...], tmp_path: str) -> None:
+        """Compile and call corresponding string representation.
+
+        Not done via `exec()` as this one was presenting an inconsistent behaviour.
+        """
+        file = "tmp.py"
+        full_path_file = Path(tmp_path) / file
+        full_path_file.write_text(data="\n".join(strings))
+        result = subprocess.run(f"python {full_path_file}", capture_output=True, text=True)
+
+        assert not result.stdout
+        assert not result.stderr
 
     def assert_no_unused_classes(self, strings: Tuple[str, ...]) -> None:
         types_defined: Set[str] = set()

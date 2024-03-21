@@ -5,9 +5,11 @@ import pytest
 
 from dynamic_pyi_generator.pyi_generator import PyiGenerator, PyiGeneratorError
 from dynamic_pyi_generator.testing_tools import Mypy
+from dynamic_pyi_generator.utils import check_if_comand_available
 
 
 @pytest.mark.usefixtures("_serial")
+@pytest.mark.skipif(not check_if_comand_available("mypy"), reason="Mypy must be available via terminal.")
 class TestPyiGenerator:
     DATA_TEST_DIR: Final = Path(__file__).parent / "test_files"
 

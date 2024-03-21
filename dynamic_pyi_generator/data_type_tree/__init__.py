@@ -1,1 +1,5 @@
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree as DataTypeTree
+from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import (
+    GenericDataTypeTree as GenericDataTypeTree,
+)
+from dynamic_pyi_generator.data_type_tree.simple_data_type_tree import SimpleDataTypeTree as SimpleDataTypeTree
