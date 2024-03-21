@@ -1,7 +1,7 @@
 import ast
 import re
 from itertools import zip_longest
-from typing import Final, List, Union
+from typing import Any, Final, List, Protocol, TypeVar, Union, cast
 
 TAB: Final = "    "
 
@@ -61,9 +61,7 @@ def compare_ast(
         return node1 == node2  # type: ignore
 
 
-def compare_str_via_ast(
-    string1: str, string2: str, /, *, ignore_imports: bool = False
-) -> bool:
+def compare_str_via_ast(string1: str, string2: str, /, *, ignore_imports: bool = False) -> bool:
     """
     Compare two strings using the AST (Abstract Syntax Tree) representation.
 
@@ -75,6 +73,51 @@ def compare_str_via_ast(
     Returns:
         bool: True if the AST representations of the strings are equal, False otherwise.
     """
-    return compare_ast(
-        ast.parse(string1), ast.parse(string2), ignore_imports=ignore_imports
-    )
+    return compare_ast(ast.parse(string1), ast.parse(string2), ignore_imports=ignore_imports)
+
+
+class _AnyMethodProtocol(Protocol):
+    __name__: str
+
+    def __call__(*args: Any, **kwargs: Any) -> Any:
+        ...
+
+
+_AnyMethodT = TypeVar("_AnyMethodT", bound=_AnyMethodProtocol)
+
+
+def cache_returned_value(method: _AnyMethodT) -> _AnyMethodT:
+    """
+    A decorator that caches the returned value of a method.
+
+    This decorator can be used to cache the returned value of a method
+    to improve performance by avoiding redundant computations.
+
+    Args:
+        method: The method to be decorated.
+
+    Returns:
+        The decorated method.
+
+    Usage:
+        @cache_returned_value
+        def my_method(self, args, **kwargs):
+            # method implementation
+
+    Example:
+        class MyClass:
+            @cache_returned_value
+            def my_method(self, args, **kwargs):
+                # method implementation
+    """
+
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        cache_attr = f"{method.__name__}____"
+        if hasattr(self, cache_attr):
+            return getattr(self, cache_attr)
+        else:
+            result = method(self, *args, **kwargs)
+            setattr(self, cache_attr, result)
+            return result
+
+    return cast(_AnyMethodT, wrapper)

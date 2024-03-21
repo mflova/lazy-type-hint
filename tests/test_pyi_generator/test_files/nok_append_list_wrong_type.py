@@ -6,5 +6,6 @@ dct = {
     "nested_lst": [1, 2, 3],
 }
 
+PyiGenerator().reset()
 data = PyiGenerator().from_data(dct, class_name="Example")
 data["nested_lst"].append(["2"])

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
 from dynamic_pyi_generator.utils import (
+    cache_returned_value,
     compare_str_via_ast,
     is_string_python_keyword_compatible,
 )
@@ -231,3 +233,29 @@ def test_is_string_python_keyword_compatible(string: str, expected_output: bool)
         AssertionError: If the expected output does not match the actual output.
     """
     assert expected_output == is_string_python_keyword_compatible(string)
+
+
+class TestCacheReturnedValue:
+    class DummyClass:
+        """Class that will be used for testing purposes."""
+
+        def __init__(self) -> None:
+            self.cache_attr = None
+
+        @cache_returned_value
+        def dummy_method(self, arg: Any) -> Any:
+            self.cache_attr = arg
+            return arg
+
+    def test_cache_returned_value(self) -> None:
+        dummy_obj = self.DummyClass()
+
+        # Test initial call
+        result = dummy_obj.dummy_method(10)
+        assert result == 10
+        assert dummy_obj.cache_attr == 10
+
+        # Test cached call
+        result = dummy_obj.dummy_method(20)
+        assert result == 10
+        assert dummy_obj.cache_attr == 10

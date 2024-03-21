@@ -94,8 +94,7 @@ class Arguments:
             return cls(**attributes)
         except TypeError as error:
             raise ValueError(
-                "Make sure that `argparse` defines all of the attributes defined in"
-                " this class."
+                "Make sure that `argparse` defines all of the attributes defined in this class."
             ) from error
 
 
@@ -119,9 +118,7 @@ def parser_args() -> Arguments:
         nargs="*",
         help="Specify those tools that will be run.",
     )
-    parser.add_argument(
-        "--single-tool", type=str, default="", help="Select a single tool to be run."
-    )
+    parser.add_argument("--single-tool", type=str, default="", help="Select a single tool to be run.")
     parser.add_argument(
         "--cls",
         action="store_true",
@@ -244,13 +241,9 @@ def run_tool(
 
     # Filter output
     err_lines = err_str.split("\n")
-    filtered_err_lines = [
-        line for line in err_lines if not any([ignore_ in line for ignore_ in ignore])
-    ]
+    filtered_err_lines = [line for line in err_lines if not any([ignore_ in line for ignore_ in ignore])]
     if only_include:
-        filtered_err_lines = [
-            line for line in err_lines if any([only_ in line for only_ in only_include])
-        ]
+        filtered_err_lines = [line for line in err_lines if any([only_ in line for only_ in only_include])]
     err_str = "\n".join(filtered_err_lines)
 
     if display_output:
@@ -265,9 +258,7 @@ def run_tool(
     return status
 
 
-def setup_dmypy_server(
-    dct: Mapping[str, Any], *, timeout: Optional[int] = None
-) -> Mapping[str, Any]:
+def setup_dmypy_server(dct: Mapping[str, Any], *, timeout: Optional[int] = None) -> Mapping[str, Any]:
     """Replace the normal `mypy` command.
 
     Replaced by one that performs the same action but with Daemon server.
@@ -379,9 +370,7 @@ def filter_tools_to_be_used(
     if not only_use_tools:
         return args  # All tools
 
-    only_use_tools_ = (
-        only_use_tools.lower() if isinstance(only_use_tools, str) else set(only_use_tools)
-    )
+    only_use_tools_ = only_use_tools.lower() if isinstance(only_use_tools, str) else set(only_use_tools)
     if "all linters" in only_use_tools_:
         return tuple([arg for arg in args if arg["tool"] != "pytest"])
 

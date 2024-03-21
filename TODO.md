@@ -1,9 +1,14 @@
 # TODO
 
+To decide: Do I add `typing_extensions` as dependency?
+
 feat:
 
 - Create `TypedDict` with docstrings if those are present within a file
 - Check behaviour with a dict with multiple lists (equal and different ones)
+- Make it compatible with different Python versions.This include:
+  - Migration for some of the classes from `typing` to `collections.abc`
+  - Use of `list` instead of `typing.List`
 - Generating `.py` files locally:
   - Allow different subfolders
   - Think from a collaborative point of view: Think that the `.pyi` file will not be up
@@ -14,8 +19,13 @@ feat:
 
 refactor:
 
+- Related to the tree, make as many generators as I can
 - Rename main class
 - Make it easier to import for users
+- Refactor imports
+- Try to fix type: ignore
+
+
 
 docs:
 

@@ -1,7 +1,8 @@
-from typing_extensions import ReadOnly, TypedDict
+from typing import FrozenSet
 
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from dynamic_pyi_generator.data_type_tree import DataTypeTree
 
-data = [[1, 2, 3], [1, 2, 4, 5]]
-PyiGenerator().reset()
-# a = PyiGenerator().from_data(data, class_name="Example")
+a: FrozenSet[int] = {1, 2}
+
+data = [1, 2, 3]
+print(DataTypeTree.get_data_type_tree_for_type(type(data)))

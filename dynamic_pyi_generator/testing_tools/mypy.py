@@ -67,11 +67,7 @@ class Mypy:
 
         error_lst = [line for line in result.stdout.split("\n") if "error: " in line]
         if ignore_errors:
-            error_lst = [
-                line
-                for line in error_lst
-                if not all(ignore_error in line for ignore_error in ignore_errors)
-            ]
+            error_lst = [line for line in error_lst if not all(ignore_error in line for ignore_error in ignore_errors)]
         # Filter out to only get the errors from the file
         error_lst = [error for error in error_lst if Path(file).name in error]
         return self.Result(

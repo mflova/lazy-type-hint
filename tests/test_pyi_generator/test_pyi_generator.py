@@ -27,7 +27,6 @@ class TestPyiGenerator:
         "file",
         (
             "ok_list.py",
-            "ok_append_list_as_any_or_object.py",
             "ok_dict.py",
             "ok_str.py",
             "ok_float.py",

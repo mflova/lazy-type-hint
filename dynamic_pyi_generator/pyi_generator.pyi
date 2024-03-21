@@ -5,8 +5,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, Final, Literal, Mapping, Sequence, Tuple, TypeVar, Union, final, overload
 import dynamic_pyi_generator
+from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.file_handler import FileHandler
-from dynamic_pyi_generator.parser import Parser
 from dynamic_pyi_generator.strategies import Strategies
 from dynamic_pyi_generator.utils import TAB, compare_str_via_ast, is_string_python_keyword_compatible
 if TYPE_CHECKING:

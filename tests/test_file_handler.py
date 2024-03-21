@@ -80,12 +80,7 @@ def run():
         file_handler: FileHandler,
         method_name: str,
     ) -> None:
-        assert (
-            file_handler.search_decorator(
-                decorator_name=decorator_name, method_name=method_name
-            )
-            == expected_idx
-        )
+        assert file_handler.search_decorator(decorator_name=decorator_name, method_name=method_name) == expected_idx
 
     @pytest.mark.parametrize(
         "method_name, return_index_above_decorator, expected_idx",
@@ -108,9 +103,7 @@ def run():
         expected_idx: List[int],
     ) -> None:
         assert (
-            file_handler.search_method(
-                method_name, return_index_above_decorator=return_index_above_decorator
-            )
+            file_handler.search_method(method_name, return_index_above_decorator=return_index_above_decorator)
             == expected_idx
         )
 

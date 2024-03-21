@@ -23,18 +23,14 @@ class FileHandler:
         return "\n".join(self.lines)
 
     @overload
-    def search_assignment(
-        self, variable: str, only_values: Literal[False] = False
-    ) -> List[Tuple[int, str]]:
+    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> List[Tuple[int, str]]:
         ...
 
     @overload
     def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
         ...
 
-    def search_assignment(
-        self, variable: str, only_values: bool = False
-    ) -> Union[List[Tuple[int, str]], List[str]]:
+    def search_assignment(self, variable: str, only_values: bool = False) -> Union[List[Tuple[int, str]], List[str]]:
         """
         Searches for assignments of a given variable in the lines of the file.
 
@@ -69,9 +65,7 @@ class FileHandler:
         Returns:
             List[int]: A list of line numbers where the decorator is found.
         """
-        lst = self.search_method(
-            method_name=method_name, return_index_above_decorator=False
-        )
+        lst = self.search_method(method_name=method_name, return_index_above_decorator=False)
         output: List[int] = []
         for idx in lst:
             while "@" in self.lines[idx - 1]:
@@ -81,9 +75,7 @@ class FileHandler:
                 break
         return output
 
-    def search_method(
-        self, method_name: str, *, return_index_above_decorator: bool = True
-    ) -> List[int]:
+    def search_method(self, method_name: str, *, return_index_above_decorator: bool = True) -> List[int]:
         """
         Search for a method in the lines of the file and return its location (indices).
 
@@ -97,9 +89,7 @@ class FileHandler:
         """
         lst: List[int] = []
         for idx, line in enumerate(self.lines):
-            if line.strip().startswith(f"def {method_name}") and not self.it_is_string(
-                line, method_name
-            ):
+            if line.strip().startswith(f"def {method_name}") and not self.it_is_string(line, method_name):
                 if return_index_above_decorator:
                     while "@" in self.lines[idx - 1]:
                         idx = idx - 1
@@ -107,7 +97,7 @@ class FileHandler:
         return lst
 
     def it_is_string(self, line: str, keyword_of_interest: str) -> bool:
-        for string_symbol in ('"', "'"):
+        for string_symbol in ('"', "'"):  # noqa: SIM110
             if string_symbol in line.split(keyword_of_interest)[0]:
                 return True
         return False
@@ -165,8 +155,7 @@ class FileHandler:
                 raise ValueError(f"The given label ({label}) is not being assigned.")
             if len(assignment_idx) > 1:
                 raise ValueError(
-                    f"The given label ({label}) is assigned multiple times. Not clear "
-                    "which one should be replaced."
+                    f"The given label ({label}) is assigned multiple times. Not clear which one should be replaced."
                 )
             idx = assignment_idx[0][0]
         else:
@@ -239,11 +228,7 @@ class FileHandler:
                         break
 
                 idx_ += 1
-                while (
-                    len(self.lines) > idx_
-                    and len(self.lines[idx_]) > spaces
-                    and self.lines[idx_][spaces].isspace()
-                ):
+                while len(self.lines) > idx_ and len(self.lines[idx_]) > spaces and self.lines[idx_][spaces].isspace():
                     lines_to_remove.append(idx_)
                     idx_ += 1
                 if len(self.lines) > idx_:
@@ -263,16 +248,11 @@ class FileHandler:
 
         lower_idx = self.search_method("__init__", return_index_above_decorator=True)[-1]
         for idx in list(range(upper_idx, lower_idx))[::-1]:
-            if (
-                "classes_created" in self.lines[idx]
-                or "classes_created" in self.lines[idx - 1]
-            ):
+            if "classes_created" in self.lines[idx] or "classes_created" in self.lines[idx - 1]:
                 continue
             self.lines.pop(idx)
 
-    def add_imports(
-        self, lines: Union[str, Sequence[str]], *, in_type_checking_block: bool = False
-    ) -> None:
+    def add_imports(self, lines: Union[str, Sequence[str]], *, in_type_checking_block: bool = False) -> None:
         """
         Adds import statements to the file.
 
@@ -311,6 +291,4 @@ class FileHandler:
         while ")" not in self.lines[bottom_idx] and ":" not in self.lines[bottom_idx]:
             bottom_idx += 1
 
-        return "\n".join(self.lines[upper_idx : bottom_idx + 1]), slice(
-            upper_idx, bottom_idx + 1
-        )
+        return "\n".join(self.lines[upper_idx : bottom_idx + 1]), slice(upper_idx, bottom_idx + 1)
