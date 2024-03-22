@@ -20,7 +20,6 @@ else:
     override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, DataTypeTree
-from dynamic_pyi_generator.data_type_tree.simple_data_type_tree import SimpleDataTypeTree
 
 
 class GenericDataTypeTree(DataTypeTree):
@@ -30,7 +29,8 @@ class GenericDataTypeTree(DataTypeTree):
     _iterator: Union[int, Iterator[Hashable]]
 
     @abstractmethod
-    def _get_childs(self, data: object) -> ChildStructure[DataTypeTree]: ...
+    def _get_childs(self, data: object) -> ChildStructure[DataTypeTree]:
+        ...
 
     def get_type_alias_childs(self) -> str:
         child_types = self._get_types()
@@ -62,8 +62,8 @@ class GenericDataTypeTree(DataTypeTree):
             child_types = [type(element).__name__ for element in iterable]
         else:
             for child in self:
-                if isinstance(child, SimpleDataTypeTree):
-                    child_types.append(child.holding_type.__name__)
+                if not child.permission_to_create_type_alias:
+                    child_types.append(child.get_str_no_type_alias_py())
                 else:
                     child_types.append(child.name)
         if not child_types:

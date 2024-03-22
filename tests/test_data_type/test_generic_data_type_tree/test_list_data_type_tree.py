@@ -16,8 +16,8 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "strategies",
         [
-            (Strategies(list_strategy="list")),
-            (Strategies(list_strategy="Sequence")),
+            (Strategies(list_strategy="list", min_height_to_define_type_alias=0)),
+            (Strategies(list_strategy="Sequence", min_height_to_define_type_alias=0)),
         ],
     )
     @pytest.mark.parametrize(
@@ -66,3 +66,43 @@ class TestGetStrPy:
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
         assert expected_output == tree.get_str_py()
         assert_imports(tree, self.imports_to_check)
+
+
+class TestTypeAliasHeight:
+    NAME: Final = "Example"
+    """Name that will be used to create the class."""
+
+    @pytest.fixture
+    def strategies(self, min_height: int) -> Strategies:
+        return Strategies(min_height_to_define_type_alias=min_height)
+
+    # fmt: off
+    @pytest.mark.parametrize(
+        "data, min_height, expected_str",
+        [
+            ([1], 0, f"{NAME} = List[int]"),
+            ([1], 1, f"{NAME} = List[int]"),
+            ([1], 2, f"{NAME} = List[int]"),
+            ([1, [1]], 0, f"{NAME} = List[Union[{NAME}List, int]]"),
+            ([1, [1]], 1, f"{NAME} = List[Union[List[int], int]]"),
+        ],
+    )
+    # fmt: on
+    def test_type_alias_based_on_height(
+        self,
+        data: List[Any],
+        strategies: Strategies,
+        expected_str: str,
+        min_height: int,  # noqa: ARG002
+    ) -> None:
+        """
+        Test the `get_str_py` method of the `ListDataTypeTree` class.
+
+        Args:
+            data (List[Any]): The input data for the test.
+            strategies (Strategies): The strategies object.
+            expected_str (str): The expected output string.
+            min_height (int): The minimum height of the tree.
+        """
+        tree = ListDataTypeTree(data, name=self.NAME, strategies=strategies)
+        assert expected_str == tree.get_str_py()

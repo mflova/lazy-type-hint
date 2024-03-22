@@ -8,7 +8,6 @@ else:
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
-from dynamic_pyi_generator.data_type_tree.simple_data_type_tree import SimpleDataTypeTree
 from dynamic_pyi_generator.utils import TAB, is_string_python_keyword_compatible
 
 
@@ -27,11 +26,23 @@ class DictDataTypeTree(MappingDataTypeTree):
         is_typed_dict: bool
         is_functional_syntax: bool
 
+    @override
+    def __post_init__(self) -> None:
+        if self.dict_profile.is_typed_dict:
+            self._needs_type_alias = True
+
     @staticmethod
     @override
     def _validate_name(name: str) -> None:  # noqa: ARG004
         # Removed name validation as the TypedDict can type any name
         return
+
+    @override
+    @property
+    def permission_to_create_type_alias(self) -> bool:
+        if self.dict_profile.is_typed_dict:
+            return True
+        return super().permission_to_create_type_alias
 
     @cached_property
     def dict_profile(self) -> DictProfile:
@@ -71,8 +82,8 @@ class DictDataTypeTree(MappingDataTypeTree):
                 type_value = f"{self.name}{self._to_camel_case(key)}"
                 content[key] = type_value
             else:
-                if isinstance(value, SimpleDataTypeTree):
-                    content[key] = value.holding_type.__name__
+                if not value.permission_to_create_type_alias:
+                    content[key] = value.get_str_no_type_alias_py()
                 else:
                     name = f"{self.name}{self._to_camel_case(key)}"
                     content[key] = name

@@ -52,7 +52,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
         keys_str = self._format_types(keys)
         value_types = self.get_type_alias_childs()
 
-        return f"{self.name} = {container}[{keys_str}, {value_types}]"
+        return f"{self.name} = {container.capitalize()}[{keys_str}, {value_types}]"
 
     @staticmethod
     def _to_camel_case(string: str) -> str:

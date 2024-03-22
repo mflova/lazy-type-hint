@@ -149,13 +149,6 @@ class PyiGenerator:
             dct[match] = path
         return dct
 
-    @staticmethod
-    def _find_line_idx(string: str, *, keyword: str) -> int:
-        for idx, line in enumerate(string.split("\n")):
-            if keyword in line:
-                return idx
-        raise PyiGeneratorError(f"It was not possible to find {keyword} among the lines of the given string.")
-
     def from_file(
         self,
         loader: Callable[[str], ObjectT],

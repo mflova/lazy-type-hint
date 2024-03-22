@@ -33,7 +33,8 @@ class StrategiesTesting(Strategies):
 
         # Generate all combinations of values
         for combination in itertools.product(*input_dict.values()):
-            yield cls(*combination)
+            for height in range(0, 5):
+                yield cls(*combination, min_height_to_define_type_alias=height)  # type: ignore
 
 
 @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())

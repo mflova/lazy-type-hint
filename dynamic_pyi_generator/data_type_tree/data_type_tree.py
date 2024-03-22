@@ -37,6 +37,7 @@ ChildStructure = Union[FrozenSet[DataTypeT], Sequence[DataTypeT], Mapping[Hashab
 class DataTypeTree(ABC):
     name: str
     depth: int
+    height: int
     imports: ImportManager  # Unique one shared among the whole tree
     parent: Optional[DataTypeTree]
     childs: Optional[ChildStructure[DataTypeTree]]
@@ -47,7 +48,6 @@ class DataTypeTree(ABC):
     data_type_tree_types: ClassVar[Mapping[Type[object], Type[DataTypeTree]]] = {}
 
     wraps: ClassVar[Union[Type[object], Sequence[Type[object]]]] = object
-    suffix_used_for_same_class_name: Final = "_{idx}"
 
     @final
     def __init__(
@@ -78,6 +78,17 @@ class DataTypeTree(ABC):
         self.imports = ImportManager() if imports is None else imports
         self.childs = self._get_childs(data)
         self.parent = parent
+        self.height = self._get_height()
+        self._needs_type_alias = False
+        self.__post_init__()
+
+    def __post_init__(self) -> None: ...
+
+    def _get_height(self) -> int:
+        max_height = 0
+        for child in self:
+            max_height = max(child.height, max_height)
+        return max_height + 1
 
     @staticmethod
     def _validate_name(name: str) -> None:
@@ -107,6 +118,17 @@ class DataTypeTree(ABC):
     @abstractmethod
     def _get_str_py(self) -> str: ...
 
+    @property
+    def permission_to_create_type_alias(self) -> bool:
+        for child in self:
+            if child._needs_type_alias:
+                return True
+        return bool(self.height > self.strategies.min_height_to_define_type_alias)
+
+    @final
+    def get_str_no_type_alias_py(self) -> str:
+        return self.get_str_py().split("=")[-1].strip()
+
     @final
     def get_str_py(self) -> str:
         return self._get_str_py().replace("NoneType", "None")
@@ -121,7 +143,8 @@ class DataTypeTree(ABC):
 
         class_representations: List[str] = []
         for child in self:
-            class_representations.extend(child.get_strs_recursive_py(include_imports=False))
+            if child.permission_to_create_type_alias:
+                class_representations.extend(child.get_strs_recursive_py(include_imports=False))
         class_representations.append(self.get_str_py())
 
         # These are available only when `get_str_py` is called

@@ -56,7 +56,7 @@ class TestPyiGenerator:
         file_content = file_path.read_text()
         exec(file_content)
 
-        result = mypy.scan_string(file_content, strict=True, ignore_errors=["Overloaded"])
+        result = mypy.scan_file(file_path, strict=True, ignore_errors=["Overloaded"])
         assert result.success == expected_mypy_success, str(result)
 
     @pytest.mark.parametrize("file", (["nok_non_compliant_dictionary.py"]))

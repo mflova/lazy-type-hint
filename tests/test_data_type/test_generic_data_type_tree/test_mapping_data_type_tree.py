@@ -5,7 +5,6 @@ import pytest
 
 from dynamic_pyi_generator.data_type_tree.generic_type import DictDataTypeTree, MappingDataTypeTree
 from dynamic_pyi_generator.strategies import Strategies
-from dynamic_pyi_generator.utils import TAB
 
 
 @pytest.mark.parametrize(
@@ -31,8 +30,8 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "strategies",
         [
-            (Strategies(dict_strategy="dict")),
-            (Strategies(dict_strategy="Mapping")),
+            (Strategies(dict_strategy="dict", min_height_to_define_type_alias=0)),
+            (Strategies(dict_strategy="Mapping", min_height_to_define_type_alias=0)),
         ],
     )
     @pytest.mark.parametrize(
@@ -84,119 +83,33 @@ class TestGetStrPy:
         assert expected_output == tree.get_str_py()
         assert_imports(tree, self.imports_to_check)
 
+
+class TestGetAliasHeight:
+    NAME: Final = "Example"
+    """Name that will be used to create the class."""
+
+    # fmt: off
     @pytest.mark.parametrize(
-        "tree, expected_output, expected_n_childs",
+        "data, min_height, expected_output",
         [
-            (
-                DictDataTypeTree({"name": "Joan"}, name=NAME),
-                f"""class {NAME}(TypedDict):
-{TAB}name: str""",
-                1,
-            ),
-            (
-                DictDataTypeTree({"age": 22}, name=NAME),
-                f"""class {NAME}(TypedDict):
-{TAB}age: int""",
-                1,
-            ),
-            (
-                DictDataTypeTree({"name": "Joan", "age": 21}, name=NAME),
-                f"""class {NAME}(TypedDict):
-{TAB}name: str
-{TAB}age: int""",
-                2,
-            ),
-            (
-                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME),
-                f"""class {NAME}(TypedDict):
-{TAB}name: str
-{TAB}kids: {NAME}Kids""",
-                2,
-            ),
-            (
-                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"], "parents": ["C", "D"]}, name=NAME),
-                f"""class {NAME}(TypedDict):
-{TAB}name: str
-{TAB}kids: {NAME}Kids
-{TAB}parents: {NAME}Parents""",
-                3,
-            ),
+            ({"name": {"unit": "dolar"}}, 0, f"{NAME} = Dict[str, ExampleName]"),
+            ({"name": {"unit": "dolar"}}, 1, f"{NAME} = Dict[str, Dict[str, str]]"),
+            ({"name": {"unit": "dolar"}}, 2, f"{NAME} = Dict[str, Dict[str, str]]"),
         ],
     )
-    def test_get_str_typed_dict_py(
-        self,
-        tree: DictDataTypeTree,
-        expected_output: str,
-        expected_n_childs: int,
-        assert_imports: Callable[[DictDataTypeTree, Iterable[str]], None],
-    ) -> None:
+    # fmt: on
+    def test_type_alias_based_on_height(self, data: Mapping[Any, Any], expected_output: str, min_height: int) -> None:
         """
         Test the `get_str_py` method of the `DictDataTypeTree` class.
 
         Args:
-            tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.
+            data (Mapping[Any, Any]): The input data for the test.
             expected_output (str): The expected output string.
-            expected_n_childs (int): The expected number of child nodes in the tree.
-            assert_imports (Callable[[TupleDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
+            min_height (int): The minimum height to define the type alias.
         """
-        assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
+        tree = DictDataTypeTree(
+            data,
+            name=self.NAME,
+            strategies=Strategies(min_height_to_define_type_alias=min_height, dict_strategy="dict"),
+        )
         assert expected_output == tree.get_str_py()
-        assert_imports(tree, self.imports_to_check)
-
-    @pytest.mark.parametrize(
-        "tree, expected_output, expected_n_childs",
-        [
-            (
-                DictDataTypeTree({"name and surname": "Joan B."}, name=NAME),
-                f"""{NAME} = TypedDict(
-    "{NAME}",
-    {{
-        "name and surname": str,
-    }},
-)""",
-                1,
-            ),
-            (
-                DictDataTypeTree({"$": 22.0, "own_list": [1, 2, 3]}, name=NAME),
-                f"""{NAME} = TypedDict(
-    "{NAME}",
-    {{
-        "$": float,
-        "own_list": {NAME}OwnList,
-    }},
-)""",
-                2,
-            ),
-            (
-                DictDataTypeTree({"$": 22, "my_list": [1, 2, 3], "my_list2": [2, 3]}, name=NAME),
-                f"""{NAME} = TypedDict(
-    "{NAME}",
-    {{
-        "$": int,
-        "my_list": {NAME}MyList,
-        "my_list2": {NAME}MyList2,
-    }},
-)""",
-                3,
-            ),
-        ],
-    )
-    def test_get_str_typed_dict_functional_syntax_py(
-        self,
-        tree: DictDataTypeTree,
-        expected_output: str,
-        expected_n_childs: int,
-        assert_imports: Callable[[DictDataTypeTree, Iterable[str]], None],
-    ) -> None:
-        """
-        Test the `get_str_py` method of the `DictDataTypeTree` class.
-
-        Args:
-            tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.
-            expected_output (str): The expected output string.
-            expected_n_childs (int): The expected number of child nodes in the tree.
-            assert_imports (Callable[[TupleDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
-        """
-        assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
-        assert expected_output == tree.get_str_py()
-        assert_imports(tree, self.imports_to_check)

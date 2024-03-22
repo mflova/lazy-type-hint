@@ -1,14 +1,8 @@
 # TODO
 
 
-Priorities:
-- Test tht the pyi file generated is not broken. Read its string, compile and exec
-
 feat:
 
-- Do not create type aliases for those types close to the final depth. This is:
-  - Instead of List[ExampleSet] -> List[Set[str]]
-  - Make it configurable with an `int` parameter if possible
 - Create `TypedDict` with docstrings if those are present within a file
 - Make it compatible with different Python versions.This include:
   - Migration for some of the classes from `typing` to `collections.abc`
@@ -24,6 +18,10 @@ feat:
 refactor:
 
 - Related to the tree, make as many generators as I can
+- Remove unused methods/functions/attributes
+  - Use vulture or pyanalyze
+- Remove unused methods
+- Rename some methods
 - Rename main class
 - Make it easier to import for users
 - Refactor imports
@@ -47,6 +45,6 @@ ci:
 - Setup branch protection
 
 tests:
-- Test it wih giant files. Is it quick enough?
+- Test tht the pyi file generated is not broken. Read its string, compile and exec
 - test main API features:
     - Add flag "if intefcace exists = Literal["validate", "overwrite"]"
