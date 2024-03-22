@@ -1,6 +1,6 @@
 import re
 from types import MappingProxyType
-from typing import Dict, Hashable, Iterator, Mapping, Set
+from typing import Dict, Hashable, Iterator, List, Mapping, Set
 
 from typing_extensions import override
 
@@ -75,3 +75,10 @@ class MappingDataTypeTree(GenericDataTypeTree):
 
         new_string[0] = new_string[0].upper()
         return "".join(new_string)
+
+    @override
+    def _get_hash(self) -> object:
+        hashes: List[object] = []
+        for name, child in self.childs.items():
+            hashes.append(("mapping", hash(type(name)), child._get_hash()))
+        return frozenset(hashes)

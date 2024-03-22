@@ -1,4 +1,5 @@
-from typing import Dict, Mapping
+from functools import cached_property
+from typing import Dict, List, Mapping, NamedTuple, cast
 
 from typing_extensions import TypeGuard, override
 
@@ -11,19 +12,42 @@ from dynamic_pyi_generator.utils import TAB, is_string_python_keyword_compatible
 class DictDataTypeTree(MappingDataTypeTree):
     wraps = dict  # type: ignore
 
+    class DictProfile(NamedTuple):
+        """
+        Represents the profile of a dictionary data type.
+
+        Attributes:
+            is_typed_dict (bool): Indicates whether the dictionary is a TypedDict.
+            is_functional_syntax (bool): Indicates whether the dictionary is defined using functional syntax.
+        """
+
+        is_typed_dict: bool
+        is_functional_syntax: bool
+
     @staticmethod
     @override
     def _validate_name(name: str) -> None:
         # Removed name validation as the TypedDict can type any name
         return
 
+    @cached_property
+    def dict_profile(self) -> DictProfile:
+        is_typed_dict = False
+        is_functional_syntax = True
+        if self._all_keys_are_string(self.childs) and self.strategies.dict_strategy == "TypedDict":
+            is_typed_dict = True
+            if self._all_keys_are_parsable(self.childs):
+                is_functional_syntax = False
+        return self.DictProfile(is_typed_dict=is_typed_dict, is_functional_syntax=is_functional_syntax)
+
     @override
     def _get_str_py(self) -> str:
-        if self._all_keys_are_string(self.childs) and self.strategies.dict_strategy == "TypedDict":
-            if self._all_keys_are_parsable(self.childs):
-                return self._parse_typed_dict(childs=self.childs, functional_syntax=False)
+        if self.dict_profile.is_typed_dict:
+            childs_str_key = cast(Mapping[str, DataTypeTree], self.childs)
+            if self.dict_profile.is_functional_syntax:
+                return self._parse_typed_dict(childs=childs_str_key)
             else:
-                return self._parse_typed_dict(childs=self.childs, functional_syntax=True)
+                return self._parse_typed_dict(childs=childs_str_key)
         else:
             return self._parse_dict(self.childs)
 
@@ -38,8 +62,6 @@ class DictDataTypeTree(MappingDataTypeTree):
     def _parse_typed_dict(
         self,
         childs: Mapping[str, DataTypeTree],
-        *,
-        functional_syntax: bool = False,
     ) -> str:
         self.imports.add("from typing import TypedDict")
 
@@ -54,7 +76,9 @@ class DictDataTypeTree(MappingDataTypeTree):
                 else:
                     name = f"{self.name}{self._to_camel_case(key)}"
                     content[key] = name
-        return self._build_typed_dict(name=self.name, content=content, functional_syntax=functional_syntax)
+        return self._build_typed_dict(
+            name=self.name, content=content, functional_syntax=self.dict_profile.is_functional_syntax
+        )
 
     @staticmethod
     def _build_typed_dict(name: str, content: Mapping[str, str], *, functional_syntax: bool = False) -> str:
@@ -91,3 +115,13 @@ class DictDataTypeTree(MappingDataTypeTree):
             modified_line += lines[idx_to_repeat].format(key=key, value=value) + "\n"
         lines[idx_to_repeat] = modified_line[:-1]
         return "\n".join(lines)
+
+    @override
+    def _get_hash(self) -> object:
+        # If TypedDict
+        if not self.dict_profile.is_typed_dict:
+            return super()._get_hash()
+        hashes: List[object] = []
+        for name, child in self.childs.items():
+            hashes.append(("typed_dict", name, child._get_hash()))
+        return frozenset(hashes)

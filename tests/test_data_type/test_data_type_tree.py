@@ -19,7 +19,7 @@ import pytest
 
 from dynamic_pyi_generator.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.strategies import Strategies
-from dynamic_pyi_generator.utils import check_if_command_available
+from dynamic_pyi_generator.utils import TAB, check_if_comand_available
 
 
 @dataclass(frozen=True)
@@ -72,6 +72,7 @@ class TestIntegration:
 
         self.assert_no_unused_classes(strings)
         self.assert_no_redefined_classes(strings)
+        self.assert_no_double_whitespace(strings)
 
         self.assert_no_broken_string_representation(strings, tmp_path=tmp_path)
 
@@ -109,6 +110,11 @@ class TestIntegration:
                     pytest.fail(f"A class/type alias was detected to be redefined: {name}")
                 all_types_defined.add(name)
 
+    def assert_no_double_whitespace(self, strings: Tuple[str, ...]) -> None:
+        for idx, line in enumerate(strings):
+            if TAB not in line and "  " in line:
+                pytest.fail(f"Double whitespaces were detected in line {idx}: {line}")
+
     @staticmethod
     def _get_name_type_alias(line: str) -> str:
         if "=" in line:
@@ -116,3 +122,44 @@ class TestIntegration:
         if "(TypedDict)" in line:
             return line.split("(TypedDict)")[0].split(" ")[-1].strip().rstrip()
         return ""
+
+
+class TestHash:
+    # fmt: off
+    @pytest.mark.parametrize(
+        "data1, data2, strategies, should_be_equal",
+        [
+            ([1, 2, 3], [4, 5, 6], Strategies(), True),
+            ([1, "str", 3], [4, 5, 6], Strategies(), False),
+            ([1, "str", 3], ["a", 5, 6], Strategies(), True),
+            ([1, {1,2}, 3], [{4,5}, 5, 6], Strategies(), True),
+            ([1, {1,2}, 3], [{4,"a"}, 5, 6], Strategies(), False),
+            ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(), False),
+            ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(tuple_size_strategy="..."), True),
+            ([1, "str", (1, "b")], ["a", 5, (1,)], Strategies(), False),
+            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(), False),
+            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(tuple_size_strategy="..."), True),
+            ([1, "str", (1, {1,2})], ["a", 5, (1,)], Strategies(), False),
+            # Dicts
+            ({"name": "Patrick"}, {"age": "22"}, Strategies(dict_strategy="Dict"), True),
+            ({"name": "Patrick"}, {"age": 22}, Strategies(dict_strategy="Dict"), False),
+            ({22: 21}, {"age2": 22}, Strategies(dict_strategy="Dict"), False),
+            ({22: 21}, {"age2": "name"}, Strategies(dict_strategy="Dict"), False),
+            ({22: 21}, {"age2": 22, "age3": "name"}, Strategies(dict_strategy="Dict"), False),
+            ({22: 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="Dict"), False),
+            ({"age1": 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="Dict"), True),
+            ({"age1": 21, "age4": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="Dict"), True),
+            ({"age1": 21, 37: 16}, {"age2": 22, 22: 21}, Strategies(dict_strategy="TypedDict"), True),
+            # TypedDict
+            ({"age1": 21, "age2": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="TypedDict"), False),
+            ({"age1": 21, "age2": 16}, {"age1": 22, "age2": 21}, Strategies(dict_strategy="TypedDict"), True),
+            ({"age1": 21, "age2": 16}, {"age1": 22, "age2": "a"}, Strategies(dict_strategy="TypedDict"), False),
+        ],
+    )
+    # fmt: on
+    def test_hash(self, data1: object, data2: object, should_be_equal: bool, strategies: Strategies) -> None:
+        tree1 = DataTypeTree.get_data_type_tree_for_type(type(data1))(data1, name="Name1", strategies=strategies)
+        tree2 = DataTypeTree.get_data_type_tree_for_type(type(data2))(data2, name="Name2", strategies=strategies)
+
+        assert should_be_equal == (tree1._get_hash() == tree2._get_hash())
+        assert should_be_equal == (hash(tree1) == hash(tree2))

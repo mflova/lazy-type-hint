@@ -24,3 +24,7 @@ class SimpleDataTypeTree(DataTypeTree):
     @final
     def __next__(self) -> DataTypeTree:
         raise StopIteration
+
+    @override
+    def _get_hash(self) -> int:
+        return id(self.holding_type)

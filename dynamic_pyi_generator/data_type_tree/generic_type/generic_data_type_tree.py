@@ -1,7 +1,19 @@
 from abc import abstractmethod
-from typing import Any, Hashable, Iterable, Iterator, List, Mapping, Sequence, Set, Tuple, Union, final
+from typing import (
+    Any,
+    Hashable,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    final,
+)
 
-from typing_extensions import Self
+from typing_extensions import Self, override
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, DataTypeTree
 from dynamic_pyi_generator.data_type_tree.simple_data_type_tree import SimpleDataTypeTree
@@ -85,10 +97,23 @@ class GenericDataTypeTree(DataTypeTree):
             else:
                 raise StopIteration
 
+    @override
+    def _get_hash(self) -> object:
+        hashes: List[object] = []
+        for child in self:
+            hashes.append(child._get_hash())
+        return tuple(hashes)
 
-def get_childs_for_set_and_sequence(self: DataTypeTree, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:
-    childs: List[DataTypeTree] = []
+
+def get_childs_for_set_and_sequence(
+    self: DataTypeTree, data: Sequence[Any], *, allow_repeated_childs: bool
+) -> Tuple[DataTypeTree, ...]:
+    if allow_repeated_childs:
+        childs: Union[Set[DataTypeTree], List[DataTypeTree]] = []
+    else:
+        childs = set()
     names_added: Set[str] = set()
+
     for element in data:
         data_type_tree = self.get_data_type_tree_for_type(type(element))
         name = f"{self.name}{type(element).__name__.capitalize()}"
@@ -100,16 +125,20 @@ def get_childs_for_set_and_sequence(self: DataTypeTree, data: Sequence[Any]) -> 
                 modified_name = f"{name}{count}"
                 count += 1
             name = modified_name
-        childs.append(
-            data_type_tree(
-                data=element,
-                name=name,
-                simplify_redundant_types=self.simplify_redundant_types,
-                imports=self.imports,
-                depth=self.depth + 1,
-                parent=self,
-                strategies=self.strategies,
-            )
+        child = data_type_tree(
+            data=element,
+            name=name,
+            simplify_redundant_types=self.simplify_redundant_types,
+            imports=self.imports,
+            depth=self.depth + 1,
+            parent=self,
+            strategies=self.strategies,
         )
-        names_added.add(name)
+        if allow_repeated_childs:
+            childs.append(child)  # type: ignore
+            names_added.add(name)
+        else:
+            if child not in childs:
+                childs.add(child)  # type: ignore
+                names_added.add(name)
     return tuple(childs)

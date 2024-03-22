@@ -98,9 +98,13 @@ class DataTypeTree(ABC):
                     raise DataTypeTreeError(f"A parser for {type_.__name__} was already found")
                 cls.data_type_tree_types[type_] = cls  # type: ignore
 
+    @abstractmethod
+    def _get_hash(self) -> object:
+        ...
+
     @final
     def __hash__(self) -> int:
-        return id(self.get_strs_recursive_py(include_imports=False))
+        return hash(self._get_hash())
 
     @abstractmethod
     def _get_str_py(self) -> str: ...
