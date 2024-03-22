@@ -1,12 +1,15 @@
-from typing import Any, Sequence, Tuple
-
-from typing_extensions import override
+from typing import TYPE_CHECKING, Any, Sequence, Tuple
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree, DataTypeTreeError
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import get_childs_for_set_and_sequence
 from dynamic_pyi_generator.data_type_tree.generic_type.sequence_data_type_tree import (
     SequenceDataTypeTree,
 )
+
+if TYPE_CHECKING:
+    from typing_extensions import override
+else:
+    override = lambda x: x
 
 
 class ListDataTypeTree(SequenceDataTypeTree):
@@ -18,11 +21,11 @@ class ListDataTypeTree(SequenceDataTypeTree):
 
     @override
     def _get_str_py(self) -> str:
-        if self.strategies.list_strategy == "List":
-            self.imports.add("from typing import List")
+        if self.strategies.list_strategy == "list":
+            self.imports.add("list")
             container = "List"
         elif self.strategies.list_strategy == "Sequence":
-            self.imports.add("from typing import Sequence")
+            self.imports.add("Sequence")
             container = "Sequence"
         else:
             raise DataTypeTreeError(f"The chosen strategy ({self.strategies.list_strategy}) is not available.")

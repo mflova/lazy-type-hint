@@ -1,7 +1,10 @@
 from functools import cached_property
-from typing import Dict, List, Mapping, NamedTuple, cast
+from typing import TYPE_CHECKING, Dict, List, Mapping, NamedTuple, cast
 
-from typing_extensions import TypeGuard, override
+if TYPE_CHECKING:
+    from typing_extensions import TypeGuard, override
+else:
+    override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
@@ -26,7 +29,7 @@ class DictDataTypeTree(MappingDataTypeTree):
 
     @staticmethod
     @override
-    def _validate_name(name: str) -> None:
+    def _validate_name(name: str) -> None:  # noqa: ARG004
         # Removed name validation as the TypedDict can type any name
         return
 
@@ -44,15 +47,12 @@ class DictDataTypeTree(MappingDataTypeTree):
     def _get_str_py(self) -> str:
         if self.dict_profile.is_typed_dict:
             childs_str_key = cast(Mapping[str, DataTypeTree], self.childs)
-            if self.dict_profile.is_functional_syntax:
-                return self._parse_typed_dict(childs=childs_str_key)
-            else:
-                return self._parse_typed_dict(childs=childs_str_key)
+            return self._parse_typed_dict(childs=childs_str_key)
         else:
             return self._parse_dict(self.childs)
 
     @staticmethod
-    def _all_keys_are_string(data: Mapping[object, DataTypeTree]) -> TypeGuard[Mapping[str, DataTypeTree]]:
+    def _all_keys_are_string(data: Mapping[object, DataTypeTree]) -> "TypeGuard[Mapping[str, DataTypeTree]]":
         return all(isinstance(key, str) for key in data)
 
     @staticmethod
@@ -63,7 +63,7 @@ class DictDataTypeTree(MappingDataTypeTree):
         self,
         childs: Mapping[str, DataTypeTree],
     ) -> str:
-        self.imports.add("from typing import TypedDict")
+        self.imports.add("TypedDict")
 
         content: Dict[str, str] = {}
         for key, value in childs.items():

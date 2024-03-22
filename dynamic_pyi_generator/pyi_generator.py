@@ -177,9 +177,7 @@ class PyiGenerator:
                 f"Given class_name is not compatible with Python class naming conventions: {class_name}"
             )
         cls = DataTypeTree.get_data_type_tree_for_type(type(data))
-        string_representation = "\n\n".join(
-            cls(data, name=class_name, strategies=self.strategies).get_strs_recursive_py(include_imports=True)
-        )
+        string_representation = str(cls(data, name=class_name, strategies=self.strategies))
         string_representation = self.header + "\n" + string_representation
         classes_added = self._get_classes_added()
         if class_name not in classes_added:

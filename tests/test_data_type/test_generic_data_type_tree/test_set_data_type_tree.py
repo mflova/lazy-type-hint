@@ -8,7 +8,7 @@ from dynamic_pyi_generator.data_type_tree.generic_type import SetDataTypeTree
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Set", "FrozenSet", "Any")
+    imports_to_check: Final = ("set", "FrozenSet", "Any")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off

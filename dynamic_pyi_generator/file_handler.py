@@ -1,13 +1,8 @@
 import ast
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, List, Literal, Tuple, Union
+from typing import Any, List, Literal, Tuple, Union, overload
 
 from dynamic_pyi_generator.utils import TAB
-
-if TYPE_CHECKING:
-    from typing_extensions import overload
-else:
-    overload = lambda x: x
 
 
 class FileHandler:
@@ -23,12 +18,10 @@ class FileHandler:
         return "\n".join(self.lines)
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> List[Tuple[int, str]]:
-        ...
+    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> List[Tuple[int, str]]: ...
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
-        ...
+    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]: ...
 
     def search_assignment(self, variable: str, only_values: bool = False) -> Union[List[Tuple[int, str]], List[str]]:
         """

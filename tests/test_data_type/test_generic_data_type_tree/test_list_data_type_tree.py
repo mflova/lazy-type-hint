@@ -9,14 +9,14 @@ from dynamic_pyi_generator.strategies import Strategies
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Sequence", "List", "Union", "Any")
+    imports_to_check: Final = ("Sequence", "list", "Union", "Any")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
     @pytest.mark.parametrize(
         "strategies",
         [
-            (Strategies(list_strategy="List")),
+            (Strategies(list_strategy="list")),
             (Strategies(list_strategy="Sequence")),
         ],
     )
@@ -62,7 +62,7 @@ class TestGetStrPy:
         """
         tree = ListDataTypeTree(data, name=self.NAME, strategies=strategies)
 
-        expected_output = expected_output.format(expected_container=strategies.list_strategy)
+        expected_output = expected_output.format(expected_container=strategies.list_strategy.capitalize())
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
         assert expected_output == tree.get_str_py()
         assert_imports(tree, self.imports_to_check)

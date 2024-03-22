@@ -13,7 +13,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Set,
     Tuple,
     Type,
     TypeVar,
@@ -22,7 +21,7 @@ from typing import (
 )
 
 from dynamic_pyi_generator.strategies import Strategies
-from dynamic_pyi_generator.utils import TAB, cache_returned_value, is_string_python_keyword_compatible
+from dynamic_pyi_generator.utils import TAB, ImportManager, cache_returned_value, is_string_python_keyword_compatible
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -38,7 +37,7 @@ ChildStructure = Union[FrozenSet[DataTypeT], Sequence[DataTypeT], Mapping[Hashab
 class DataTypeTree(ABC):
     name: str
     depth: int
-    imports: Set[str]  # Unique one shared among the whole tree
+    imports: ImportManager  # Unique one shared among the whole tree
     parent: Optional[DataTypeTree]
     childs: Optional[ChildStructure[DataTypeTree]]
     simplify_redundant_types: bool
@@ -57,7 +56,7 @@ class DataTypeTree(ABC):
         name: str,
         *,
         simplify_redundant_types: bool = True,
-        imports: Optional[Set[str]] = None,
+        imports: Optional[ImportManager] = None,
         depth: int = 0,
         strategies: Strategies = Strategies(),  # noqa: B008
         parent: Optional[DataTypeTree] = None,
@@ -76,7 +75,7 @@ class DataTypeTree(ABC):
         self.strategies = strategies
         self.simplify_redundant_types = simplify_redundant_types
         self.depth = depth
-        self.imports = set() if imports is None else imports
+        self.imports = ImportManager() if imports is None else imports
         self.childs = self._get_childs(data)
         self.parent = parent
 
@@ -99,8 +98,7 @@ class DataTypeTree(ABC):
                 cls.data_type_tree_types[type_] = cls  # type: ignore
 
     @abstractmethod
-    def _get_hash(self) -> object:
-        ...
+    def _get_hash(self) -> object: ...
 
     @final
     def __hash__(self) -> int:
@@ -128,11 +126,27 @@ class DataTypeTree(ABC):
 
         # These are available only when `get_str_py` is called
         if include_imports:
-            return tuple(sorted(self.imports) + class_representations)
+            return (self.imports.format(), *class_representations)
         return tuple(class_representations)
 
+    @final
+    def formatted_string(self, strs_py: Sequence[str]) -> str:
+        strs_py = list(strs_py)
+        if not strs_py:
+            return ""
+        for idx, line in enumerate(strs_py):  # noqa: B007
+            if "" in line:
+                break
+        strs_py[idx] = strs_py[idx] + "\n"  # Add extra separation between imports
+        return "\n\n".join(strs_py)
+
+    @final
     def __str__(self) -> str:
-        return f"{type(self).__name__}"
+        return self.formatted_string(self.get_strs_recursive_py(include_imports=True))
+
+    @final
+    def __repr__(self) -> str:
+        return self.__str__()
 
     @abstractmethod
     def __iter__(self) -> Self:
@@ -155,10 +169,6 @@ class DataTypeTree(ABC):
         for child in self:
             print(f"{TAB*child.depth} - {child}")
             child.print_childs()
-
-    @final
-    def __repr__(self) -> str:
-        return self.__str__()
 
     @final
     def __eq__(self, other_object: object) -> bool:

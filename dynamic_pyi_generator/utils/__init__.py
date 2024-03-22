@@ -1,3 +1,4 @@
+from dynamic_pyi_generator.utils.import_manager import ImportManager as ImportManager
 from dynamic_pyi_generator.utils.mypy import Mypy as Mypy
 from dynamic_pyi_generator.utils.utils import (
     TAB as TAB,

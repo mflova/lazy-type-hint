@@ -24,14 +24,14 @@ def test_to_camel_case(string: str, expected_out: str) -> None:
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Mapping", "Any", "Dict", "TypedDict")
+    imports_to_check: Final = ("Mapping", "Any", "dict", "TypedDict", "MappingProxyType")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
     @pytest.mark.parametrize(
         "strategies",
         [
-            (Strategies(dict_strategy="Dict")),
+            (Strategies(dict_strategy="dict")),
             (Strategies(dict_strategy="Mapping")),
         ],
     )

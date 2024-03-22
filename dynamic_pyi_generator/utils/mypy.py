@@ -57,6 +57,8 @@ class Mypy:
             string (str): The string to be scanned.
             strict (bool, optional): Whether to enable strict mode. Defaults to False.
             python_version (str, optional): The Python version to use for type checking. Defaults to "3.8".
+            ignore_errors (Iterable[str], optional): A collection of error keywords to ignore during type checking.
+                Defaults to ().
 
         Returns:
             Result: The result of the type checking, including success status, errors, and the scanned string.

@@ -9,7 +9,7 @@ from dynamic_pyi_generator.strategies import Strategies
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Tuple", "Union", "Any")
+    imports_to_check: Final = ("tuple", "Union", "Any")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
@@ -28,16 +28,16 @@ class TestGetStrPy:
             (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=Strategies(tuple_size_strategy="fixed")), f"{NAME} = Tuple[{NAME}Set, {NAME}Dict]", 2),
             (TupleDataTypeTree((), name=NAME, strategies=Strategies(tuple_size_strategy="fixed")), f"{NAME} = Tuple[Any, ...]", 0),
             # Non fixed size
-            (TupleDataTypeTree((1,), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[int, ...]", 1),
-            (TupleDataTypeTree((1, 2), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[int, ...]", 1),
-            (TupleDataTypeTree((1, 2.0), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[float, ...]", 2),
-            (TupleDataTypeTree(({1, 2}, 2), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[Union[{NAME}Set, int], ...]", 2),
-            (TupleDataTypeTree(((1,2), (1,2), (1,3)), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[{NAME}Tuple, ...]", 1),
-            (TupleDataTypeTree(({1, 2}, {3, 4}), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[{NAME}Set, ...]", 1),
-            (TupleDataTypeTree(({1, 2}, {3, 4.2}, {1}), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[Union[{NAME}Set, {NAME}Set2], ...]", 2),
-            (TupleDataTypeTree(({1, 2}, "a"), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[Union[{NAME}Set, str], ...]", 2),
-            (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[Union[{NAME}Dict, {NAME}Set], ...]", 2),
-            (TupleDataTypeTree((), name=NAME, strategies=Strategies(tuple_size_strategy="...")), f"{NAME} = Tuple[Any, ...]", 0),
+            (TupleDataTypeTree((1,), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[int, ...]", 1),
+            (TupleDataTypeTree((1, 2), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[int, ...]", 1),
+            (TupleDataTypeTree((1, 2.0), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[float, ...]", 2),
+            (TupleDataTypeTree(({1, 2}, 2), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[Union[{NAME}Set, int], ...]", 2),
+            (TupleDataTypeTree(((1,2), (1,2), (1,3)), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[{NAME}Tuple, ...]", 1),
+            (TupleDataTypeTree(({1, 2}, {3, 4}), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[{NAME}Set, ...]", 1),
+            (TupleDataTypeTree(({1, 2}, {3, 4.2}, {1}), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[Union[{NAME}Set, {NAME}Set2], ...]", 2),
+            (TupleDataTypeTree(({1, 2}, "a"), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[Union[{NAME}Set, str], ...]", 2),
+            (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[Union[{NAME}Dict, {NAME}Set], ...]", 2),
+            (TupleDataTypeTree((), name=NAME, strategies=Strategies(tuple_size_strategy="any size")), f"{NAME} = Tuple[Any, ...]", 0),
         ],
     )
     def test_get_str_py(

@@ -19,12 +19,9 @@ def import_template() -> str:
 
 
 @pytest.fixture
-def assert_imports(import_template: str) -> Callable[[DataTypeTree, Iterable[str]], None]:
+def assert_imports() -> Callable[[DataTypeTree, Iterable[str]], None]:
     """
     Asserts that the given DataTypeTree contains all the necessary imports.
-
-    Args:
-        import_template (str): The template string used to format the import statement.
 
     Returns:
         Callable[[DataTypeTree, Iterable[str]], None]: A function that takes a DataTypeTree and a list of
@@ -42,7 +39,7 @@ def assert_imports(import_template: str) -> Callable[[DataTypeTree, Iterable[str
             )
             if import__ in tree.get_str_py():
                 assert (
-                    import_template.format(from_="typing", import_=import_) in tree.imports
-                ), f"Not all needed imports were detected. Expected to import {import_} but only found {tree.imports}"
+                    import_ in tree.imports._set
+                ), f"Not all needed imports were detected. Expected to import {import_} but only found {tree.imports._set}"
 
     return _assert_imports

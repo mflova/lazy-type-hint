@@ -1,8 +1,11 @@
 import re
 from types import MappingProxyType
-from typing import Dict, Hashable, Iterator, List, Mapping, Set
+from typing import TYPE_CHECKING, Dict, Hashable, Iterator, List, Literal, Mapping, Set
 
-from typing_extensions import override
+if TYPE_CHECKING:
+    from typing_extensions import override
+else:
+    override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import GenericDataTypeTree
@@ -36,12 +39,14 @@ class MappingDataTypeTree(GenericDataTypeTree):
         return self._parse_dict(self.childs)
 
     def _parse_dict(self, childs: Mapping[Hashable, DataTypeTree]) -> str:
-        container: str = "Dict" if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
+        container: Literal["dict", "TypedDict", "MappingProxyType", "Mapping"] = (
+            "dict" if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
+        )
         if self.holding_type.__name__ == "mappingproxy":
             container = "MappingProxyType"
-            self.imports.add(f"from types import {container}")
+            self.imports.add(container)
         else:
-            self.imports.add(f"from typing import {container}")
+            self.imports.add(container)
 
         keys = self._get_types(iterable=childs.keys(), remove_repeated=True)
         keys_str = self._format_types(keys)

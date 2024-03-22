@@ -4,7 +4,7 @@ from typing import Final
 import pytest
 
 from dynamic_pyi_generator.pyi_generator import PyiGenerator, PyiGeneratorError
-from dynamic_pyi_generator.utils import Mypy, check_if_command_available
+from dynamic_pyi_generator.utils import Mypy
 
 
 @pytest.mark.usefixtures("_serial")

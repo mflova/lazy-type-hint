@@ -1,6 +1,9 @@
-from typing import Any, Sequence, Set, Tuple
+from typing import TYPE_CHECKING, Any, Literal, Sequence, Set, Tuple
 
-from typing_extensions import override
+if TYPE_CHECKING:
+    from typing_extensions import override
+else:
+    override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import (
@@ -19,9 +22,12 @@ class SetDataTypeTree(GenericDataTypeTree):
 
     @override
     def _get_str_py(self) -> str:
-        container = "FrozenSet" if self.holding_type is frozenset else "Set"
-        self.imports.add(f"from typing import {container}")
-        return f"{self.name} = {container}[{self.get_type_alias_childs()}]"
+        container: Literal["FrozenSet", "set"] = "FrozenSet" if self.holding_type is frozenset else "set"
+        self.imports.add(container)
+
+        if container == "FrozenSet":
+            return f"{self.name} = FrozenSet[{self.get_type_alias_childs()}]"
+        return f"{self.name} = Set[{self.get_type_alias_childs()}]"
 
     @override
     def _get_hash(self) -> object:

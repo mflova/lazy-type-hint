@@ -10,7 +10,6 @@ from typing import (
     List,
     Mapping,
     Set,
-    Tuple,
     get_args,
     get_type_hints,
 )
@@ -68,31 +67,31 @@ class TestIntegration:
     ) -> None:
         data = create_sample(data_type)
         cls = DataTypeTree.get_data_type_tree_for_type(type(data))
-        strings = cls(data, name="Example", strategies=strategies).get_strs_recursive_py(include_imports=True)
+        string = str(cls(data, name="Example", strategies=strategies).get_strs_recursive_py(include_imports=True))
 
-        self.assert_no_unused_classes(strings)
-        self.assert_no_redefined_classes(strings)
-        self.assert_no_double_whitespace(strings)
-
-        self.assert_no_broken_string_representation(strings, tmp_path=tmp_path)
+        self.assert_no_unused_classes(string)
+        self.assert_no_redefined_classes(string)
+        self.assert_no_double_whitespace(string)
+        self.assert_basic_format(string)
+        self.assert_no_broken_string_representation(string, tmp_path=tmp_path)
 
     @staticmethod
-    def assert_no_broken_string_representation(strings: Tuple[str, ...], tmp_path: str) -> None:
+    def assert_no_broken_string_representation(string: str, tmp_path: str) -> None:
         """Compile and call corresponding string representation.
 
         Not done via `exec()` as this one was presenting an inconsistent behaviour.
         """
         file = "tmp.py"
         full_path_file = Path(tmp_path) / file
-        full_path_file.write_text(data="\n".join(strings))
+        full_path_file.write_text(data=string)
         result = subprocess.run(f"python {full_path_file}", capture_output=True, text=True)
 
         assert not result.stdout
         assert not result.stderr
 
-    def assert_no_unused_classes(self, strings: Tuple[str, ...]) -> None:
+    def assert_no_unused_classes(self, string: str) -> None:
         types_defined: Set[str] = set()
-        for line in strings:
+        for line in string.split("\n"):
             for type_defined in types_defined.copy():
                 if type_defined in line:
                     types_defined.remove(type_defined)
@@ -101,19 +100,28 @@ class TestIntegration:
                 types_defined.add(name)
         assert len(types_defined) == 1, f"Some classes were created but they are not in use: {', '.join(types_defined)}"
 
-    def assert_no_redefined_classes(self, strings: Tuple[str, ...]) -> None:
+    def assert_no_redefined_classes(self, string: str) -> None:
         all_types_defined: Set[str] = set()
-        for line in strings:
+        for line in string.split("\n"):
             name = self._get_name_type_alias(line)
             if name:
                 if name in all_types_defined:
                     pytest.fail(f"A class/type alias was detected to be redefined: {name}")
                 all_types_defined.add(name)
 
-    def assert_no_double_whitespace(self, strings: Tuple[str, ...]) -> None:
-        for idx, line in enumerate(strings):
+    def assert_no_double_whitespace(self, string: str) -> None:
+        for idx, line in enumerate(string.split("\n")):
             if TAB not in line and "  " in line:
                 pytest.fail(f"Double whitespaces were detected in line {idx}: {line}")
+
+    def assert_basic_format(self, string: str) -> None:
+        strings = string.split("\n")
+        for idx, line in enumerate(strings):
+            if line.startswith("class"):
+                error = "There has to eb exaxctly two empty lines before defining a class."
+                assert strings[idx - 1] == "", error
+                assert strings[idx - 2] == "", error
+                assert strings[idx - 3] != "", error
 
     @staticmethod
     def _get_name_type_alias(line: str) -> str:
@@ -135,20 +143,20 @@ class TestHash:
             ([1, {1,2}, 3], [{4,5}, 5, 6], Strategies(), True),
             ([1, {1,2}, 3], [{4,"a"}, 5, 6], Strategies(), False),
             ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(), False),
-            ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(tuple_size_strategy="..."), True),
+            ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(tuple_size_strategy="any size"), True),
             ([1, "str", (1, "b")], ["a", 5, (1,)], Strategies(), False),
             ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(), False),
-            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(tuple_size_strategy="..."), True),
+            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(tuple_size_strategy="any size"), True),
             ([1, "str", (1, {1,2})], ["a", 5, (1,)], Strategies(), False),
             # Dicts
-            ({"name": "Patrick"}, {"age": "22"}, Strategies(dict_strategy="Dict"), True),
-            ({"name": "Patrick"}, {"age": 22}, Strategies(dict_strategy="Dict"), False),
-            ({22: 21}, {"age2": 22}, Strategies(dict_strategy="Dict"), False),
-            ({22: 21}, {"age2": "name"}, Strategies(dict_strategy="Dict"), False),
-            ({22: 21}, {"age2": 22, "age3": "name"}, Strategies(dict_strategy="Dict"), False),
-            ({22: 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="Dict"), False),
-            ({"age1": 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="Dict"), True),
-            ({"age1": 21, "age4": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="Dict"), True),
+            ({"name": "Patrick"}, {"age": "22"}, Strategies(dict_strategy="dict"), True),
+            ({"name": "Patrick"}, {"age": 22}, Strategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": 22}, Strategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": "name"}, Strategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": 22, "age3": "name"}, Strategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="dict"), False),
+            ({"age1": 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="dict"), True),
+            ({"age1": 21, "age4": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="dict"), True),
             ({"age1": 21, 37: 16}, {"age2": 22, 22: 21}, Strategies(dict_strategy="TypedDict"), True),
             # TypedDict
             ({"age1": 21, "age2": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="TypedDict"), False),

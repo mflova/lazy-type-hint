@@ -1,6 +1,9 @@
-from typing import Any, List, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, List, Sequence, Tuple
 
-from typing_extensions import override
+if TYPE_CHECKING:
+    from typing_extensions import override
+else:
+    override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import get_childs_for_set_and_sequence
@@ -19,7 +22,7 @@ class TupleDataTypeTree(SequenceDataTypeTree):
 
     @override
     def _get_str_py(self) -> str:
-        self.imports.add("from typing import Tuple")
+        self.imports.add("tuple")
         return f"{self.name} = Tuple[{self.get_type_alias_childs()}]"
 
     @override
@@ -33,7 +36,7 @@ class TupleDataTypeTree(SequenceDataTypeTree):
     @override
     def _format_types(self, child_types: Sequence[str]) -> str:
         if len(child_types) == 1 and "Any" in child_types:
-            self.imports.add("from typing import Any")
+            self.imports.add("Any")
             return "Any, ..."
 
         if self.strategies.tuple_size_strategy == "fixed":
@@ -42,12 +45,12 @@ class TupleDataTypeTree(SequenceDataTypeTree):
             names_set = set(child_types)
             if len(names_set) == 1:
                 return f"{next(iter(names_set))}, ..."
-            self.imports.add("from typing import Union")
+            self.imports.add("Union")
             return f"Union[{', '.join(sorted(names_set))}], ..."
 
     @override
     def _get_hash(self) -> object:
-        if self.strategies.tuple_size_strategy == "...":
+        if self.strategies.tuple_size_strategy == "any size":
             return super()._get_hash()
         else:
             hashes: List[object] = []

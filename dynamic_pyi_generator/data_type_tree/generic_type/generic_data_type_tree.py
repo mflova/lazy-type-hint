@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from typing import (
+    TYPE_CHECKING,
     Any,
     Hashable,
     Iterable,
@@ -13,7 +14,10 @@ from typing import (
     final,
 )
 
-from typing_extensions import Self, override
+if TYPE_CHECKING:
+    from typing_extensions import Self, override
+else:
+    override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, DataTypeTree
 from dynamic_pyi_generator.data_type_tree.simple_data_type_tree import SimpleDataTypeTree
@@ -26,8 +30,7 @@ class GenericDataTypeTree(DataTypeTree):
     _iterator: Union[int, Iterator[Hashable]]
 
     @abstractmethod
-    def _get_childs(self, data: object) -> ChildStructure[DataTypeTree]:
-        ...
+    def _get_childs(self, data: object) -> ChildStructure[DataTypeTree]: ...
 
     def get_type_alias_childs(self) -> str:
         child_types = self._get_types()
@@ -36,7 +39,7 @@ class GenericDataTypeTree(DataTypeTree):
     def _format_types(self, child_types: Sequence[str]) -> str:
         if len(child_types) == 1:
             return child_types[0]
-        self.imports.add("from typing import Union")
+        self.imports.add("Union")
         return f"Union[{', '.join(child_types)}]"
 
     @final
@@ -64,7 +67,7 @@ class GenericDataTypeTree(DataTypeTree):
                 else:
                     child_types.append(child.name)
         if not child_types:
-            self.imports.add("from typing import Any")
+            self.imports.add("Any")
             child_types.append("Any")
 
         if remove_repeated:
@@ -74,7 +77,7 @@ class GenericDataTypeTree(DataTypeTree):
             return tuple(sorted(child_types_set))
         return tuple(child_types)
 
-    def __iter__(self) -> Self:
+    def __iter__(self) -> "Self":
         if isinstance(self.childs, Mapping):
             self._iterator = iter(self.childs.keys())
         else:

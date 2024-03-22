@@ -1,14 +1,14 @@
 from dataclasses import dataclass, fields
 from typing import Literal, get_args, get_type_hints
 
-LIST_STRATEGIES = Literal["Sequence", "List"]
-TUPLE_SIZE_STRATEGIES = Literal["fixed", "..."]
-MAPPING_STRATEGIES = Literal["TypedDict", "Mapping", "Dict"]
+LIST_STRATEGIES = Literal["Sequence", "list"]
+TUPLE_SIZE_STRATEGIES = Literal["fixed", "any size"]
+MAPPING_STRATEGIES = Literal["TypedDict", "Mapping", "dict"]
 
 
 @dataclass(frozen=True)
 class Strategies:
-    list_strategy: LIST_STRATEGIES = "List"
+    list_strategy: LIST_STRATEGIES = "list"
     tuple_size_strategy: TUPLE_SIZE_STRATEGIES = "fixed"
     dict_strategy: MAPPING_STRATEGIES = "TypedDict"
 

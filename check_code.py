@@ -9,11 +9,13 @@ import sys
 from argparse import Namespace
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, fields
-from typing import Any, Dict, Final, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Tuple, Union
 
 import yaml
 from colorama import Fore, Style, init
-from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 THIS_DIR: Final = os.path.dirname(__file__)
 """Absolute path to the folder holding this file."""
@@ -74,7 +76,7 @@ class Arguments:
         return self.only_run_tools
 
     @classmethod
-    def from_argparse(cls, args: Namespace) -> Self:
+    def from_argparse(cls, args: Namespace) -> "Self":
         attributes: Dict[str, Any] = {}
         for field in fields(cls):
             if hasattr(args, field.name):
