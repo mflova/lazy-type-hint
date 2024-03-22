@@ -19,7 +19,7 @@ import pytest
 
 from dynamic_pyi_generator.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.strategies import Strategies
-from dynamic_pyi_generator.utils import TAB, check_if_comand_available
+from dynamic_pyi_generator.utils import TAB, check_if_command_available
 
 
 @dataclass(frozen=True)
