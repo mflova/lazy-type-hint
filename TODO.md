@@ -19,7 +19,6 @@ refactor:
 
 - Related to the tree, make as many generators as I can
 - Remove unused methods/functions/attributes
-  - Use vulture or pyanalyze
 - Remove unused methods
 - Rename some methods
 - Rename main class

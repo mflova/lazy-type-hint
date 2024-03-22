@@ -5,7 +5,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Final,
     FrozenSet,
     Hashable,
     Iterable,
@@ -27,7 +26,8 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class DataTypeTreeError(Exception): ...
+class DataTypeTreeError(Exception):
+    ...
 
 
 DataTypeT = TypeVar("DataTypeT")
@@ -82,7 +82,8 @@ class DataTypeTree(ABC):
         self._needs_type_alias = False
         self.__post_init__()
 
-    def __post_init__(self) -> None: ...
+    def __post_init__(self) -> None:
+        ...
 
     def _get_height(self) -> int:
         max_height = 0
@@ -96,7 +97,8 @@ class DataTypeTree(ABC):
             raise DataTypeTreeError(f"The given name ({name}) is not Python-keyword compatible")
 
     @abstractmethod
-    def _get_childs(self, data: object) -> Optional[ChildStructure[DataTypeTree]]: ...
+    def _get_childs(self, data: object) -> Optional[ChildStructure[DataTypeTree]]:
+        ...
 
     @final
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -109,14 +111,16 @@ class DataTypeTree(ABC):
                 cls.data_type_tree_types[type_] = cls  # type: ignore
 
     @abstractmethod
-    def _get_hash(self) -> object: ...
+    def _get_hash(self) -> object:
+        ...
 
     @final
     def __hash__(self) -> int:
         return hash(self._get_hash())
 
     @abstractmethod
-    def _get_str_py(self) -> str: ...
+    def _get_str_py(self) -> str:
+        ...
 
     @property
     def permission_to_create_type_alias(self) -> bool:

@@ -75,6 +75,19 @@ class TestIntegration:
         self.assert_no_double_whitespace(string)
         self.assert_basic_format(string)
         self.assert_no_broken_string_representation(string, tmp_path=tmp_path)
+        self.assert_python_38_compatible(string)
+
+    @staticmethod
+    def assert_python_38_compatible(string: str) -> None:
+        """
+        Asserts that the given string is compatible with Python 3.8.
+
+        Args:
+            string (str): The string to check for compatibility.
+        """
+        to_check = ["dict", "list", "set", "tuple"]
+        for line in string.split("\n"):
+            assert all(f"{check}[" not in line for check in to_check)
 
     @staticmethod
     def assert_no_broken_string_representation(string: str, tmp_path: str) -> None:
