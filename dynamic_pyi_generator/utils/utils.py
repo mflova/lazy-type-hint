@@ -81,8 +81,7 @@ def compare_str_via_ast(string1: str, string2: str, /, *, ignore_imports: bool =
 class _AnyMethodProtocol(Protocol):
     __name__: str
 
-    def __call__(*args: Any, **kwargs: Any) -> Any:
-        ...
+    def __call__(*args: Any, **kwargs: Any) -> Any: ...
 
 
 _AnyMethodT = TypeVar("_AnyMethodT", bound=_AnyMethodProtocol)
@@ -125,7 +124,7 @@ def cache_returned_value(method: _AnyMethodT) -> _AnyMethodT:
     return cast(_AnyMethodT, wrapper)
 
 
-def check_if_comand_available(tool: str) -> bool:
+def check_if_command_available(tool: str) -> bool:
     """
     Check if a command is available.
 

@@ -19,7 +19,7 @@ import pytest
 
 from dynamic_pyi_generator.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.strategies import Strategies
-from dynamic_pyi_generator.utils import check_if_comand_available
+from dynamic_pyi_generator.utils import check_if_command_available
 
 
 @dataclass(frozen=True)
@@ -58,7 +58,9 @@ class TestIntegration:
     test_files: Final = ("dictionary.py", "list.py", "set.py")
     test_files_dir: Final = Path(__file__).parent / "test_files"
 
-    @pytest.mark.skipif(not check_if_comand_available("python"), reason="Python must be available within the terminal.")
+    @pytest.mark.skipif(
+        not check_if_command_available("python"), reason="Python must be available within the terminal."
+    )
     @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
     @pytest.mark.parametrize("data_type", ["frozenset", "set", "list", "tuple", "dictionary", "mapping"])
     def test_integration(

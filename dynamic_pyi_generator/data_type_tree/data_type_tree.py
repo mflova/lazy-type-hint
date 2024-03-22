@@ -28,8 +28,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class DataTypeTreeError(Exception):
-    ...
+class DataTypeTreeError(Exception): ...
 
 
 DataTypeT = TypeVar("DataTypeT")
@@ -87,8 +86,7 @@ class DataTypeTree(ABC):
             raise DataTypeTreeError(f"The given name ({name}) is not Python-keyword compatible")
 
     @abstractmethod
-    def _get_childs(self, data: object) -> Optional[ChildStructure[DataTypeTree]]:
-        ...
+    def _get_childs(self, data: object) -> Optional[ChildStructure[DataTypeTree]]: ...
 
     @final
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -105,8 +103,7 @@ class DataTypeTree(ABC):
         return id(self.get_strs_recursive_py(include_imports=False))
 
     @abstractmethod
-    def _get_str_py(self) -> str:
-        ...
+    def _get_str_py(self) -> str: ...
 
     @final
     def get_str_py(self) -> str:
@@ -115,6 +112,8 @@ class DataTypeTree(ABC):
     @final
     @cache_returned_value
     def get_strs_recursive_py(self, *, include_imports: bool = True) -> Tuple[str, ...]:
+        if self.depth == 0 and not self.childs:
+            return (self.get_str_py(),)  # It will return a type alias for simple data types
         if not self.childs:
             return ()
 

@@ -4,12 +4,11 @@ from typing import Final
 import pytest
 
 from dynamic_pyi_generator.pyi_generator import PyiGenerator, PyiGeneratorError
-from dynamic_pyi_generator.testing_tools import Mypy
-from dynamic_pyi_generator.utils import check_if_comand_available
+from dynamic_pyi_generator.utils import Mypy, check_if_command_available
 
 
 @pytest.mark.usefixtures("_serial")
-@pytest.mark.skipif(not check_if_comand_available("mypy"), reason="Mypy must be available via terminal.")
+@pytest.mark.skipif(not Mypy.is_available(), reason="Mypy must be available via terminal.")
 class TestPyiGenerator:
     DATA_TEST_DIR: Final = Path(__file__).parent / "test_files"
 
@@ -54,9 +53,10 @@ class TestPyiGenerator:
         """
         expected_mypy_success = self.expected_mypy_succes(file)
         file_path = self.DATA_TEST_DIR / file
+        file_content = file_path.read_text()
+        exec(file_content)
 
-        exec(file_path.read_text())
-        result = mypy.run(file_path, ignore_errors="Overloaded")
+        result = mypy.scan_string(file_content, strict=True, ignore_errors=["Overloaded"])
         assert result.success == expected_mypy_success, str(result)
 
     @pytest.mark.parametrize("file", (["nok_non_compliant_dictionary.py"]))

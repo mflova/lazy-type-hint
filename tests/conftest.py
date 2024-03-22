@@ -7,7 +7,7 @@ import pytest
 from filelock import BaseFileLock
 
 from dynamic_pyi_generator.pyi_generator import PyiGenerator
-from dynamic_pyi_generator.testing_tools import Mypy
+from dynamic_pyi_generator.utils import Mypy
 
 
 @pytest.fixture

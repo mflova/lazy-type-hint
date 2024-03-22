@@ -1,1 +1,1 @@
-from .mypy import Mypy as Mypy
+from ..utils.mypy import Mypy as Mypy
