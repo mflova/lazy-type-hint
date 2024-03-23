@@ -4,6 +4,10 @@
 feat:
 
 - Create `TypedDict` with docstrings if those are present within a file
+  - Ideas: Two modes:
+    - Either giving a specific key that will be used specifically for docs
+    - yaml: Or using the # symbols to detect comments and pre-parse the document to modify
+      those lines as a new key within that dictionary. This key will be a reserved word like __doc
 - Make it compatible with different Python versions.This include:
   - Migration for some of the classes from `typing` to `collections.abc`
   - Use of `list` instead of `typing.List`
@@ -17,6 +21,7 @@ feat:
 
 refactor:
 
+- Move as much as I can into TYPE_CHECKING block
 - Related to the tree, make as many generators as I can
 - Remove unused methods/functions/attributes
 - Remove unused methods

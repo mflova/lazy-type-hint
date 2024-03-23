@@ -16,15 +16,15 @@ from typing import (
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree import DataTypeTree
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.data_type_tree import DataTypeTree, data_type_tree_factory
+from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import TAB, check_if_command_available
 
 
 @dataclass(frozen=True)
-class StrategiesTesting(Strategies):
+class StrategiesTesting(ParsingStrategies):
     @classmethod
-    def generate_all(cls) -> Iterable[Strategies]:
+    def generate_all(cls) -> Iterable[ParsingStrategies]:
         type_hints = get_type_hints(cls)
         input_dict: Mapping[str, List[str]] = defaultdict(list)
         for field in fields(cls):
@@ -39,10 +39,9 @@ class StrategiesTesting(Strategies):
 
 @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
 @pytest.mark.parametrize("to_check", ("imports", "strategies"))
-def test_all_childs_share(create_sample: Callable[[str], str], strategies: Strategies, to_check: str) -> None:
+def test_all_childs_share(create_sample: Callable[[str], str], strategies: ParsingStrategies, to_check: str) -> None:
     data = create_sample("dictionary")
-    cls = DataTypeTree.get_data_type_tree_for_type(type(data))
-    tree = cls(data, strategies=strategies, name="Example")
+    tree = data_type_tree_factory(data, strategies=strategies, name="Example")
 
     parent_object = getattr(tree, to_check)
 
@@ -64,11 +63,14 @@ class TestIntegration:
     @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
     @pytest.mark.parametrize("data_type", ["frozenset", "set", "list", "tuple", "dictionary", "mapping"])
     def test_integration(
-        self, strategies: Strategies, create_sample: Callable[[str], str], data_type: str, tmp_path: str
+        self, strategies: ParsingStrategies, create_sample: Callable[[str], str], data_type: str, tmp_path: str
     ) -> None:
         data = create_sample(data_type)
-        cls = DataTypeTree.get_data_type_tree_for_type(type(data))
-        string = str(cls(data, name="Example", strategies=strategies).get_strs_recursive_py(include_imports=True))
+        string = str(
+            data_type_tree_factory(data, name="Example", strategies=strategies)._get_strs_all_nodes_unformatted(
+                include_imports=True
+            )
+        )
 
         self.assert_no_unused_classes(string)
         self.assert_no_redefined_classes(string)
@@ -151,37 +153,37 @@ class TestHash:
     @pytest.mark.parametrize(
         "data1, data2, strategies, should_be_equal",
         [
-            ([1, 2, 3], [4, 5, 6], Strategies(), True),
-            ([1, "str", 3], [4, 5, 6], Strategies(), False),
-            ([1, "str", 3], ["a", 5, 6], Strategies(), True),
-            ([1, {1,2}, 3], [{4,5}, 5, 6], Strategies(), True),
-            ([1, {1,2}, 3], [{4,"a"}, 5, 6], Strategies(), False),
-            ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(), False),
-            ([1, "str", (1, 2)], ["a", 5, (1,)], Strategies(tuple_size_strategy="any size"), True),
-            ([1, "str", (1, "b")], ["a", 5, (1,)], Strategies(), False),
-            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(), False),
-            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], Strategies(tuple_size_strategy="any size"), True),
-            ([1, "str", (1, {1,2})], ["a", 5, (1,)], Strategies(), False),
+            ([1, 2, 3], [4, 5, 6], ParsingStrategies(), True),
+            ([1, "str", 3], [4, 5, 6], ParsingStrategies(), False),
+            ([1, "str", 3], ["a", 5, 6], ParsingStrategies(), True),
+            ([1, {1,2}, 3], [{4,5}, 5, 6], ParsingStrategies(), True),
+            ([1, {1,2}, 3], [{4,"a"}, 5, 6], ParsingStrategies(), False),
+            ([1, "str", (1, 2)], ["a", 5, (1,)], ParsingStrategies(), False),
+            ([1, "str", (1, 2)], ["a", 5, (1,)], ParsingStrategies(tuple_size_strategy="any size"), True),
+            ([1, "str", (1, "b")], ["a", 5, (1,)], ParsingStrategies(), False),
+            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], ParsingStrategies(), False),
+            ([1, "str", (1, "b")], ["a", 5, ("c", 1,)], ParsingStrategies(tuple_size_strategy="any size"), True),
+            ([1, "str", (1, {1,2})], ["a", 5, (1,)], ParsingStrategies(), False),
             # Dicts
-            ({"name": "Patrick"}, {"age": "22"}, Strategies(dict_strategy="dict"), True),
-            ({"name": "Patrick"}, {"age": 22}, Strategies(dict_strategy="dict"), False),
-            ({22: 21}, {"age2": 22}, Strategies(dict_strategy="dict"), False),
-            ({22: 21}, {"age2": "name"}, Strategies(dict_strategy="dict"), False),
-            ({22: 21}, {"age2": 22, "age3": "name"}, Strategies(dict_strategy="dict"), False),
-            ({22: 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="dict"), False),
-            ({"age1": 21}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="dict"), True),
-            ({"age1": 21, "age4": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="dict"), True),
-            ({"age1": 21, 37: 16}, {"age2": 22, 22: 21}, Strategies(dict_strategy="TypedDict"), True),
+            ({"name": "Patrick"}, {"age": "22"}, ParsingStrategies(dict_strategy="dict"), True),
+            ({"name": "Patrick"}, {"age": 22}, ParsingStrategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": 22}, ParsingStrategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": "name"}, ParsingStrategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": 22, "age3": "name"}, ParsingStrategies(dict_strategy="dict"), False),
+            ({22: 21}, {"age2": 22, "age3": 21}, ParsingStrategies(dict_strategy="dict"), False),
+            ({"age1": 21}, {"age2": 22, "age3": 21}, ParsingStrategies(dict_strategy="dict"), True),
+            ({"age1": 21, "age4": 16}, {"age2": 22, "age3": 21}, ParsingStrategies(dict_strategy="dict"), True),
+            ({"age1": 21, 37: 16}, {"age2": 22, 22: 21}, ParsingStrategies(dict_strategy="TypedDict"), True),
             # TypedDict
-            ({"age1": 21, "age2": 16}, {"age2": 22, "age3": 21}, Strategies(dict_strategy="TypedDict"), False),
-            ({"age1": 21, "age2": 16}, {"age1": 22, "age2": 21}, Strategies(dict_strategy="TypedDict"), True),
-            ({"age1": 21, "age2": 16}, {"age1": 22, "age2": "a"}, Strategies(dict_strategy="TypedDict"), False),
+            ({"age1": 21, "age2": 16}, {"age2": 22, "age3": 21}, ParsingStrategies(dict_strategy="TypedDict"), False),
+            ({"age1": 21, "age2": 16}, {"age1": 22, "age2": 21}, ParsingStrategies(dict_strategy="TypedDict"), True),
+            ({"age1": 21, "age2": 16}, {"age1": 22, "age2": "a"}, ParsingStrategies(dict_strategy="TypedDict"), False),
         ],
     )
     # fmt: on
-    def test_hash(self, data1: object, data2: object, should_be_equal: bool, strategies: Strategies) -> None:
-        tree1 = DataTypeTree.get_data_type_tree_for_type(type(data1))(data1, name="Name1", strategies=strategies)
-        tree2 = DataTypeTree.get_data_type_tree_for_type(type(data2))(data2, name="Name2", strategies=strategies)
+    def test_hash(self, data1: object, data2: object, should_be_equal: bool, strategies: ParsingStrategies) -> None:
+        tree1 = data_type_tree_factory(data1, name="Name1", strategies=strategies)
+        tree2 = data_type_tree_factory(data2, name="Name2", strategies=strategies)
 
         assert should_be_equal == (tree1._get_hash() == tree2._get_hash())
         assert should_be_equal == (hash(tree1) == hash(tree2))

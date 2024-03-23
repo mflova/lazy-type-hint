@@ -8,6 +8,7 @@ else:
     override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
+from dynamic_pyi_generator.data_type_tree.factory import data_type_tree_factory
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import GenericDataTypeTree
 
 
@@ -19,15 +20,13 @@ class MappingDataTypeTree(GenericDataTypeTree):
     _keys: Iterator[Hashable]
 
     @override
-    def _get_childs(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
+    def _instantiate_childs(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
         childs: Dict[Hashable, DataTypeTree] = {}
         for key, value in data.items():
-            data_type_tree = self.get_data_type_tree_for_type(type(value))
             suffix = type(key).__name__ if not isinstance(key, str) else self._to_camel_case(key)
-            childs[key] = data_type_tree(
+            childs[key] = data_type_tree_factory(
                 data=value,
                 name=f"{self.name}{suffix}",
-                simplify_redundant_types=self.simplify_redundant_types,
                 imports=self.imports,
                 depth=self.depth + 1,
                 strategies=self.strategies,
@@ -35,10 +34,16 @@ class MappingDataTypeTree(GenericDataTypeTree):
             )
         return childs
 
-    def _get_str_py(self) -> str:
+    def _get_str_top_node(self) -> str:
         return self._parse_dict(self.childs)
 
     def _parse_dict(self, childs: Mapping[Hashable, DataTypeTree]) -> str:
+        """Get a string representation of the dictionary for this same top node.
+
+        Examples:
+            - Mapping[str, Union[float, str]]
+            - Mapping[str, str]
+        """
         container: Literal["dict", "TypedDict", "MappingProxyType", "Mapping"] = (
             "dict" if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
         )
@@ -52,7 +57,8 @@ class MappingDataTypeTree(GenericDataTypeTree):
         keys_str = self._format_types(keys)
         value_types = self.get_type_alias_childs()
 
-        return f"{self.name} = {container.capitalize()}[{keys_str}, {value_types}]"
+        container_ = "Dict" if container == "dict" else container
+        return f"{self.name} = {container_}[{keys_str}, {value_types}]"
 
     @staticmethod
     def _to_camel_case(string: str) -> str:
@@ -82,7 +88,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
         return "".join(new_string)
 
     @override
-    def _get_hash(self) -> object:
+    def _get_hash(self) -> Hashable:
         hashes: List[object] = []
         for name, child in self.childs.items():
             hashes.append(("mapping", hash(type(name)), child._get_hash()))

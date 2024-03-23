@@ -3,7 +3,7 @@ from typing import Any, Callable, Final, Iterable, List
 import pytest
 
 from dynamic_pyi_generator.data_type_tree.generic_type import ListDataTypeTree
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 
 
 class TestGetStrPy:
@@ -16,8 +16,8 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "strategies",
         [
-            (Strategies(list_strategy="list", min_height_to_define_type_alias=0)),
-            (Strategies(list_strategy="Sequence", min_height_to_define_type_alias=0)),
+            (ParsingStrategies(list_strategy="list", min_height_to_define_type_alias=0)),
+            (ParsingStrategies(list_strategy="Sequence", min_height_to_define_type_alias=0)),
         ],
     )
     @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ class TestGetStrPy:
     def test_get_str_py(
         self,
         data: List[Any],
-        strategies: Strategies,
+        strategies: ParsingStrategies,
         expected_output: str,
         expected_n_childs: int,
         assert_imports: Callable[[ListDataTypeTree, Iterable[str]], None],
@@ -64,7 +64,7 @@ class TestGetStrPy:
 
         expected_output = expected_output.format(expected_container=strategies.list_strategy.capitalize())
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 
 
@@ -73,8 +73,8 @@ class TestTypeAliasHeight:
     """Name that will be used to create the class."""
 
     @pytest.fixture
-    def strategies(self, min_height: int) -> Strategies:
-        return Strategies(min_height_to_define_type_alias=min_height)
+    def strategies(self, min_height: int) -> ParsingStrategies:
+        return ParsingStrategies(min_height_to_define_type_alias=min_height)
 
     # fmt: off
     @pytest.mark.parametrize(
@@ -91,7 +91,7 @@ class TestTypeAliasHeight:
     def test_type_alias_based_on_height(
         self,
         data: List[Any],
-        strategies: Strategies,
+        strategies: ParsingStrategies,
         expected_str: str,
         min_height: int,  # noqa: ARG002
     ) -> None:
@@ -105,4 +105,4 @@ class TestTypeAliasHeight:
             min_height (int): The minimum height of the tree.
         """
         tree = ListDataTypeTree(data, name=self.NAME, strategies=strategies)
-        assert expected_str == tree.get_str_py()
+        assert expected_str == tree.get_str_top_node()

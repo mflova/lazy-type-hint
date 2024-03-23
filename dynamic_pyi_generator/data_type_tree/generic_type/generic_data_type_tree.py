@@ -20,23 +20,37 @@ else:
     override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, DataTypeTree
+from dynamic_pyi_generator.data_type_tree.factory import data_type_tree_factory
 
 
 class GenericDataTypeTree(DataTypeTree):
+    """Tree that holds any kind of object that must contain other inner structures."""
+
     childs: ChildStructure[DataTypeTree]
 
     # Iterable-protocol related
     _iterator: Union[int, Iterator[Hashable]]
 
     @abstractmethod
-    def _get_childs(self, data: object) -> ChildStructure[DataTypeTree]:
+    def _instantiate_childs(self, data: object) -> ChildStructure[DataTypeTree]:
         ...
 
     def get_type_alias_childs(self) -> str:
+        """Get, in a format manner, a single string with all subtypes found within the generic structure.
+
+        Examples:
+            - Union[float, MyDict]
+            - Union[float, MyDict, str]
+            - MyDict
+        """
         child_types = self._get_types()
         return self._format_types(child_types)
 
     def _format_types(self, child_types: Sequence[str]) -> str:
+        """Given a collection of type or type aliases, format them.
+
+        If multiple of them are given, a `Union` type will be used.
+        """
         if len(child_types) == 1:
             return child_types[0]
         self.imports.add("Union")
@@ -55,7 +69,6 @@ class GenericDataTypeTree(DataTypeTree):
 
         Returns:
             Tuple[str, ...]: A tuple containing the child types.
-
         """
         child_types: List[str] = []
         if iterable:
@@ -63,7 +76,7 @@ class GenericDataTypeTree(DataTypeTree):
         else:
             for child in self:
                 if not child.permission_to_create_type_alias:
-                    child_types.append(child.get_str_no_type_alias_py())
+                    child_types.append(child.get_str_top_node_without_lvalue())
                 else:
                     child_types.append(child.name)
         if not child_types:
@@ -101,16 +114,20 @@ class GenericDataTypeTree(DataTypeTree):
                 raise StopIteration
 
     @override
-    def _get_hash(self) -> object:
+    def _get_hash(self) -> Hashable:
         hashes: List[object] = []
         for child in self:
             hashes.append(child._get_hash())
         return tuple(hashes)
 
 
-def get_childs_for_set_and_sequence(
+def instantiate_childs_for_set_and_sequence(
     self: DataTypeTree, data: Sequence[Any], *, allow_repeated_childs: bool
 ) -> Tuple[DataTypeTree, ...]:
+    """Instantiate the childs for sets and sequences.
+
+    If `allow_repeated_childs` is set to True, all childs will be returned even if they are repeated.
+    """
     if allow_repeated_childs:
         childs: Union[Set[DataTypeTree], List[DataTypeTree]] = []
     else:
@@ -118,7 +135,6 @@ def get_childs_for_set_and_sequence(
     names_added: Set[str] = set()
 
     for element in data:
-        data_type_tree = self.get_data_type_tree_for_type(type(element))
         name = f"{self.name}{type(element).__name__.capitalize()}"
         # Generate new name in case this one was already added
         if name in names_added:
@@ -128,10 +144,9 @@ def get_childs_for_set_and_sequence(
                 modified_name = f"{name}{count}"
                 count += 1
             name = modified_name
-        child = data_type_tree(
+        child = data_type_tree_factory(
             data=element,
             name=name,
-            simplify_redundant_types=self.simplify_redundant_types,
             imports=self.imports,
             depth=self.depth + 1,
             parent=self,

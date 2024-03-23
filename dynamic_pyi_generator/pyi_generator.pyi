@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Final, Literal, Mapping, 
 import dynamic_pyi_generator
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.file_handler import FileHandler
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import TAB, compare_str_via_ast, is_string_python_keyword_compatible
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -21,7 +21,7 @@ class PyiGenerator:
     classes_created: 'TypeAlias' = Any
     'Classes created by the class. Do not modify.'
     @final
-    def __init__(self, *, strategies: Strategies=Strategies(), if_interface_exists: Literal['overwrite', 'validate']='validate', generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...]=(dynamic_pyi_generator, 'build')) -> None:...
+    def __init__(self, *, strategies: ParsingStrategies=ParsingStrategies(), if_interface_exists: Literal['overwrite', 'validate']='validate', generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...]=(dynamic_pyi_generator, 'build')) -> None:...
 
     def from_file(self, loader: Callable[[str], ObjectT], path: str, class_name: str) -> ObjectT:...
 

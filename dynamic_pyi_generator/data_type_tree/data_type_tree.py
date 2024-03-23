@@ -1,3 +1,8 @@
+"""`DataTypeTree` object that creates a tree representing all container types within the data type given.
+
+This data can then be parsed to a .py compatible file that will type hint your code.
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -19,7 +24,7 @@ from typing import (
     final,
 )
 
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import TAB, ImportManager, cache_returned_value, is_string_python_keyword_compatible
 
 if TYPE_CHECKING:
@@ -30,22 +35,24 @@ class DataTypeTreeError(Exception):
     ...
 
 
-DataTypeT = TypeVar("DataTypeT")
+DataTypeT = TypeVar("DataTypeT", bound=object)
 ChildStructure = Union[FrozenSet[DataTypeT], Sequence[DataTypeT], Mapping[Hashable, DataTypeT]]
+"""Different child structures that the Tree can hold."""
 
 
 class DataTypeTree(ABC):
+    """Tree that represents any kind of data with its inner structures."""
+
     name: str
     depth: int
     height: int
     imports: ImportManager  # Unique one shared among the whole tree
     parent: Optional[DataTypeTree]
     childs: Optional[ChildStructure[DataTypeTree]]
-    simplify_redundant_types: bool
     holding_type: Type[object]
-    strategies: Strategies
+    strategies: ParsingStrategies
 
-    data_type_tree_types: ClassVar[Mapping[Type[object], Type[DataTypeTree]]] = {}
+    subclasses: ClassVar[Mapping[Type[object], Type[DataTypeTree]]] = {}
 
     wraps: ClassVar[Union[Type[object], Sequence[Type[object]]]] = object
 
@@ -55,10 +62,9 @@ class DataTypeTree(ABC):
         data: object,
         name: str,
         *,
-        simplify_redundant_types: bool = True,
         imports: Optional[ImportManager] = None,
         depth: int = 0,
-        strategies: Strategies = Strategies(),  # noqa: B008
+        strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
         parent: Optional[DataTypeTree] = None,
     ) -> None:
         # Validation
@@ -73,10 +79,9 @@ class DataTypeTree(ABC):
         self.name = name
         self.holding_type = type(data)
         self.strategies = strategies
-        self.simplify_redundant_types = simplify_redundant_types
         self.depth = depth
         self.imports = ImportManager() if imports is None else imports
-        self.childs = self._get_childs(data)
+        self.childs = self._instantiate_childs(data)
         self.parent = parent
         self.height = self._get_height()
         self._needs_type_alias = False
@@ -86,6 +91,7 @@ class DataTypeTree(ABC):
         ...
 
     def _get_height(self) -> int:
+        """Get maximum height of the current node in the tree."""
         max_height = 0
         for child in self:
             max_height = max(child.height, max_height)
@@ -93,63 +99,82 @@ class DataTypeTree(ABC):
 
     @staticmethod
     def _validate_name(name: str) -> None:
+        """CHeck that any given name is compatible with Python keyword naming rules."""
         if not is_string_python_keyword_compatible(name):
             raise DataTypeTreeError(f"The given name ({name}) is not Python-keyword compatible")
 
     @abstractmethod
-    def _get_childs(self, data: object) -> Optional[ChildStructure[DataTypeTree]]:
-        ...
+    def _instantiate_childs(self, data: object) -> Optional[ChildStructure[DataTypeTree]]:
+        """Instantiate the child structure that will be assigned to `self.childs`.
+
+        This one will depend on how each subclass manage the child structure.
+        """
 
     @final
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Populate `subclasses` with all subclasses of this same class."""
         super().__init_subclass__(**kwargs)
         wraps = cls.wraps if isinstance(cls.wraps, Iterable) else [cls.wraps]
         for type_ in wraps:
             if type_ != object:
-                if type_ in cls.data_type_tree_types:
+                if type_ in cls.subclasses:
                     raise DataTypeTreeError(f"A parser for {type_.__name__} was already found")
-                cls.data_type_tree_types[type_] = cls  # type: ignore
+                cls.subclasses[type_] = cls  # type: ignore
 
     @abstractmethod
-    def _get_hash(self) -> object:
-        ...
+    def _get_hash(self) -> Hashable:
+        """Get a unique hash that identifies the current data type."""
 
     @final
     def __hash__(self) -> int:
+        """Unique hash that identifies whether the current tree is considered to be unique."""
         return hash(self._get_hash())
 
     @abstractmethod
-    def _get_str_py(self) -> str:
-        ...
+    def _get_str_top_node(self) -> str:
+        """Get the type alias or the representation only for the current self.
+
+        It does not include childs.
+        """
 
     @property
     def permission_to_create_type_alias(self) -> bool:
+        """Parameter that indicates wheter the current trype is allowed to create a type alias.
+
+        This will depend on the parsing strategy and on the fact that some trees require a type
+        alias no matter the height.
+        """
         for child in self:
             if child._needs_type_alias:
                 return True
         return bool(self.height > self.strategies.min_height_to_define_type_alias)
 
     @final
-    def get_str_no_type_alias_py(self) -> str:
-        return self.get_str_py().split("=")[-1].strip()
+    def get_str_top_node_without_lvalue(self) -> str:
+        return self.get_str_top_node().split("=")[-1].strip()
 
     @final
-    def get_str_py(self) -> str:
-        return self._get_str_py().replace("NoneType", "None")
+    def get_str_top_node(self) -> str:
+        return self._get_str_top_node().replace("NoneType", "None")
+
+    @final
+    def get_str_all_nodes(self, include_imports: bool = True) -> str:
+        """String that represents the .py file created from the tree."""
+        return self._formatted_string(self._get_strs_all_nodes_unformatted(include_imports=include_imports))
 
     @final
     @cache_returned_value
-    def get_strs_recursive_py(self, *, include_imports: bool = True) -> Tuple[str, ...]:
+    def _get_strs_all_nodes_unformatted(self, *, include_imports: bool = True) -> Tuple[str, ...]:
         if self.depth == 0 and not self.childs:
-            return (self.get_str_py(),)  # It will return a type alias for simple data types
+            return (self.get_str_top_node(),)  # It will return a type alias for simple data types
         if not self.childs:
             return ()
 
         class_representations: List[str] = []
         for child in self:
             if child.permission_to_create_type_alias:
-                class_representations.extend(child.get_strs_recursive_py(include_imports=False))
-        class_representations.append(self.get_str_py())
+                class_representations.extend(child._get_strs_all_nodes_unformatted(include_imports=False))
+        class_representations.append(self.get_str_top_node())
 
         # These are available only when `get_str_py` is called
         if include_imports:
@@ -157,7 +182,8 @@ class DataTypeTree(ABC):
         return tuple(class_representations)
 
     @final
-    def formatted_string(self, strs_py: Sequence[str]) -> str:
+    def _formatted_string(self, strs_py: Sequence[str]) -> str:
+        """Get the string representation of the type hints that represent the whole tree."""
         strs_py = list(strs_py)
         if not strs_py:
             return ""
@@ -169,11 +195,18 @@ class DataTypeTree(ABC):
 
     @final
     def __str__(self) -> str:
-        return self.formatted_string(self.get_strs_recursive_py(include_imports=True))
+        """String that represents the .py file created from the tree."""
+        return self.get_str_all_nodes(include_imports=True)
 
     @final
     def __repr__(self) -> str:
-        return self.__str__()
+        strings: List[str] = []
+        if self.depth == 0:
+            strings.append(type(self).__name__)
+        for child in self:
+            strings.append(f"{TAB*child.depth} - {child}")
+            strings.append(repr(child))
+        return "\n".join(strings)
 
     @abstractmethod
     def __iter__(self) -> Self:
@@ -181,6 +214,7 @@ class DataTypeTree(ABC):
 
     @final
     def __len__(self) -> int:
+        """Number of childs within the tree."""
         if self.childs is None:
             return 0
         return len(self.childs)
@@ -191,23 +225,10 @@ class DataTypeTree(ABC):
 
     @final
     def print_childs(self) -> None:
-        if self.depth == 0:
-            print(type(self).__name__)
-        for child in self:
-            print(f"{TAB*child.depth} - {child}")
-            child.print_childs()
+        print(repr(self))
 
     @final
     def __eq__(self, other_object: object) -> bool:
         if type(self) is type(other_object):
             return hash(self) == hash(other_object)
         return False
-
-    @classmethod
-    def get_data_type_tree_for_type(cls, type_: Type[object]) -> Type[DataTypeTree]:
-        try:
-            return cls.data_type_tree_types[type_]
-        except KeyError as error:
-            raise DataTypeTreeError(
-                f"There is no tree representation for the given data type: {type_.__name__}"
-            ) from error

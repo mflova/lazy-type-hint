@@ -7,7 +7,7 @@ MAPPING_STRATEGIES = Literal["TypedDict", "Mapping", "dict"]
 
 
 @dataclass(frozen=True)
-class Strategies:
+class ParsingStrategies:
     list_strategy: LIST_STRATEGIES = "list"
     tuple_size_strategy: TUPLE_SIZE_STRATEGIES = "fixed"
     dict_strategy: MAPPING_STRATEGIES = "TypedDict"

@@ -20,9 +20,9 @@ from typing import (
 )
 
 import dynamic_pyi_generator
-from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
+from dynamic_pyi_generator.data_type_tree import data_type_tree_factory
 from dynamic_pyi_generator.file_handler import FileHandler
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import (
     TAB,
     compare_str_via_ast,
@@ -55,7 +55,7 @@ class PyiGenerator:
     """
     if_interface_exists: Literal["overwrite", "validate"]
     """Strategy to follow if a requested class has been found as existing."""
-    strategies: Strategies
+    strategies: ParsingStrategies
     """Strategies to follow when parsing the objects."""
 
     # Constants that should not be modified
@@ -70,7 +70,7 @@ class PyiGenerator:
     def __init__(
         self,
         *,
-        strategies: Strategies = Strategies(),  # noqa: B008
+        strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
         if_interface_exists: Literal["overwrite", "validate"] = "validate",
         generated_classes_custom_dir: Tuple[Union[ModuleType, str], ...] = (
             dynamic_pyi_generator,
@@ -169,8 +169,7 @@ class PyiGenerator:
             raise PyiGeneratorError(
                 f"Given class_name is not compatible with Python class naming conventions: {class_name}"
             )
-        cls = DataTypeTree.get_data_type_tree_for_type(type(data))
-        string_representation = str(cls(data, name=class_name, strategies=self.strategies))
+        string_representation = str(data_type_tree_factory(data, name=class_name, strategies=self.strategies))
         string_representation = self.header + "\n" + string_representation
         classes_added = self._get_classes_added()
         if class_name not in classes_added:

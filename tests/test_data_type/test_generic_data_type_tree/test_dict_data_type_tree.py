@@ -2,9 +2,9 @@ from typing import Callable, Final, Iterable
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree import DataTypeTree
+from dynamic_pyi_generator.data_type_tree import data_type_tree_factory
 from dynamic_pyi_generator.data_type_tree.generic_type import DictDataTypeTree, MappingDataTypeTree
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import TAB
 
 
@@ -32,33 +32,33 @@ class TestGetStrPy:
         "tree, expected_output, expected_n_childs",
         [
             (
-                DictDataTypeTree({"name": "Joan"}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"name": "Joan"}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str""",
                 1,
             ),
             (
-                DictDataTypeTree({"age": 22}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"age": 22}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}age: int""",
                 1,
             ),
             (
-                DictDataTypeTree({"name": "Joan", "age": 21}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"name": "Joan", "age": 21}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
 {TAB}age: int""",
                 2,
             ),
             (
-                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
 {TAB}kids: {NAME}Kids""",
                 2,
             ),
             (
-                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"], "parents": ["C", "D"]}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"], "parents": ["C", "D"]}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
 {TAB}kids: {NAME}Kids
@@ -85,7 +85,7 @@ class TestGetStrPy:
             assert_imports (Callable[[TupleDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
         """
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 
     # fmt: off
@@ -93,7 +93,7 @@ class TestGetStrPy:
         "tree, expected_output, expected_n_childs",
         [
             (
-                DictDataTypeTree({"name and surname": "Joan B."}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"name and surname": "Joan B."}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""{NAME} = TypedDict(
     "{NAME}",
     {{
@@ -103,7 +103,7 @@ class TestGetStrPy:
                 1,
             ),
             (
-                DictDataTypeTree({"$": 22.0, "own_list": [1, 2, 3]}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"$": 22.0, "own_list": [1, 2, 3]}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""{NAME} = TypedDict(
     "{NAME}",
     {{
@@ -114,7 +114,7 @@ class TestGetStrPy:
                 2,
             ),
             (
-                DictDataTypeTree({"$": 22, "my_list": [1, 2, 3], "my_list2": [2, 3]}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"$": 22, "my_list": [1, 2, 3], "my_list2": [2, 3]}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""{NAME} = TypedDict(
     "{NAME}",
     {{
@@ -145,7 +145,7 @@ class TestGetStrPy:
             assert_imports (Callable[[TupleDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
         """
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 
 
@@ -160,13 +160,13 @@ class TestGetStrHeight:
         "tree, expected_output",
         [
             (
-                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
 {TAB}kids: {NAME}Kids""",
             ),
             (
-                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=1)),
+                DictDataTypeTree({"name": "Joan", "kids": ["A", "B"]}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=1)),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
 {TAB}kids: List[str]""",
@@ -188,7 +188,7 @@ class TestGetStrHeight:
             expected_n_childs (int): The expected number of child nodes in the tree.
             assert_imports (Callable[[TupleDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
         """
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
 
     # fmt: off
     @pytest.mark.parametrize(
@@ -201,9 +201,8 @@ class TestGetStrHeight:
     )
     # fmt: on
     def test_permissions(self, data: object, min_height: int, expected_output: str) -> None:
-        cls = DataTypeTree.get_data_type_tree_for_type(type(data))
         error = "No matter the minimum height set up, `TypedDict` should always have preference"
-        assert (
-            expected_output
-            == cls(data, name=self.NAME, strategies=Strategies(min_height_to_define_type_alias=min_height)).get_str_py()
-        ), error
+        tree = data_type_tree_factory(
+            data, name=self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=min_height)
+        )
+        assert expected_output == tree.get_str_top_node(), error

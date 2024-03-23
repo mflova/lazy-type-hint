@@ -22,7 +22,7 @@ class TestGetStrPy:
     )
     def test_get_str_py(self, data: object, expected_str: str) -> None:
         data_type_tree = SimpleDataTypeTree(data, self.NAME)
-        assert expected_str == data_type_tree.get_str_py()
+        assert expected_str == data_type_tree.get_str_top_node()
 
 
 class TestHash:

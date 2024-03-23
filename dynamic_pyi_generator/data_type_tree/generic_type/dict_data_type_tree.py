@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import TYPE_CHECKING, Dict, List, Mapping, NamedTuple, cast
+from typing import TYPE_CHECKING, Dict, Hashable, List, Mapping, NamedTuple, cast
 
 if TYPE_CHECKING:
     from typing_extensions import TypeGuard, override
@@ -28,13 +28,14 @@ class DictDataTypeTree(MappingDataTypeTree):
 
     @override
     def __post_init__(self) -> None:
+        """TypedDicts are "forced" to have a type alias."""
         if self.dict_profile.is_typed_dict:
             self._needs_type_alias = True
 
     @staticmethod
     @override
     def _validate_name(name: str) -> None:  # noqa: ARG004
-        # Removed name validation as the TypedDict can type any name
+        """Removed name validation as the TypedDict can type any name."""
         return
 
     @override
@@ -46,6 +47,7 @@ class DictDataTypeTree(MappingDataTypeTree):
 
     @cached_property
     def dict_profile(self) -> DictProfile:
+        """Define the characteristics of the current dictionary."""
         is_typed_dict = False
         is_functional_syntax = True
         if self._all_keys_are_string(self.childs) and self.strategies.dict_strategy == "TypedDict":
@@ -55,7 +57,7 @@ class DictDataTypeTree(MappingDataTypeTree):
         return self.DictProfile(is_typed_dict=is_typed_dict, is_functional_syntax=is_functional_syntax)
 
     @override
-    def _get_str_py(self) -> str:
+    def _get_str_top_node(self) -> str:
         if self.dict_profile.is_typed_dict:
             childs_str_key = cast(Mapping[str, DataTypeTree], self.childs)
             return self._parse_typed_dict(childs=childs_str_key)
@@ -74,6 +76,16 @@ class DictDataTypeTree(MappingDataTypeTree):
         self,
         childs: Mapping[str, DataTypeTree],
     ) -> str:
+        """
+        Define the name of the keys and values for the current dictionary.
+
+        If the name of a child type alias needs to be created, this one will use as a suffix the name
+        of the associated key.
+
+        Example:
+            - address: AddressList
+            - age: AgeInt
+        """
         self.imports.add("TypedDict")
 
         content: Dict[str, str] = {}
@@ -83,7 +95,7 @@ class DictDataTypeTree(MappingDataTypeTree):
                 content[key] = type_value
             else:
                 if not value.permission_to_create_type_alias:
-                    content[key] = value.get_str_no_type_alias_py()
+                    content[key] = value.get_str_top_node_without_lvalue()
                 else:
                     name = f"{self.name}{self._to_camel_case(key)}"
                     content[key] = name
@@ -105,7 +117,6 @@ class DictDataTypeTree(MappingDataTypeTree):
 
         Returns:
             str: The string representation of the typed dictionary.
-
         """
         if functional_syntax:
             template = f"""{name} = TypedDict(
@@ -128,9 +139,8 @@ class DictDataTypeTree(MappingDataTypeTree):
         return "\n".join(lines)
 
     @override
-    def _get_hash(self) -> object:
-        # If TypedDict
-        if not self.dict_profile.is_typed_dict:
+    def _get_hash(self) -> Hashable:
+        if not self.dict_profile.is_typed_dict:  # If TypedDict
             return super()._get_hash()
         hashes: List[object] = []
         for name, child in self.childs.items():

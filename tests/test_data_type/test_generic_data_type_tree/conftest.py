@@ -37,7 +37,7 @@ def assert_imports() -> Callable[[DataTypeTree, Iterable[str]], None]:
             import__ = (
                 f" {import_}[" if import_ in generic_type_hints or f"{import_}(" in generic_type_hints else import_
             )
-            if import__ in tree.get_str_py():
+            if import__ in tree.get_str_top_node():
                 assert (
                     import_ in tree.imports._set
                 ), f"Not all needed imports were detected. Expected to import {import_} but only found {tree.imports._set}"

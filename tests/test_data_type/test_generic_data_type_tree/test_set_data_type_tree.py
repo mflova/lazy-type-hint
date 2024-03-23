@@ -3,7 +3,7 @@ from typing import Any, Callable, Final, Iterable, Set
 import pytest
 
 from dynamic_pyi_generator.data_type_tree.generic_type import SetDataTypeTree
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 
 
 class TestGetStrPy:
@@ -16,24 +16,24 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "tree, expected_output, expected_n_childs",
         [
-            (SetDataTypeTree({1}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[int]", 1),
-            (SetDataTypeTree({1, 2}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[int]", 1),
-            (SetDataTypeTree({1, 2.0}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[float]", 2),
-            (SetDataTypeTree({(1, 2), 2}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, int]]", 2),
-            (SetDataTypeTree({(1, 2), "a"}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, str]]", 2),
-            (SetDataTypeTree({(1, 2), (3, 4)}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[{NAME}Tuple]", 1),
-            (SetDataTypeTree({(1, 2), (3, 4.2)}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
-            (SetDataTypeTree({(1, 2), (3, 4.2), (2, 3)}, name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
-            (SetDataTypeTree(set(), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Any]", 0),
-            (SetDataTypeTree(frozenset({1}), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[int]", 1),
-            (SetDataTypeTree(frozenset((1, 2)), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[int]", 1),
-            (SetDataTypeTree(frozenset((1, 2.0)), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[float]", 2),
-            (SetDataTypeTree(frozenset(((1, 2), 2)), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, int]]", 2),
-            (SetDataTypeTree(frozenset(((1, 2), "a")), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, str]]", 2),
-            (SetDataTypeTree(frozenset({(1, 2), (3, 4)}), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[{NAME}Tuple]", 1),
-            (SetDataTypeTree(frozenset({(1, 2), (3, 4.2)}), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
-            (SetDataTypeTree(frozenset({(1, 2), (3, 4.2), (2, 3)}), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
-            (SetDataTypeTree(frozenset(set()), name=NAME, strategies=Strategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Any]", 0),
+            (SetDataTypeTree({1}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[int]", 1),
+            (SetDataTypeTree({1, 2}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[int]", 1),
+            (SetDataTypeTree({1, 2.0}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[float]", 2),
+            (SetDataTypeTree({(1, 2), 2}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, int]]", 2),
+            (SetDataTypeTree({(1, 2), "a"}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, str]]", 2),
+            (SetDataTypeTree({(1, 2), (3, 4)}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[{NAME}Tuple]", 1),
+            (SetDataTypeTree({(1, 2), (3, 4.2)}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
+            (SetDataTypeTree({(1, 2), (3, 4.2), (2, 3)}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
+            (SetDataTypeTree(set(), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[Any]", 0),
+            (SetDataTypeTree(frozenset({1}), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[int]", 1),
+            (SetDataTypeTree(frozenset((1, 2)), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[int]", 1),
+            (SetDataTypeTree(frozenset((1, 2.0)), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[float]", 2),
+            (SetDataTypeTree(frozenset(((1, 2), 2)), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, int]]", 2),
+            (SetDataTypeTree(frozenset(((1, 2), "a")), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, str]]", 2),
+            (SetDataTypeTree(frozenset({(1, 2), (3, 4)}), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[{NAME}Tuple]", 1),
+            (SetDataTypeTree(frozenset({(1, 2), (3, 4.2)}), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
+            (SetDataTypeTree(frozenset({(1, 2), (3, 4.2), (2, 3)}), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Union[{NAME}Tuple, {NAME}Tuple2]]", 2),
+            (SetDataTypeTree(frozenset(set()), name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = FrozenSet[Any]", 0),
         ],
     )
     # fmt: on
@@ -54,7 +54,7 @@ class TestGetStrPy:
             assert_imports (Callable[[SetDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
         """
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 
 
@@ -63,8 +63,8 @@ class TestTypeAliasHeight:
     """Name that will be used to create the class."""
 
     @pytest.fixture
-    def strategies(self, min_height: int) -> Strategies:
-        return Strategies(min_height_to_define_type_alias=min_height)
+    def strategies(self, min_height: int) -> ParsingStrategies:
+        return ParsingStrategies(min_height_to_define_type_alias=min_height)
 
     # fmt: off
     @pytest.mark.parametrize(
@@ -81,7 +81,7 @@ class TestTypeAliasHeight:
     def test_type_alias_based_on_height(
         self,
         data: Set[Any],
-        strategies: Strategies,
+        strategies: ParsingStrategies,
         expected_str: str,
         min_height: int,  # noqa: ARG002
     ) -> None:
@@ -95,4 +95,4 @@ class TestTypeAliasHeight:
             min_height (int): The minimum height of the tree.
         """
         tree = SetDataTypeTree(data, name=self.NAME, strategies=strategies)
-        assert expected_str == tree.get_str_py()
+        assert expected_str == tree.get_str_top_node()

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Hashable, Union
 
 if TYPE_CHECKING:
     from typing_extensions import Self, override
@@ -9,15 +9,17 @@ from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 
 
 class SimpleDataTypeTree(DataTypeTree):
+    """Tree that holds any kind of object that cannot container inner structures."""
+
     childs: None
     wraps = (bool, int, float, range, slice, str, type(None))
 
     @override
-    def _get_childs(self, data: Union[bool, float, str]) -> None:  # type: ignore  # noqa: ARG002
+    def _instantiate_childs(self, data: Union[bool, float, str]) -> None:  # type: ignore  # noqa: ARG002
         return None
 
     @override
-    def _get_str_py(self) -> str:
+    def _get_str_top_node(self) -> str:
         return f"{self.name} = {self.holding_type.__name__}"
 
     @override
@@ -29,7 +31,7 @@ class SimpleDataTypeTree(DataTypeTree):
         raise StopIteration
 
     @override
-    def _get_hash(self) -> int:
+    def _get_hash(self) -> Hashable:
         return id(self.holding_type)
 
     @override

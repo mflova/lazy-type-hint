@@ -4,7 +4,7 @@ from typing import Any, Callable, Final, Iterable, Mapping
 import pytest
 
 from dynamic_pyi_generator.data_type_tree.generic_type import DictDataTypeTree, MappingDataTypeTree
-from dynamic_pyi_generator.strategies import Strategies
+from dynamic_pyi_generator.strategies import ParsingStrategies
 
 
 @pytest.mark.parametrize(
@@ -30,8 +30,8 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "strategies",
         [
-            (Strategies(dict_strategy="dict", min_height_to_define_type_alias=0)),
-            (Strategies(dict_strategy="Mapping", min_height_to_define_type_alias=0)),
+            (ParsingStrategies(dict_strategy="dict", min_height_to_define_type_alias=0)),
+            (ParsingStrategies(dict_strategy="Mapping", min_height_to_define_type_alias=0)),
         ],
     )
     @pytest.mark.parametrize(
@@ -59,7 +59,7 @@ class TestGetStrPy:
         data: Mapping[Any, Any],
         expected_output: str,
         expected_n_childs: int,
-        strategies: Strategies,
+        strategies: ParsingStrategies,
         assert_imports: Callable[[MappingDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
@@ -78,9 +78,10 @@ class TestGetStrPy:
         else:
             tree = MappingDataTypeTree(data, name=self.NAME, strategies=strategies)
 
-        expected_output = expected_output.format(expected_container=strategies.dict_strategy)
+        expected_container = "Dict" if strategies.dict_strategy == "dict" else strategies.dict_strategy
+        expected_output = expected_output.format(expected_container=expected_container)
         assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 
 
@@ -110,6 +111,6 @@ class TestGetAliasHeight:
         tree = DictDataTypeTree(
             data,
             name=self.NAME,
-            strategies=Strategies(min_height_to_define_type_alias=min_height, dict_strategy="dict"),
+            strategies=ParsingStrategies(min_height_to_define_type_alias=min_height, dict_strategy="dict"),
         )
-        assert expected_output == tree.get_str_py()
+        assert expected_output == tree.get_str_top_node()
