@@ -2,9 +2,6 @@
 
 TODO:
 - Test: Check that the `input_data` is not modified by any mean
-- Refactor: Create a new module called SequenceSetOperations. This one will
-contain the function that instantiates the childs but also the operations that will be
-used in the feature commented below.
 - Include some kind of pytest coverage.
 - New feature: Possibility to merge ALL dictionaries
 within a sequence/set. Add a new strategy parameter called:

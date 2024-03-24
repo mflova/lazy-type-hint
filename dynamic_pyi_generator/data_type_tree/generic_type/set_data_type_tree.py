@@ -8,18 +8,23 @@ else:
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import (
     GenericDataTypeTree,
-    instantiate_childs_for_set_and_sequence,
 )
+from dynamic_pyi_generator.data_type_tree.generic_type.set_and_sequence_operations import SetAndSequenceOperations
 
 
 class SetDataTypeTree(GenericDataTypeTree):
     wraps = (frozenset, set)
     childs: Sequence[DataTypeTree]
     original_data: Union[Set[object], FrozenSet[object]]
+    set_operations: SetAndSequenceOperations
+
+    @override
+    def __pre_init__(self) -> None:
+        self.set_operations = SetAndSequenceOperations(self)
 
     @override
     def _instantiate_childs(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
-        return instantiate_childs_for_set_and_sequence(self, data, allow_repeated_childs=False)
+        return self.set_operations.instantiate_childs(data, allow_repeated_childs=False)
 
     @override
     def _get_str_top_node(self) -> str:

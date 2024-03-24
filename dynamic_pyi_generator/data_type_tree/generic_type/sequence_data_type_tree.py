@@ -8,10 +8,16 @@ else:
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import (
     GenericDataTypeTree,
 )
+from dynamic_pyi_generator.data_type_tree.generic_type.set_and_sequence_operations import SetAndSequenceOperations
 
 
 class SequenceDataTypeTree(GenericDataTypeTree):
     original_data = Sequence[object]
+    sequence_operations: SetAndSequenceOperations
+
+    @override
+    def __pre_init__(self) -> None:
+        self.sequence_operations = SetAndSequenceOperations(self)
 
     @override
     def _get_hash(self) -> Hashable:

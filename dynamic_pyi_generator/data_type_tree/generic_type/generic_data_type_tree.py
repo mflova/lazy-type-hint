@@ -1,14 +1,12 @@
 from abc import abstractmethod
 from typing import (
     TYPE_CHECKING,
-    Any,
     Hashable,
     Iterable,
     Iterator,
     List,
     Mapping,
     Sequence,
-    Set,
     Tuple,
     Union,
     final,
@@ -20,7 +18,6 @@ else:
     override = lambda x: x
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, DataTypeTree
-from dynamic_pyi_generator.data_type_tree.factory import data_type_tree_factory
 
 
 class GenericDataTypeTree(DataTypeTree):
@@ -119,44 +116,3 @@ class GenericDataTypeTree(DataTypeTree):
         for child in self:
             hashes.append(child._get_hash())
         return tuple(hashes)
-
-
-def instantiate_childs_for_set_and_sequence(
-    self: DataTypeTree, data: Sequence[Any], *, allow_repeated_childs: bool
-) -> Tuple[DataTypeTree, ...]:
-    """Instantiate the childs for sets and sequences.
-
-    If `allow_repeated_childs` is set to True, all childs will be returned even if they are repeated.
-    """
-    if allow_repeated_childs:
-        childs: Union[Set[DataTypeTree], List[DataTypeTree]] = []
-    else:
-        childs = set()
-    names_added: Set[str] = set()
-
-    for element in data:
-        name = f"{self.name}{type(element).__name__.capitalize()}"
-        # Generate new name in case this one was already added
-        if name in names_added:
-            modified_name = name
-            count = 2
-            while modified_name in names_added:
-                modified_name = f"{name}{count}"
-                count += 1
-            name = modified_name
-        child = data_type_tree_factory(
-            data=element,
-            name=name,
-            imports=self.imports,
-            depth=self.depth + 1,
-            parent=self,
-            strategies=self.strategies,
-        )
-        if allow_repeated_childs:
-            childs.append(child)  # type: ignore
-            names_added.add(name)
-        else:
-            if child not in childs:
-                childs.add(child)  # type: ignore
-                names_added.add(name)
-    return tuple(childs)

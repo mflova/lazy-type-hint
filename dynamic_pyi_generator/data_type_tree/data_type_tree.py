@@ -90,6 +90,7 @@ class DataTypeTree(ABC):
                 f"The given parser is meant to parse `{', '.join(wraps_str)}` data type but "
                 f"{type(data).__name__} was given"
             )
+        self.__pre_init__()
         self.name = name
         self.holding_type = type(data)
         self.strategies = strategies
@@ -101,6 +102,9 @@ class DataTypeTree(ABC):
         self._needs_type_alias = False
         self.data = data
         self.__post_init__()
+
+    def __pre_init__(self) -> None:
+        ...
 
     def __post_init__(self) -> None:
         ...
