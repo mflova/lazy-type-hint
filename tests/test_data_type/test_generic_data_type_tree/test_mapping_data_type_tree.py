@@ -4,6 +4,7 @@ from typing import Any, Callable, Final, Iterable, Mapping
 import pytest
 
 from dynamic_pyi_generator.data_type_tree.generic_type import DictDataTypeTree, MappingDataTypeTree
+from dynamic_pyi_generator.file_modifiers.yaml_file_modifier import YamlFileModifier
 from dynamic_pyi_generator.strategies import ParsingStrategies
 
 
@@ -114,3 +115,38 @@ class TestGetAliasHeight:
             strategies=ParsingStrategies(min_height_to_define_type_alias=min_height, dict_strategy="dict"),
         )
         assert expected_output == tree.get_str_top_node()
+
+
+class TestHiddenKeyBasedDocs:
+    PREFFIX: Final = YamlFileModifier.preffix
+
+    @pytest.mark.parametrize(
+        "data1, data2, expected_same_hash",
+        [
+            (
+                MappingProxyType({"name": "Joan", f"{PREFFIX}name": "This is a doc"}),
+                MappingProxyType({"name": "Joan"}),
+                True,
+            ),
+            (MappingProxyType({"age": 22, f"{PREFFIX}age": "This is a doc"}), MappingProxyType({"age": 23}), True),
+            (MappingProxyType({"age": 22, f"{PREFFIX}age": "This is a doc"}), MappingProxyType({"age": "22"}), False),
+        ],
+    )
+    def test_hash_is_not_altered(
+        self, data1: Mapping[Any, Any], data2: Mapping[Any, Any], expected_same_hash: bool
+    ) -> None:
+        tree1 = MappingDataTypeTree(data1, name="Tree1")
+        tree2 = MappingDataTypeTree(data2, name="Tree2")
+        assert expected_same_hash == (hash(tree1) == hash(tree2))
+
+    @pytest.mark.parametrize(
+        "data1, data2",
+        [
+            (MappingProxyType({"name": "Joan", f"{PREFFIX}name": "This is a doc"}), MappingProxyType({"name": "Joan"})),
+            (MappingProxyType({"age": 22, f"{PREFFIX}age": "This is a doc"}), MappingProxyType({"age": 23})),
+        ],
+    )
+    def test_type_alias_does_not_change(self, data1: Mapping[Any, Any], data2: Mapping[Any, Any]) -> None:
+        tree1 = MappingDataTypeTree(data1, name="Tree1")
+        tree2 = MappingDataTypeTree(data2, name="Tree2")
+        assert tree1.get_str_top_node_without_lvalue() == tree2.get_str_top_node_without_lvalue()

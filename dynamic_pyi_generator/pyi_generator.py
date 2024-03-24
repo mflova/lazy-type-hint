@@ -21,7 +21,8 @@ from typing import (
 
 import dynamic_pyi_generator
 from dynamic_pyi_generator.data_type_tree import data_type_tree_factory
-from dynamic_pyi_generator.file_handler import FileHandler
+from dynamic_pyi_generator.file_modifiers.py_file_modifier import PyFileModifier
+from dynamic_pyi_generator.file_modifiers.yaml_file_modifier import YAML_COMMENTS_POSITION, YamlFileModifier
 from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import (
     TAB,
@@ -40,11 +41,12 @@ class PyiGeneratorError(Exception):
 
 
 ObjectT = TypeVar("ObjectT")
+PathT = TypeVar("PathT", str, Path)
 
 
 class PyiGenerator:
     # Utils
-    this_file_pyi: FileHandler
+    this_file_pyi: PyFileModifier
     """.pyi representation of this same module."""
     this_file_pyi_path: Path
     """Path to the .pyi file associated to this same module."""
@@ -63,7 +65,7 @@ class PyiGenerator:
     """Header that will be prepended to all new classes created."""
     classes_created: "TypeAlias" = Any
     """Classes created by the class. Do not modify."""
-    methods_to_be_overloaded: Final = ("from_data", "from_file")
+    methods_to_be_overloaded: Final = ("from_data", "from_yaml_file")
     """Methods that will be modified in the PYI interface when new classes are added."""
 
     @final
@@ -85,7 +87,7 @@ class PyiGenerator:
         if not self.this_file_pyi_path.exists():
             self.this_file_pyi = self._generate_this_file_pyi()
         else:
-            self.this_file_pyi = FileHandler(self.this_file_pyi_path.read_text(encoding="utf-8"))
+            self.this_file_pyi = PyFileModifier(self.this_file_pyi_path.read_text(encoding="utf-8"))
 
         # Validation
         self._validate_classes_custom_dir(self.custom_classes_dir)
@@ -149,14 +151,22 @@ class PyiGenerator:
             dct[match] = path
         return dct
 
-    def from_file(
+    def from_yaml_file(
         self,
-        loader: Callable[[str], ObjectT],
-        path: str,
+        loader: Callable[[PathT], ObjectT],
+        path: PathT,
+        *,
         class_name: str,
+        comments_are: Union[YAML_COMMENTS_POSITION, Sequence[YAML_COMMENTS_POSITION]],
     ) -> ObjectT:
+        yaml_file_modifier = YamlFileModifier(path, comments_are=comments_are)
+        new_path = yaml_file_modifier.create_temporary_file_with_comments_as_keys()
+        try:
+            data = loader(new_path)
+        except Exception:  # noqa: BLE001
+            data = loader(path)
         return self.from_data(
-            loader(path),
+            data,
             class_name=class_name,
         )
 
@@ -199,11 +209,11 @@ class PyiGenerator:
         self._update_this_file_pyi()
 
     @final
-    def _generate_this_file_pyi(self) -> FileHandler:
+    def _generate_this_file_pyi(self) -> PyFileModifier:
         content = Path(__file__).read_text()
 
         # Prepend @overload decorator to load function
-        file_handler = FileHandler(content)
+        file_handler = PyFileModifier(content)
         file_handler.remove_all_method_bodies()
         file_handler.remove_all_private_methods()
         file_handler.remove_all_instance_variables(class_name=(type(self)).__name__)

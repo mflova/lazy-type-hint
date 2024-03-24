@@ -1,18 +1,23 @@
 from functools import cached_property
-from typing import TYPE_CHECKING, Dict, Hashable, List, Mapping, NamedTuple, cast
+from typing import TYPE_CHECKING, Dict, Hashable, List, Mapping, NamedTuple, Sequence, cast
 
 if TYPE_CHECKING:
     from typing_extensions import TypeGuard, override
 else:
     override = lambda x: x
 
+from typing import TypeVar
+
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
-from dynamic_pyi_generator.utils import TAB, is_string_python_keyword_compatible
+from dynamic_pyi_generator.utils import TAB, format_string_as_docstring, is_string_python_keyword_compatible
+
+ValueT = TypeVar("ValueT")
 
 
 class DictDataTypeTree(MappingDataTypeTree):
     wraps = dict  # type: ignore
+    data: Dict[Hashable, object]
 
     class DictProfile(NamedTuple):
         """
@@ -65,7 +70,7 @@ class DictDataTypeTree(MappingDataTypeTree):
             return self._parse_dict(self.childs)
 
     @staticmethod
-    def _all_keys_are_string(data: Mapping[object, DataTypeTree]) -> "TypeGuard[Mapping[str, DataTypeTree]]":
+    def _all_keys_are_string(data: Mapping[object, ValueT]) -> "TypeGuard[Mapping[str, ValueT]]":
         return all(isinstance(key, str) for key in data)
 
     @staticmethod
@@ -100,11 +105,20 @@ class DictDataTypeTree(MappingDataTypeTree):
                     name = f"{self.name}{self._to_camel_case(key)}"
                     content[key] = name
         return self._build_typed_dict(
-            name=self.name, content=content, functional_syntax=self.dict_profile.is_functional_syntax
+            name=self.name,
+            content=content,
+            functional_syntax=self.dict_profile.is_functional_syntax,
+            key_used_as_class_docstring=self.strategies.key_used_as_doc,
         )
 
-    @staticmethod
-    def _build_typed_dict(name: str, content: Mapping[str, str], *, functional_syntax: bool = False) -> str:
+    def _build_typed_dict(
+        self,
+        name: str,
+        content: Mapping[str, str],
+        *,
+        functional_syntax: bool = False,
+        key_used_as_class_docstring: str = "",
+    ) -> str:
         """
         Build a typed dictionary based on the given name and content.
 
@@ -114,6 +128,9 @@ class DictDataTypeTree(MappingDataTypeTree):
                 key-value pair represents a field and its type.
             functional_syntax (bool, optional): If True, use functional syntax to define
                 the typed dictionary. Defaults to False.
+            key_used_as_class_docstring (str, optional): The key to be used as the class docstring.
+                This is a hidden one and it will not be represented in the final `TypedDict`.
+                Defaults to an empty string.
 
         Returns:
             str: The string representation of the typed dictionary.
@@ -128,19 +145,63 @@ class DictDataTypeTree(MappingDataTypeTree):
             idx_to_repeat = -3
         else:
             template = f"""class {name}(TypedDict):
-{TAB}{{key}}: {{value}}"""
+{TAB}{{key}}: {{value}}{{optional_key_docstring}}"""
             idx_to_repeat = -1
 
-        lines = template.split("\n")
+        # Build the dictionary
+        lines = template.splitlines()
         modified_line = ""
+        key_docstrings = self._get_key_docstrings(docstring_keys_start_with=self.hidden_keys_preffix)
         for key, value in content.items():
-            modified_line += lines[idx_to_repeat].format(key=key, value=value) + "\n"
+            if key.startswith(self.hidden_keys_preffix):  # Do not add artificially created keys
+                continue
+            if self.dict_profile.is_functional_syntax:
+                modified_line += lines[idx_to_repeat].format(key=key, value=value) + "\n"
+            else:
+                docstring = key_docstrings.get(key, "")
+                modified_line += lines[idx_to_repeat].format(key=key, value=value, optional_key_docstring=docstring)
+                if not docstring:
+                    modified_line += "\n"
         lines[idx_to_repeat] = modified_line[:-1]
+
+        # Append class docstring if found
+        if key_used_as_class_docstring in self.data and key_used_as_class_docstring:
+            lines = self._insert_class_docstring(lines, key_used_as_doc=key_used_as_class_docstring)
         return "\n".join(lines)
+
+    def _get_key_docstrings(self, *, docstring_keys_start_with: str) -> Mapping[str, str]:
+        if self.dict_profile.is_functional_syntax or not self._all_keys_are_string(self.data):
+            return {}
+        dct: Dict[str, str] = {}
+        # Insert key docstrings
+        for key in self.data:
+            if not key.startswith(docstring_keys_start_with):  # Check key is not docstring based
+                doc_key: str = f"{self.hidden_keys_preffix}{key}"
+                if doc_key in self.data:  # Check if there is key docstring
+                    unformatted_docstring = self.data[doc_key]  # type: ignore
+                    if not isinstance(unformatted_docstring, str):
+                        continue
+                    formated_docstring = (
+                        "\n" + format_string_as_docstring(unformatted_docstring, indentation=TAB) + "\n"
+                    )
+                    dct[key] = formated_docstring
+        return dct
+
+    def _insert_class_docstring(self, lines: Sequence[str], *, key_used_as_doc: str) -> List[str]:
+        string = self.data[key_used_as_doc]
+        lines = list(lines)
+        if isinstance(string, str):
+            indentation = "" if self.dict_profile.is_functional_syntax else TAB
+            docstring = format_string_as_docstring(string, indentation=indentation)
+            if self.dict_profile.is_functional_syntax:
+                lines.insert(len(lines), docstring)
+            else:
+                lines.insert(1, docstring + "\n")
+        return lines
 
     @override
     def _get_hash(self) -> Hashable:
-        if not self.dict_profile.is_typed_dict:  # If TypedDict
+        if not self.dict_profile.is_typed_dict:
             return super()._get_hash()
         hashes: List[object] = []
         for name, child in self.childs.items():

@@ -13,6 +13,7 @@ class SimpleDataTypeTree(DataTypeTree):
 
     childs: None
     wraps = (bool, int, float, range, slice, str, type(None))
+    original_data = Union[bool, int, float, range, slice, str, None]
 
     @override
     def _instantiate_childs(self, data: Union[bool, float, str]) -> None:  # type: ignore  # noqa: ARG002
@@ -20,6 +21,9 @@ class SimpleDataTypeTree(DataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
+        if self.holding_type.__name__ == "NoneType":
+            self.imports.add("Optional")
+            return f"{self.name} = Optional[object]"
         return f"{self.name} = {self.holding_type.__name__}"
 
     @override

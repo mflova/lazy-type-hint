@@ -5,11 +5,11 @@ from typing import Any, List, Literal, Tuple, Union, overload
 from dynamic_pyi_generator.utils import TAB
 
 
-class FileHandler:
+class PyFileModifier:
     lines: List[str]
 
     def __init__(self, representation: str) -> None:
-        self.lines = representation.split("\n")
+        self.lines = representation.splitlines()
 
     def __str__(self) -> str:
         return "\n".join(self.lines)
@@ -181,7 +181,7 @@ class FileHandler:
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 node.body = [ast.Ellipsis()]  # type: ignore
-        self.lines = ast.unparse(tree).strip().split("\n")  # type: ignore
+        self.lines = ast.unparse(tree).strip().splitlines()  # type: ignore
 
     def remove_all_private_methods(self) -> None:
         """
