@@ -1,9 +1,6 @@
-from typing import TYPE_CHECKING, Hashable, Union
+from typing import Hashable, Union
 
-if TYPE_CHECKING:
-    from typing_extensions import Self, override
-else:
-    override = lambda x: x
+from typing_extensions import Self, override
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 
@@ -16,7 +13,7 @@ class SimpleDataTypeTree(DataTypeTree):
     original_data = Union[bool, int, float, range, slice, str, None]
 
     @override
-    def _instantiate_childs(self, data: Union[bool, float, str]) -> None:  # type: ignore  # noqa: ARG002
+    def _instantiate_childs(self, data: Union[bool, float, str]) -> None:  # type: ignore
         return None
 
     @override

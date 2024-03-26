@@ -8,6 +8,7 @@ packages = [{include = "dynamic_pyi_generator"}]
 
 [tool.poetry.dependencies]
 python = "^3.8, <=3.12"
+typing_extensions = "*"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.9.0"
@@ -15,7 +16,6 @@ ruff = "^0.3.2"
 pytest = "7.4.4"  # Testing
 codespell = "2.2.6"  # Spell checker
 black = "23.12.1"  # Autoformatter
-typing_extensions = "*"
 pytest-clarity = "^1.0.1"
 pyyaml = "*"  # Used by the `check_code.py` script
 types-pyyaml = "*"

@@ -1,9 +1,6 @@
-from typing import TYPE_CHECKING, Any, FrozenSet, Hashable, Literal, Sequence, Set, Tuple, Union
+from typing import Any, FrozenSet, Hashable, Literal, Sequence, Set, Tuple, Union
 
-if TYPE_CHECKING:
-    from typing_extensions import override
-else:
-    override = lambda x: x
+from typing_extensions import override
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.generic_type.generic_data_type_tree import (
@@ -16,15 +13,15 @@ class SetDataTypeTree(GenericDataTypeTree):
     wraps = (frozenset, set)
     childs: Sequence[DataTypeTree]
     original_data: Union[Set[object], FrozenSet[object]]
-    set_operations: SetAndSequenceOperations
+    operations: SetAndSequenceOperations
 
     @override
-    def __pre_init__(self) -> None:
-        self.set_operations = SetAndSequenceOperations(self)
+    def __pre_child_instantiation__(self) -> None:
+        self.operations = SetAndSequenceOperations(self)
 
     @override
     def _instantiate_childs(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
-        return self.set_operations.instantiate_childs(data, allow_repeated_childs=False)
+        return self.operations.instantiate_childs(data, allow_repeated_childs=False)
 
     @override
     def _get_str_top_node(self) -> str:

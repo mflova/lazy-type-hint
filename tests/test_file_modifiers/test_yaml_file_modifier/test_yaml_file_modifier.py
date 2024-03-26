@@ -635,6 +635,7 @@ class TestMergeComments:
         assert expected_output == YamlFileModifier._merge_comments(comments)
 
 
+@pytest.mark.usefixtures("_serial")
 class TestIntegration:
     TEST_FILE: Final = TEST_FILES_DIR / "example.yaml"
     PREFIX: Final = YamlFileModifier.preffix

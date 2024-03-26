@@ -81,7 +81,6 @@ class Mypy:
             if error_str:
                 if ignore_errors:
                     if all(keyword not in error_str for keyword in ignore_errors):
-                        print(error_str)
                         errors.append(error_str)
                 else:
                     errors.append(error_str)

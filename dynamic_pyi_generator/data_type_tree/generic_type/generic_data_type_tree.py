@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from typing import (
-    TYPE_CHECKING,
     Hashable,
     Iterable,
     Iterator,
@@ -12,10 +11,7 @@ from typing import (
     final,
 )
 
-if TYPE_CHECKING:
-    from typing_extensions import Self, override
-else:
-    override = lambda x: x
+from typing_extensions import Self, override
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, DataTypeTree
 
@@ -94,6 +90,7 @@ class GenericDataTypeTree(DataTypeTree):
             self._iterator = 0  # Reset the index to zero when starting a new iteration
         return self
 
+    @override
     def __next__(self) -> DataTypeTree:
         # Many type ignores here but everything is safe
         if isinstance(self.childs, Mapping):

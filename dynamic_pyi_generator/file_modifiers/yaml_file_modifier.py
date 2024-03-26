@@ -32,8 +32,7 @@ class Comment:
     spacing_element: Tuple[Literal["spaces", "tabs", "none"], int]
 
 
-class YamlFileModifierError(Exception):
-    ...
+class YamlFileModifierError(Exception): ...
 
 
 class YamlFileModifier:
@@ -319,7 +318,7 @@ class YamlFileModifier:
 
         for idx, line in enumerate(self.lines):
             line_with_no_spacing = self._remove_spacing(line)
-            if line_with_no_spacing[0].isalpha():
+            if len(line_with_no_spacing) > 0 and (line_with_no_spacing[0].isalpha() or line_with_no_spacing[0] == "-"):
                 spaces_or_tabs = self._count_spaces_or_tabs_at_start(line, indendation=indentation)
                 if spaces_or_tabs is None:
                     continue
@@ -399,6 +398,7 @@ class YamlFileModifier:
             string = (
                 f"{indentation*comment.spacing_element[1]}{key}: |{self._format_comment_as_multiline_yaml(comment)}"
             )
+            # TODO Add 1 or not?
             new_lines.insert(comment.key_line, string)
         return "\n".join(new_lines)
 

@@ -20,6 +20,8 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "Any",
     "Union",
     "Optional",
+    "NotRequired",
+    "ReadOnly",
 ]
 
 
@@ -42,6 +44,8 @@ class ImportManager:
             "Any": ("typing", "Any"),
             "Union": ("typing", "Union"),
             "Optional": ("typing", "Optional"),
+            "NotRequired": ("typing_extensions", "NotRequired"),
+            "ReadOnly": ("typing_extensions", "ReadOnly"),
         }
     )
 

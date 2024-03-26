@@ -17,6 +17,7 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -25,7 +26,7 @@ from typing import (
 )
 
 from dynamic_pyi_generator.strategies import ParsingStrategies
-from dynamic_pyi_generator.utils import TAB, ImportManager, cache_returned_value, is_string_python_keyword_compatible
+from dynamic_pyi_generator.utils import ImportManager, cache_returned_value, is_string_python_keyword_compatible
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -90,23 +91,23 @@ class DataTypeTree(ABC):
                 f"The given parser is meant to parse `{', '.join(wraps_str)}` data type but "
                 f"{type(data).__name__} was given"
             )
-        self.__pre_init__()
+        self.data = data
         self.name = name
         self.holding_type = type(data)
         self.strategies = strategies
         self.depth = depth
         self.imports = ImportManager() if imports is None else imports
-        self.childs = self._instantiate_childs(data)
         self.parent = parent
+        self.__pre_child_instantiation__()
+        self.childs = self._instantiate_childs(data)
         self.height = self._get_height()
         self._needs_type_alias = False
-        self.data = data
-        self.__post_init__()
+        self.__post_child_instantiation__()
 
-    def __pre_init__(self) -> None:
+    def __pre_child_instantiation__(self) -> None:
         ...
 
-    def __post_init__(self) -> None:
+    def __post_child_instantiation__(self) -> None:
         ...
 
     def _get_height(self) -> int:
@@ -190,9 +191,14 @@ class DataTypeTree(ABC):
             return ()
 
         class_representations: List[str] = []
+        strings_added: Set[str] = set()
         for child in self:
             if child.permission_to_create_type_alias:
-                class_representations.extend(child._get_strs_all_nodes_unformatted(include_imports=False))
+                strings = child._get_strs_all_nodes_unformatted(include_imports=False)
+                for string in strings:
+                    if string not in strings_added:
+                        class_representations.append(string)
+                        strings_added.add(string)
         class_representations.append(self.get_str_top_node())
 
         # These are available only when `get_str_py` is called
@@ -219,13 +225,7 @@ class DataTypeTree(ABC):
 
     @final
     def __repr__(self) -> str:
-        strings: List[str] = []
-        if self.depth == 0:
-            strings.append(type(self).__name__)
-        for child in self:
-            strings.append(f"{TAB*child.depth} - {child}")
-            strings.append(repr(child))
-        return "\n".join(strings)
+        return f"{type(self).__name__}.{self.name}"
 
     @abstractmethod
     def __iter__(self) -> Self:

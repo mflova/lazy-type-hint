@@ -1,14 +1,11 @@
-from typing import TYPE_CHECKING, Any, List, Sequence, Tuple
+from typing import Any, List, Sequence, Tuple
+
+from typing_extensions import override
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree, DataTypeTreeError
 from dynamic_pyi_generator.data_type_tree.generic_type.sequence_data_type_tree import (
     SequenceDataTypeTree,
 )
-
-if TYPE_CHECKING:
-    from typing_extensions import override
-else:
-    override = lambda x: x
 
 
 class ListDataTypeTree(SequenceDataTypeTree):
@@ -17,7 +14,7 @@ class ListDataTypeTree(SequenceDataTypeTree):
 
     @override
     def _instantiate_childs(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
-        return self.sequence_operations.instantiate_childs(data, allow_repeated_childs=False)
+        return self.operations.instantiate_childs(data, allow_repeated_childs=False)
 
     @override
     def _get_str_top_node(self) -> str:

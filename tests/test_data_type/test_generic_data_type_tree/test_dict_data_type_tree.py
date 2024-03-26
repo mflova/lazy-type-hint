@@ -1,9 +1,27 @@
-from typing import Any, Callable, Dict, Final, Iterable
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    Hashable,
+    Iterable,
+    Mapping,
+    Sequence,
+    Set,
+    Sized,
+    Tuple,
+)
 
 import pytest
 
 from dynamic_pyi_generator.data_type_tree import data_type_tree_factory
-from dynamic_pyi_generator.data_type_tree.generic_type import DictDataTypeTree, MappingDataTypeTree
+from dynamic_pyi_generator.data_type_tree.generic_type.dict_data_type_tree import (
+    DictDataTypeTree,
+    DictMetadata,
+    DictMetadataComparison,
+    KeyInfo,
+)
+from dynamic_pyi_generator.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
 from dynamic_pyi_generator.file_modifiers.yaml_file_modifier import YamlFileModifier
 from dynamic_pyi_generator.strategies import ParsingStrategies
 from dynamic_pyi_generator.utils import TAB
@@ -298,6 +316,165 @@ class TestClassDocstringFromKey:
             assert '""""' not in tree.get_str_top_node().splitlines()[-1]
 
 
+class TestDictMerge:
+    PREFFIX: Final = YamlFileModifier.preffix
+
+    @pytest.mark.parametrize(
+        "data, expected_merged_data, expected_key_info",
+        [
+            (
+                [
+                    {"b": 2, f"{PREFFIX}b": "doc"},
+                    {},
+                ],
+                {"b": 2, f"{PREFFIX}b": "doc"},
+                {"b": KeyInfo(name="b", docstring="doc", required=False)},
+            ),
+            (
+                [
+                    {},
+                    {"b": 2, f"{PREFFIX}b": "doc"},
+                ],
+                {"b": 2, f"{PREFFIX}b": "doc"},
+                {"b": KeyInfo(name="b", docstring="doc", required=False)},
+            ),
+            (
+                [
+                    {"b": 4},
+                    {"b": 2},
+                ],
+                {"b": 2},
+                {"b": KeyInfo(name="b", required=True)},
+            ),
+            (
+                [
+                    {"b": 4},
+                    {"a": 2},
+                ],
+                {"b": 4, "a": 2},
+                {
+                    "b": KeyInfo(name="b", required=False),
+                    "a": KeyInfo(name="a", required=False),
+                },
+            ),
+            (
+                [
+                    {"b": 4},
+                    {"a": 2, "b": 7, f"{PREFFIX}b": "doc"},
+                ],
+                {"b": 7, "a": 2, f"{PREFFIX}b": "doc"},
+                {
+                    "b": KeyInfo(name="b", docstring="doc", required=True),
+                    "a": KeyInfo(name="a", required=False),
+                },
+            ),
+            (
+                [
+                    {"a": 2, "b": 7, f"{PREFFIX}b": "doc"},
+                    {"b": 4},
+                ],
+                {"b": 4, "a": 2, f"{PREFFIX}b": "doc"},
+                {
+                    "b": KeyInfo(name="b", docstring="doc", required=True),
+                    "a": KeyInfo(name="a", required=False),
+                },
+            ),
+        ],
+    )
+    def test_from_multiple_dict_data_type_trees(
+        self,
+        data: Sequence[Mapping[Hashable, object]],
+        expected_merged_data: DictDataTypeTree,
+        expected_key_info: Mapping[Hashable, KeyInfo],
+    ) -> None:
+        inputs = [
+            DictDataTypeTree(dct, name="Name", strategies=ParsingStrategies(dict_strategy="TypedDict")) for dct in data
+        ]
+        merged_tree = DictDataTypeTree.from_multiple_dict_data_type_trees(*inputs)
+        assert expected_merged_data == merged_tree.data
+        assert expected_key_info == merged_tree.dict_metadata.key_info
+
+
+class TestSimilarityMerge:
+    NAME: Final = "Example"
+
+    @pytest.mark.parametrize(
+        "data, expected_merge, expected_str_all_nodes",
+        [
+            (
+                [{"name": "a", "age": 22}, {"name": "b", "age": 23, "optional_field": 27}],
+                True,
+                (
+                    f"""class ExampleDict(TypedDict):
+{TAB}name: str
+{TAB}age: int
+{TAB}optional_field: NotRequired[int]""",
+                    "Example = List[ExampleDict]",
+                ),
+            ),
+            (
+                [{"a": "a", "b": 22}, {"c": "b", "d": 23}],
+                False,
+                (
+                    f"""class ExampleDict2(TypedDict):
+{TAB}c: str
+{TAB}d: int""",
+                    f"""class ExampleDict(TypedDict):
+{TAB}a: str
+{TAB}b: int""",
+                    "Example = List[Union[ExampleDict, ExampleDict2]]",
+                ),
+            ),
+        ],
+    )
+    def test_list_containing_dictionaries(
+        self, data: Sized, expected_merge: bool, expected_str_all_nodes: Tuple[str, ...]
+    ) -> None:
+        tree = data_type_tree_factory(data, name=self.NAME)
+
+        if not expected_merge:
+            assert len(tree) == len(data)
+        assert sorted(expected_str_all_nodes) == sorted(tree._get_strs_all_nodes_unformatted(include_imports=False))
+
+    @pytest.mark.parametrize(
+        "data, expected_merge, expected_str_all_nodes",
+        [
+            (
+                ({"name": "a", "age": 22}, {"name": "b", "age": 23, "optional_field": 27}),
+                True,
+                (
+                    f"""class ExampleDict(TypedDict):
+{TAB}name: str
+{TAB}age: int
+{TAB}optional_field: NotRequired[int]""",
+                    "Example = Tuple[ExampleDict, ExampleDict]",
+                ),
+            ),
+            (
+                ({"a": "a", "b": 22}, {"c": "b", "d": 23}),
+                False,
+                (
+                    f"""class ExampleDict(TypedDict):
+{TAB}a: str
+{TAB}b: int""",
+                    f"""class ExampleDict2(TypedDict):
+{TAB}c: str
+{TAB}d: int""",
+                    "Example = Tuple[ExampleDict, ExampleDict2]",
+                ),
+            ),
+        ],
+    )
+    def test_tuple_containing_dictionaries(
+        self, data: Sized, expected_merge: bool, expected_str_all_nodes: Tuple[str, ...]
+    ) -> None:
+        tree = data_type_tree_factory(data, name=self.NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed"))
+
+        if not expected_merge:
+            assert len(tree) == len(data)
+        assert expected_str_all_nodes == tree._get_strs_all_nodes_unformatted(include_imports=False)
+
+
 class TestKeyDocstring:
     NAME: Final = "Example"
     PREFFIX: Final = YamlFileModifier.preffix
@@ -372,3 +549,224 @@ class TestKeyDocstring:
         tree1 = DictDataTypeTree(data1, name="Tree1")
         tree2 = DictDataTypeTree(data2, name="Tree2")
         assert expected_same_hash == (hash(tree1) == hash(tree2))
+
+    @pytest.mark.parametrize(
+        "data, should_be_functional_syntax",
+        [
+            ({"a": 2}, False),
+            ({"a": 2, ".b": 2}, True),
+            ({"a": 2, " b": 2}, True),
+            ({"a": 2, "from": 2}, True),
+            ({"a": 2, "in": 2}, True),
+            ({"a": 2, "class": 2}, True),
+        ],
+    )
+    def test_typed_dict_goes_to_functional_syntax(
+        self, data: Mapping[Hashable, object], should_be_functional_syntax: bool
+    ) -> None:
+        tree = DictDataTypeTree(data, name="Example", strategies=ParsingStrategies(dict_strategy="TypedDict"))
+        assert should_be_functional_syntax == tree.dict_metadata.is_functional_syntax
+
+
+class TestDictMetadata:
+    PREFFIX: Final = YamlFileModifier.preffix
+
+    @pytest.mark.parametrize(
+        "data, expected_output",
+        [
+            ({"a": 2, "b": 1}, True),
+            ({1: 2, "b": 1}, False),
+            ({"a": 2, "b": "a"}, True),
+            ({"a": "a", "b": "a"}, True),
+        ],
+    )
+    def test_all_keys_are_string(self, data: Mapping[Hashable, object], expected_output: bool) -> None:
+        assert expected_output == DictMetadata._all_keys_are_string(data)
+
+    @pytest.mark.parametrize(
+        "data, expected_output",
+        [
+            ({"a": 2, "b": 1}, True),
+            ({":a": 2, "b": 1}, False),
+            ({" a": 2, "b": 1}, False),
+            ({".a": 2, "b": 1}, False),
+            ({".a.": 2, "b": 1}, False),
+            ({"1a": 2, "b": 1}, False),
+            ({"a1": 2, "b": 1}, True),
+        ],
+    )
+    def test_all_keys_are_parsable(self, data: Mapping[Hashable, object], expected_output: bool) -> None:
+        assert (
+            expected_output
+            == DictMetadata(
+                data, hidden_key_preffix="", strategies=ParsingStrategies(dict_strategy="TypedDict")
+            )._all_keys_are_parsable()
+        )
+
+    @pytest.mark.parametrize(
+        "data, expected_output",
+        [
+            ({"b": 2, f"{PREFFIX}b": "doc"}, {"b": "doc"}),
+            ({"b": 2, f"{PREFFIX}b": "doc", "a": 1}, {"b": "doc"}),
+            ({".b": 2, f"{PREFFIX}b": "doc", "a": 1}, {}),
+        ],
+    )
+    def test_get_key_docstrings(self, data: Mapping[Hashable, object], expected_output: Mapping[str, object]) -> None:
+        assert (
+            expected_output
+            == DictMetadata(
+                data, hidden_key_preffix=self.PREFFIX, strategies=ParsingStrategies(dict_strategy="TypedDict")
+            ).get_key_docstrings()
+        )
+
+    @pytest.mark.parametrize(
+        "initial_dict, other_dict, expected_dict, expected_key_info",
+        [
+            (
+                {"a": 2},
+                {"a": 3},
+                {"a": 2},
+                {"a": KeyInfo(name="a", docstring="", required=True)},
+            ),
+            (
+                {"a": 2, "b": 2},
+                {"a": 3},
+                {"a": 2, "b": 2},
+                {
+                    "a": KeyInfo(name="a", docstring="", required=True),
+                    "b": KeyInfo(name="b", docstring="", required=False),
+                },
+            ),
+            (
+                {"a": 3},
+                {"a": 2, "b": 2},
+                {"a": 3, "b": 2},
+                {
+                    "a": KeyInfo(name="a", docstring="", required=True),
+                    "b": KeyInfo(name="b", docstring="", required=False),
+                },
+            ),
+            (
+                {"a": 3, f"{PREFFIX}a": "a_doc"},
+                {"a": 2, "b": 2},
+                {"a": 3, f"{PREFFIX}a": "a_doc", "b": 2},
+                {
+                    "a": KeyInfo(name="a", docstring="a_doc", required=True),
+                    "b": KeyInfo(name="b", docstring="", required=False),
+                },
+            ),
+            (
+                {"a": 2, "b": 2},
+                {"a": 3, f"{PREFFIX}a": "a_doc"},
+                {"a": 2, f"{PREFFIX}a": "a_doc", "b": 2},
+                {
+                    "a": KeyInfo(name="a", docstring="a_doc", required=True),
+                    "b": KeyInfo(name="b", docstring="", required=False),
+                },
+            ),
+            (
+                {"a": 3, f"{PREFFIX}a": "a_doc"},
+                {"a": 3, f"{PREFFIX}a": "a_doc2"},
+                {"a": 3, f"{PREFFIX}a": "a_doc"},
+                {
+                    "a": KeyInfo(name="a", docstring="a_doc", required=True),
+                },
+            ),
+            (
+                {"a": 3, f"{PREFFIX}a": "a_doc2"},
+                {"a": 3, f"{PREFFIX}a": "a_doc"},
+                {"a": 3, f"{PREFFIX}a": "a_doc2"},
+                {
+                    "a": KeyInfo(name="a", docstring="a_doc2", required=True),
+                },
+            ),
+            (
+                {".a": 3, f"{PREFFIX}.a": "a_doc2"},
+                {".a": 3, f"{PREFFIX}.a": "a_doc"},
+                {".a": 3, f"{PREFFIX}.a": "a_doc2"},
+                {
+                    ".a": KeyInfo(name=".a", docstring="a_doc2", required=True),
+                },
+            ),
+        ],
+    )
+    def test_update(
+        self,
+        initial_dict: Mapping[Hashable, object],
+        other_dict: Mapping[Hashable, object],
+        expected_dict: Mapping[Hashable, object],
+        expected_key_info: Mapping[Hashable, KeyInfo],
+    ) -> None:
+        strategies = ParsingStrategies(dict_strategy="TypedDict")
+        metadata = DictMetadata(initial_dict, hidden_key_preffix=self.PREFFIX, strategies=strategies)
+        metadata.update(DictMetadata(other_dict, hidden_key_preffix=self.PREFFIX, strategies=strategies))
+        assert expected_dict == metadata._data
+        assert expected_key_info == metadata.key_info
+
+    @pytest.mark.parametrize(
+        "data, include_hidden_keys, expected_output",
+        [
+            ({"b": 2, f"{PREFFIX}b": "doc"}, False, {"b"}),
+            ({"b": 2, "a": "doc"}, False, {"b", "a"}),
+            ({"b": 2, f"{PREFFIX}b": "doc"}, True, {f"{PREFFIX}b", "b"}),
+            ({"b": 2, "a": "doc"}, True, {"b", "a"}),
+            ({1: 2, "a": "doc"}, True, {1, "a"}),
+            ({1: 2, f"{PREFFIX}a": "doc", "a": 2}, True, {1, "a", f"{PREFFIX}a"}),
+        ],
+    )
+    def test_get_keys(
+        self, data: Mapping[Hashable, object], expected_output: Set[str], include_hidden_keys: bool
+    ) -> None:
+        assert expected_output == DictMetadata(
+            data, hidden_key_preffix=self.PREFFIX, strategies=ParsingStrategies(dict_strategy="TypedDict")
+        ).get_keys(include_hidden_prefix_keys=include_hidden_keys)
+
+    @pytest.mark.parametrize(
+        "dicts, expected_output, expected_similarity",
+        [
+            (
+                [{"a": 2}, {"a": 3}, {"a": 2}],
+                DictMetadataComparison(common_keys={"a"}, value_types={"a": {int}}),
+                100,
+            ),
+            (
+                [{"a": 2}, {"b": 3}, {"c": 2}],
+                DictMetadataComparison(
+                    non_common_keys={"a", "b", "c"}, value_types={"a": {int}, "b": {int}, "c": {int}}
+                ),
+                0,
+            ),
+            (
+                [{"a": 2}, {"a": 3.2}, {"b": 2}],
+                DictMetadataComparison(non_common_keys={"a", "b"}, value_types={"a": {float}, "b": {int}}),
+                0,
+            ),
+            (
+                [{"a": 2, "b": 3}, {"a": 3}, {"a": "b", "j": "a"}],
+                DictMetadataComparison(
+                    common_keys={"a"},
+                    non_common_keys={"b", "j"},
+                    value_types={"a": {int, str}, "b": {int}, "j": {str}},
+                ),
+                33,
+            ),
+            (
+                [{}, {"a": 3}, {}],
+                DictMetadataComparison(non_common_keys={"a"}, value_types={"a": {int}}),
+                0,
+            ),
+        ],
+    )
+    def test_get_info_from_multiple_dicts(
+        self,
+        dicts: Sequence[Mapping[Hashable, object]],
+        expected_output: DictMetadataComparison,
+        expected_similarity: int,
+    ) -> None:
+        dicts_ = [
+            DictMetadata(dct, hidden_key_preffix=self.PREFFIX, strategies=ParsingStrategies(dict_strategy="TypedDict"))
+            for dct in dicts
+        ]
+        comparison = DictMetadata.compare_multiple_dicts(*dicts_)
+        assert expected_output == comparison
+        assert expected_similarity == comparison.percentage_similarity

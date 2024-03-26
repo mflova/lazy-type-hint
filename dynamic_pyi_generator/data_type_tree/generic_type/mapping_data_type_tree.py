@@ -1,13 +1,8 @@
 import re
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set
+from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set
 
-from dynamic_pyi_generator.file_modifiers.yaml_file_modifier import YamlFileModifier
-
-if TYPE_CHECKING:
-    from typing_extensions import override
-else:
-    override = lambda x: x
+from typing_extensions import override
 
 from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.data_type_tree.factory import data_type_tree_factory
