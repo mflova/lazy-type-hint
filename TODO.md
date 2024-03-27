@@ -26,7 +26,6 @@ Backlog:
 
 feat:
 
-- Include ReadOnly attributes within TypedDict
 - Make it compatible with different Python versions.This include:
   - Migration for some of the classes from `typing` to `collections.abc`
   - Use of `list` instead of `typing.List`
