@@ -3,11 +3,32 @@
 
 
 TODO:
+- `ClassDataTypeTree`:
+  - It should be an easy one. Two scenarios:
+    - It is built-in:
+      - Do nothing (int, str, bool...)
+      - Import it
+    - It is not built-in:
+      - Look from where it was imported from and add it to `self.imports`
+
+- `FunctionDataTypeTree` or `CallableDataTypeTree`: Different scenarios:
+  - Lambda: Possible modeled as a `Callable`
+  - Function: Depending on strategy parse it as a:
+    - `Callable`: Very limited. Only if it has not kwargs and some other considerations
+    - `Protocol`: Fully customizable.
+  - In both cases I might need to import new things
+  - What would happen with methods?
+
+- Cleanup: Create two main classes:
+  - `TypeHintGen`: One that returns a `Result` that has methods like:
+    - `as_str`
+    - `as_file`
+  - `TypeHintGenLive`: The current class
+
 - Tests with float and int. For example: 
   - is TypedDict similarity merge working with float vs int?
   - is merging of equal TypedDict working when float vs int
   - How should these work?
-- Fix tests
 - Rename strategies to be easier to understand
 - Include some kind of pytest coverage.
 - Allow similarity dict merges with dictionaries having different value types
