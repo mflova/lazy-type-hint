@@ -210,22 +210,16 @@ class DictDataTypeTree(MappingDataTypeTree):
 
     @override
     @property
-    def permission_to_create_type_alias(self) -> bool:
+    def permission_to_be_created_as_type_alias(self) -> bool:
         if self.dict_metadata.is_typed_dict:
             return True
-        return super().permission_to_create_type_alias
+        return super().permission_to_be_created_as_type_alias
 
     @override
     def __pre_child_instantiation__(self) -> None:
         self.dict_metadata = DictMetadata(
             self.data, hidden_key_preffix=self.hidden_keys_preffix, strategies=self.strategies
         )
-
-    @override
-    def __post_child_instantiation__(self) -> None:
-        """TypedDicts are "forced" to have a type alias."""
-        if self.dict_metadata.is_typed_dict:
-            self._needs_type_alias = True
 
     @override
     def _get_str_top_node(self) -> str:
@@ -257,7 +251,7 @@ class DictDataTypeTree(MappingDataTypeTree):
                 type_value = f"{self.name}{self._to_camel_case(key)}"
                 content[key] = type_value
             else:
-                if not value.permission_to_create_type_alias:
+                if not value.permission_to_be_created_as_type_alias:
                     content[key] = value.get_str_top_node_without_lvalue()
                 else:
                     name = f"{self.name}{self._to_camel_case(key)}"

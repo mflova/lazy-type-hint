@@ -41,5 +41,5 @@ class SimpleDataTypeTree(DataTypeTree):
 
     @override
     @property
-    def permission_to_create_type_alias(self) -> bool:
+    def permission_to_be_created_as_type_alias(self) -> bool:
         return False

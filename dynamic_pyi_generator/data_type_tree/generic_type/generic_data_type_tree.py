@@ -68,7 +68,7 @@ class GenericDataTypeTree(DataTypeTree):
             child_types = [type(element).__name__ for element in iterable]
         else:
             for child in self:
-                if not child.permission_to_create_type_alias:
+                if not child.permission_to_be_created_as_type_alias:
                     child_types.append(child.get_str_top_node_without_lvalue())
                 else:
                     child_types.append(child.name)

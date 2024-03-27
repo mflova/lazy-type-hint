@@ -26,14 +26,18 @@ from typing import (
 )
 
 from dynamic_pyi_generator.strategies import ParsingStrategies
-from dynamic_pyi_generator.utils import ImportManager, cache_returned_value, is_string_python_keyword_compatible
+from dynamic_pyi_generator.utils import (
+    ImportManager,
+    OrderedSet,
+    cache_returned_value,
+    is_string_python_keyword_compatible,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class DataTypeTreeError(Exception):
-    ...
+class DataTypeTreeError(Exception): ...
 
 
 DataTypeT = TypeVar("DataTypeT", bound=object)
@@ -101,14 +105,11 @@ class DataTypeTree(ABC):
         self.__pre_child_instantiation__()
         self.childs = self._instantiate_childs(data)
         self.height = self._get_height()
-        self._needs_type_alias = False
         self.__post_child_instantiation__()
 
-    def __pre_child_instantiation__(self) -> None:
-        ...
+    def __pre_child_instantiation__(self) -> None: ...
 
-    def __post_child_instantiation__(self) -> None:
-        ...
+    def __post_child_instantiation__(self) -> None: ...
 
     def _get_height(self) -> int:
         """Get maximum height of the current node in the tree."""
@@ -158,15 +159,12 @@ class DataTypeTree(ABC):
         """
 
     @property
-    def permission_to_create_type_alias(self) -> bool:
-        """Parameter that indicates wheter the current trype is allowed to create a type alias.
+    def permission_to_be_created_as_type_alias(self) -> bool:
+        """Parameter that indicates whether the current class is allowed to be created as a type alias.
 
         This will depend on the parsing strategy and on the fact that some trees require a type
-        alias no matter the height.
+        alias no matter its height.
         """
-        for child in self:
-            if child._needs_type_alias:
-                return True
         return bool(self.height > self.strategies.min_height_to_define_type_alias)
 
     @final
@@ -180,42 +178,51 @@ class DataTypeTree(ABC):
     @final
     def get_str_all_nodes(self, include_imports: bool = True) -> str:
         """String that represents the .py file created from the tree."""
-        return self._formatted_string(self._get_strs_all_nodes_unformatted(include_imports=include_imports))
+        return self._format_node_strings(self.get_strs_all_nodes_unformatted(include_imports=include_imports))
 
     @final
     @cache_returned_value
-    def _get_strs_all_nodes_unformatted(self, *, include_imports: bool = True) -> Tuple[str, ...]:
-        if self.depth == 0 and not self.childs:
-            return (self.get_str_top_node(),)  # It will return a type alias for simple data types
-        if not self.childs:
-            return ()
-
-        class_representations: List[str] = []
-        strings_added: Set[str] = set()
-        for child in self:
-            if child.permission_to_create_type_alias:
-                strings = child._get_strs_all_nodes_unformatted(include_imports=False)
-                for string in strings:
-                    if string not in strings_added:
-                        class_representations.append(string)
-                        strings_added.add(string)
-        class_representations.append(self.get_str_top_node())
-
-        # These are available only when `get_str_py` is called
+    def get_strs_all_nodes_unformatted(self, *, include_imports: bool = True) -> Tuple[str, ...]:
+        """Get, ordered by dependencies, all strings representing the whole tree."""
+        strings: OrderedSet[str] = OrderedSet()
+        self._get_strs_all_nodes_unformatted(types=strings)
+        strings_lst = strings.as_list()
         if include_imports:
-            return (self.imports.format(), *class_representations)
-        return tuple(class_representations)
+            strings_lst.insert(0, self.imports.format())
+        return tuple(strings_lst)
 
     @final
-    def _formatted_string(self, strs_py: Sequence[str]) -> str:
+    def _get_strs_all_nodes_unformatted(self, *, types: Optional[OrderedSet[str]] = None) -> None:
+        if types is None:
+            types = OrderedSet()
+
+        if self.depth == 0 and not self.childs:
+            if self.permission_to_be_created_as_type_alias:
+                types.add(self.get_str_top_node())
+            return
+        if not self.childs:
+            return
+
+        for child in self:
+            child._get_strs_all_nodes_unformatted(types=types)
+            if child.permission_to_be_created_as_type_alias:
+                types.add(child.get_str_top_node())
+        types.add(self.get_str_top_node())
+        return
+
+    @final
+    def _format_node_strings(self, strs_py: Sequence[str]) -> str:
         """Get the string representation of the type hints that represent the whole tree."""
         strs_py = list(strs_py)
         if not strs_py:
             return ""
+
+        # Add extra separation between imports and first line
         for idx, line in enumerate(strs_py):  # noqa: B007
             if "" in line:
                 break
-        strs_py[idx] = strs_py[idx] + "\n"  # Add extra separation between imports
+        strs_py[idx] = strs_py[idx] + "\n"
+
         return "\n\n".join(strs_py)
 
     @final
@@ -225,7 +232,7 @@ class DataTypeTree(ABC):
 
     @final
     def __repr__(self) -> str:
-        return f"{type(self).__name__}.{self.name}"
+        return f"{type(self).__name__}-{self.name}"
 
     @abstractmethod
     def __iter__(self) -> Self:

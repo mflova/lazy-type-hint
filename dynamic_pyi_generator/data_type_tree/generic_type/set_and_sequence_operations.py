@@ -39,7 +39,7 @@ class SetAndSequenceOperations:
             childs: Union[Set[DataTypeTree], List[DataTypeTree]] = []
         else:
             childs = set()
-        names_added: Set[str] = set()
+        names_added: Set[str] = set()  # Used to generate new and unique cnames in a quicker way.
 
         for element in data:
             name = f"{self.data_type_tree.name}{type(element).__name__.capitalize()}"

@@ -432,11 +432,13 @@ class TestSimilarityMerge:
     def test_list_containing_dictionaries(
         self, data: Sized, expected_merge: bool, expected_str_all_nodes: Tuple[str, ...]
     ) -> None:
-        tree = data_type_tree_factory(data, name=self.NAME)
+        tree = data_type_tree_factory(
+            data, name=self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=1)
+        )
 
         if not expected_merge:
             assert len(tree) == len(data)
-        assert sorted(expected_str_all_nodes) == sorted(tree._get_strs_all_nodes_unformatted(include_imports=False))
+        assert sorted(expected_str_all_nodes) == sorted(tree.get_strs_all_nodes_unformatted(include_imports=False))
 
     @pytest.mark.parametrize(
         "data, expected_merge, expected_str_all_nodes",
@@ -474,7 +476,7 @@ class TestSimilarityMerge:
 
         if not expected_merge:
             assert len(tree) == len(data)
-        assert expected_str_all_nodes == tree._get_strs_all_nodes_unformatted(include_imports=False)
+        assert expected_str_all_nodes == tree.get_strs_all_nodes_unformatted(include_imports=False)
 
 
 class TestKeyDocstring:

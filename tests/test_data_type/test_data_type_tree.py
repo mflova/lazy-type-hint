@@ -74,7 +74,7 @@ class TestIntegration:
         except TypeError:
             data_before = None
         string = str(
-            data_type_tree_factory(data, name="Example", strategies=strategies)._get_strs_all_nodes_unformatted(
+            data_type_tree_factory(data, name="Example", strategies=strategies).get_strs_all_nodes_unformatted(
                 include_imports=True
             )
         )
