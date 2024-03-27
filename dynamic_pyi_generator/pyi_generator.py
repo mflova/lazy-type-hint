@@ -160,15 +160,15 @@ class PyiGenerator:
         comments_are: Union[YAML_COMMENTS_POSITION, Sequence[YAML_COMMENTS_POSITION]],
     ) -> ObjectT:
         yaml_file_modifier = YamlFileModifier(path, comments_are=comments_are)
-        new_path = yaml_file_modifier.create_temporary_file_with_comments_as_keys()
+        original_data = loader(path)
         try:
-            data = loader(new_path)
+            new_path: PathT = type(path)(yaml_file_modifier.create_temporary_file_with_comments_as_keys())
+            potentially_modified_data = loader(new_path)
+            self.from_data(potentially_modified_data, class_name=class_name)
         except Exception:  # noqa: BLE001
-            data = loader(path)
-        return self.from_data(
-            data,
-            class_name=class_name,
-        )
+            return self.from_data(original_data, class_name=class_name)
+        else:
+            return original_data
 
     def from_data(
         self,
