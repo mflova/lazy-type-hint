@@ -11,6 +11,7 @@ from typing import (
     Final,
     Literal,
     Mapping,
+    Optional,
     Sequence,
     Tuple,
     TypeVar,
@@ -157,8 +158,10 @@ class PyiGenerator:
         path: PathT,
         *,
         class_name: str,
-        comments_are: Union[YAML_COMMENTS_POSITION, Sequence[YAML_COMMENTS_POSITION]],
+        comments_are: Optional[Union[YAML_COMMENTS_POSITION, Sequence[YAML_COMMENTS_POSITION]]] = "side",
     ) -> ObjectT:
+        if comments_are is None:
+            return self.from_data(loader(path), class_name=class_name)
         yaml_file_modifier = YamlFileModifier(path, comments_are=comments_are)
         original_data = loader(path)
         try:
