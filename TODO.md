@@ -3,6 +3,11 @@
 
 
 TODO:
+- Tests with float and int. For example: 
+  - is TypedDict similarity merge working with float vs int?
+  - is merging of equal TypedDict working when float vs int
+  - How should these work?
+- Fix tests
 - Rename strategies to be easier to understand
 - Include some kind of pytest coverage.
 - Allow similarity dict merges with dictionaries having different value types

@@ -1,9 +1,5 @@
-import subprocess
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Generic, Iterable, List, NamedTuple, Set, Tuple, TypeVar, Union
-
-from dynamic_pyi_generator.utils.utils import check_if_command_available
+from typing import Generic, List, Set, Tuple, TypeVar
 
 ObjectT = TypeVar("ObjectT")
 

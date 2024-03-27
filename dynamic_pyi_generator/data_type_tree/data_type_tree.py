@@ -13,11 +13,9 @@ from typing import (
     FrozenSet,
     Hashable,
     Iterable,
-    List,
     Mapping,
     Optional,
     Sequence,
-    Set,
     Tuple,
     Type,
     TypeVar,
@@ -37,7 +35,8 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class DataTypeTreeError(Exception): ...
+class DataTypeTreeError(Exception):
+    ...
 
 
 DataTypeT = TypeVar("DataTypeT", bound=object)
@@ -107,9 +106,11 @@ class DataTypeTree(ABC):
         self.height = self._get_height()
         self.__post_child_instantiation__()
 
-    def __pre_child_instantiation__(self) -> None: ...
+    def __pre_child_instantiation__(self) -> None:
+        ...
 
-    def __post_child_instantiation__(self) -> None: ...
+    def __post_child_instantiation__(self) -> None:
+        ...
 
     def _get_height(self) -> int:
         """Get maximum height of the current node in the tree."""
@@ -165,6 +166,8 @@ class DataTypeTree(ABC):
         This will depend on the parsing strategy and on the fact that some trees require a type
         alias no matter its height.
         """
+        if self.parent is None:
+            return True
         return bool(self.height > self.strategies.min_height_to_define_type_alias)
 
     @final
@@ -207,7 +210,8 @@ class DataTypeTree(ABC):
             child._get_strs_all_nodes_unformatted(types=types)
             if child.permission_to_be_created_as_type_alias:
                 types.add(child.get_str_top_node())
-        types.add(self.get_str_top_node())
+        if self.permission_to_be_created_as_type_alias:
+            types.add(self.get_str_top_node())
         return
 
     @final
@@ -222,6 +226,11 @@ class DataTypeTree(ABC):
             if "" in line:
                 break
         strs_py[idx] = strs_py[idx] + "\n"
+
+        # 2 empty lines before defining a class
+        for idx, line in enumerate(strs_py[2:], start=2):
+            if line.startswith("class"):
+                strs_py[idx] = "\n" + strs_py[idx]
 
         return "\n\n".join(strs_py)
 

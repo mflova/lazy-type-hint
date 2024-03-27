@@ -73,12 +73,11 @@ class TestIntegration:
             data_before: Optional[object] = deepcopy(data)
         except TypeError:
             data_before = None
-        string = str(
-            data_type_tree_factory(data, name="Example", strategies=strategies).get_strs_all_nodes_unformatted(
-                include_imports=True
-            )
+        string = data_type_tree_factory(data, name="Example", strategies=strategies).get_str_all_nodes(
+            include_imports=True
         )
 
+        print(string)
         self.assert_no_unused_classes(string)
         self.assert_no_redefined_classes(string)
         self.assert_no_double_whitespace(string)
@@ -123,11 +122,17 @@ class TestIntegration:
         for line in string.splitlines():
             for type_defined in types_defined.copy():
                 if type_defined in line:
-                    types_defined.remove(type_defined)
+                    idx = line.find(type_defined) + len(type_defined)
+                    if idx >= len(line) or idx < len(line) and not line[idx].isalpha():
+                        types_defined.remove(type_defined)
             name = self._get_name_type_alias(line)
             if name:
                 types_defined.add(name)
-        assert len(types_defined) == 1, f"Some classes were created but they are not in use: {', '.join(types_defined)}"
+        error = (
+            "Only the new class created can be the only non-used class. However, more than 1 unused class/type alias "
+            f"was detected: {', '.join(types_defined)}"
+        )
+        assert len(types_defined) == 1, error
 
     def assert_no_redefined_classes(self, string: str) -> None:
         all_types_defined: Set[str] = set()
@@ -147,7 +152,7 @@ class TestIntegration:
         strings = string.splitlines()
         for idx, line in enumerate(strings):
             if line.startswith("class"):
-                error = "There has to eb exaxctly two empty lines before defining a class."
+                error = "There has to be exaxctly two empty lines before defining a class."
                 assert strings[idx - 1] == "", error
                 assert strings[idx - 2] == "", error
                 assert strings[idx - 3] != "", error

@@ -42,4 +42,6 @@ class SimpleDataTypeTree(DataTypeTree):
     @override
     @property
     def permission_to_be_created_as_type_alias(self) -> bool:
+        if self.parent is None:
+            return True
         return False
