@@ -3,7 +3,6 @@
 
 
 TODO:
-- Fix: modified input data
 - Rename strategies to be easier to understand
 - Include some kind of pytest coverage.
 - Allow similarity dict merges with dictionaries having different value types

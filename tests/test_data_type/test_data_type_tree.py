@@ -90,8 +90,7 @@ class TestIntegration:
 
     @staticmethod
     def assert_input_object_is_not_modified(data_before: object, data_after: object) -> None:
-        print(data_before)
-        assert str(data_before) == str(data_after)
+        assert data_before == data_after
 
     @staticmethod
     def assert_python_38_compatible(string: str) -> None:
