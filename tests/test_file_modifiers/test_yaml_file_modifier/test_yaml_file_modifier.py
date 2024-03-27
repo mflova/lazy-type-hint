@@ -511,6 +511,21 @@ class TestExtractComments:
                     )
                 ),
             ),
+            (
+                "list_yaml_comments_above_and_side.yaml",
+                ["above", "side"],
+                (
+                    (
+                        Comment(
+                            full_string="First comment.\n\nSide comment.",
+                            associated_with_key="names",
+                            key_line=1,
+                            spacing_element=("spaces", 2),
+                            must_replace_its_key_as_first_element_of_list=True,
+                        ),
+                    )
+                ),
+            ),
         ],
     )
     def test_method(
@@ -527,6 +542,33 @@ class TestMergeComments:
     @pytest.mark.parametrize(
         "comments, expected_output",
         [
+            [
+                (
+                    Comment(
+                        full_string="Comment for key1.",
+                        associated_with_key="key1",
+                        key_line=2,
+                        spacing_element=("spaces", 0),
+                        must_replace_its_key_as_first_element_of_list=True,
+                    ),
+                    Comment(
+                        full_string="Comment 2 for key1.",
+                        associated_with_key="key1",
+                        key_line=2,
+                        spacing_element=("spaces", 0),
+                        must_replace_its_key_as_first_element_of_list=False,
+                    ),
+                ),
+                (
+                    Comment(
+                        full_string="Comment for key1.\n\nComment 2 for key1.",
+                        associated_with_key="key1",
+                        key_line=2,
+                        spacing_element=("spaces", 0),
+                        must_replace_its_key_as_first_element_of_list=True,
+                    ),
+                ),
+            ],
             [
                 (
                     Comment(
@@ -641,7 +683,7 @@ class TestIntegration:
     PREFIX: Final = YamlFileModifier.preffix
 
     @pytest.mark.parametrize(
-        "file, comments_are, dict_to_be_created",
+        "file, comments_are, object_to_be_created",
         [
             (
                 "only_dicts_comments_above.yaml",
@@ -710,6 +752,7 @@ class TestIntegration:
                         "list1": ["item1", "item2", "item3"],
                         "list2": [
                             {
+                                f"{PREFIX}subitem1": "Comment for subitem1.\n",
                                 "subitem1": {
                                     f"{PREFIX}subkey1": "[mm].\n",
                                     "subkey1": "subvalue1",
@@ -731,6 +774,7 @@ class TestIntegration:
                         "list1": ["item1", "item2", "item3"],
                         "list2": [
                             {
+                                f"{PREFIX}subitem1": "Comment for subitem1.\n",
                                 "subitem1": {
                                     f"{PREFIX}subkey1": "Comment for subkey1.\n\n[mm].\n",
                                     "subkey1": "subvalue1",
@@ -743,6 +787,26 @@ class TestIntegration:
                 },
             ),
             (
+                "list_yaml_comments_above_and_side.yaml",
+                "above",
+                [
+                    {
+                        f"{PREFIX}names": "First comment.\n",
+                        "names": [{"name": "Juan", "age": 18}, {"name": "Juan", "age": 18}],
+                    }
+                ],
+            ),
+            (
+                "list_yaml_comments_above_and_side.yaml",
+                ["above", "side"],
+                [
+                    {
+                        f"{PREFIX}names": "First comment.\n\nSide comment.\n",
+                        "names": [{"name": "Juan", "age": 18}, {"name": "Juan", "age": 18}],
+                    }
+                ],
+            ),
+            (
                 "full_yaml_comments_above_and_side.yaml",
                 ["side", "above"],
                 {
@@ -752,6 +816,7 @@ class TestIntegration:
                         "list1": ["item1", "item2", "item3"],
                         "list2": [
                             {
+                                f"{PREFIX}subitem1": "Comment for subitem1.\n",
                                 "subitem1": {
                                     f"{PREFIX}subkey1": "[mm].\n\nComment for subkey1.\n",
                                     "subkey1": "subvalue1",
@@ -766,15 +831,23 @@ class TestIntegration:
         ],
     )
     def test_method(
-        self, file: str, comments_are: YAML_COMMENTS_POSITION, dict_to_be_created: Mapping[str, object]
+        self,
+        file: str,
+        comments_are: YAML_COMMENTS_POSITION,
+        object_to_be_created: Union[Mapping[str, object], Sequence[object]],
     ) -> None:
         data_file_modifier = YamlFileModifier(TEST_FILES_DIR / file, comments_are=comments_are)
         path = data_file_modifier.create_temporary_file_with_comments_as_keys()
-        assert dict_to_be_created == self.read_yaml(path)
+        assert object_to_be_created == self.read_yaml(path)
 
-    def read_yaml(self, path: Union[Path, str]) -> Mapping[str, object]:
+    def read_yaml(self, path: Union[Path, str]) -> Union[Mapping[str, object], Sequence[object]]:
         with open(path) as f:
             try:
-                return dict(yaml.load(f, Loader=yaml.SafeLoader))
+                content = yaml.load(f, Loader=yaml.SafeLoader)
             except ParserError as error:
                 pytest.fail(f"Generated yaml file cannot be read: {error}")
+            if isinstance(content, dict):
+                return dict(content)
+            elif isinstance(content, (tuple, list)):
+                return list(content)
+            raise ValueError("Non recognized format.")

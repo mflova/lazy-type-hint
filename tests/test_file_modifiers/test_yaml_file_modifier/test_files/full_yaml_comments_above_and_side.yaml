@@ -7,8 +7,8 @@ level1:
     - item2
     - item3
   list2:
-    # Comment for subitem1
-    - subitem1:  # This one cannot be read [mm]
+    # Non valid comment for subitem1
+    - subitem1:  # Comment for subitem1
         # Comment for subkey1
         subkey1: subvalue1  # [mm]
       # Comment not valid for subkey1

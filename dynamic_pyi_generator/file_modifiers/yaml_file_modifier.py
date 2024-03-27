@@ -30,6 +30,16 @@ class Comment:
     associated_with_key: str
     key_line: int
     spacing_element: Tuple[Literal["spaces", "tabs", "none"], int]
+    must_replace_its_key_as_first_element_of_list: bool = False
+
+    @property
+    def spacing(self) -> str:
+        spacing_element = "\t" if self.spacing_element[0] == "tabs" else " "
+        lst: List[str] = [spacing_element] * self.spacing_element[1]
+        if self.must_replace_its_key_as_first_element_of_list:
+            lst[-2] = "-"
+            return "".join(lst)
+        return "".join(lst)
 
 
 class YamlFileModifierError(Exception): ...
@@ -333,6 +343,7 @@ class YamlFileModifier:
                         comment = self._capitalize_only_first_letter(comment)
                     elif comments_are == "side":
                         comment = self._extract_side_comment(line)
+                    is_key_first_element_within_list = line_with_no_spacing[0] == "-"
 
                     if not comment:
                         continue
@@ -343,6 +354,7 @@ class YamlFileModifier:
                             key_line=idx,
                             spacing_element=(indentation, spaces_or_tabs),
                             associated_with_key=key,
+                            must_replace_its_key_as_first_element_of_list=is_key_first_element_within_list,
                         )
                     )
 
@@ -383,6 +395,9 @@ class YamlFileModifier:
                     key_line=comments_lst[0].key_line,
                     associated_with_key=comments_lst[0].associated_with_key,
                     spacing_element=comments_lst[0].spacing_element,
+                    must_replace_its_key_as_first_element_of_list=any(
+                        comment.must_replace_its_key_as_first_element_of_list for comment in comments_lst
+                    ),
                 )
             )
         return tuple(merged_comments)
@@ -394,11 +409,9 @@ class YamlFileModifier:
         new_lines = list(self.lines).copy()
         for comment in reverse_order_comments:
             key = self.preffix + comment.associated_with_key
-            indentation = "\t" if comment.spacing_element[0] == "tabs" else " "
-            string = (
-                f"{indentation*comment.spacing_element[1]}{key}: |{self._format_comment_as_multiline_yaml(comment)}"
-            )
-            # TODO Add 1 or not?
+            string = f"{comment.spacing}{key}: |{self._format_comment_as_multiline_yaml(comment)}"
+            if comment.must_replace_its_key_as_first_element_of_list:
+                new_lines[comment.key_line] = new_lines[comment.key_line].replace("-", " ", 1)
             new_lines.insert(comment.key_line, string)
         return "\n".join(new_lines)
 
