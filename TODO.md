@@ -3,9 +3,24 @@
 
 
 TODO:
-- Test: Check that the `input_data` is not modified by any mean
+- Fix: modified input data
+- Rename strategies to be easier to understand
 - Include some kind of pytest coverage.
 - Allow similarity dict merges with dictionaries having different value types
+- Fix case where: 
+            class AdultDictKidsDict(TypedDict):
+                name: str
+                age: int
+                toys: List[str]
+
+            AdultDictKids = List[AdultDictKidsDict]
+
+            class AdultDict(TypedDict):
+                name: str
+                age: int
+                kids: NotRequired[AdultDictKids]  # Cannot manage to not create a type alias here
+
+            Adult = List[AdultDict]
 
 
 Backlog:

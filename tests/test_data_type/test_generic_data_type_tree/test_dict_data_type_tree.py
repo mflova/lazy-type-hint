@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import (
     Any,
     Callable,
@@ -5,6 +6,7 @@ from typing import (
     Final,
     Hashable,
     Iterable,
+    List,
     Mapping,
     Sequence,
     Set,
@@ -566,6 +568,22 @@ class TestKeyDocstring:
     ) -> None:
         tree = DictDataTypeTree(data, name="Example", strategies=ParsingStrategies(dict_strategy="TypedDict"))
         assert should_be_functional_syntax == tree.dict_metadata.is_functional_syntax
+
+
+class TestOriginalDataNotMutated:
+    @pytest.mark.parametrize(
+        "input_data",
+        [
+            [{"name": "Manu"}, {"name": "Joan", "age": 22}],
+            [{"name": "Manu"}, {}],
+        ],
+    )
+    def test_mutation(self, input_data: List[Dict[Hashable, object]]) -> None:
+        input_data_before = deepcopy(input_data)
+        data_type_tree_factory(
+            input_data, strategies=ParsingStrategies(merge_different_typed_dicts_if_similarity_above=1), name="Example"
+        )
+        assert input_data_before == input_data
 
 
 class TestDictMetadata:

@@ -30,3 +30,5 @@ class ParsingStrategies:
 
         if self.merge_different_typed_dicts_if_similarity_above <= 0:
             raise ValueError("`merge_typed_dicts_if_similarity_above` must be greater than 0")
+        if self.merge_different_typed_dicts_if_similarity_above > 100:
+            raise ValueError("`merge_typed_dicts_if_similarity_above` must be less than 100")

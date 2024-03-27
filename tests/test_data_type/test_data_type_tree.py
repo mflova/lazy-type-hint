@@ -1,14 +1,15 @@
 import itertools
 import subprocess
 from collections import defaultdict
+from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import (
     Callable,
-    Final,
     Iterable,
     List,
     Mapping,
+    Optional,
     Set,
     get_args,
     get_type_hints,
@@ -34,7 +35,12 @@ class StrategiesTesting(ParsingStrategies):
         # Generate all combinations of values
         for combination in itertools.product(*input_dict.values()):
             for height in range(0, 5):
-                yield cls(*combination, min_height_to_define_type_alias=height)  # type: ignore
+                for merge_different_typed_dicts_if_similarity_above in range(25, 101, 25):
+                    yield cls(  # type: ignore[misc]
+                        *combination,
+                        min_height_to_define_type_alias=height,
+                        merge_different_typed_dicts_if_similarity_above=merge_different_typed_dicts_if_similarity_above,
+                    )
 
 
 @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
@@ -54,9 +60,6 @@ def test_all_childs_share(create_sample: Callable[[str], str], strategies: Parsi
 
 
 class TestIntegration:
-    test_files: Final = ("dictionary.py", "list.py", "set.py")
-    test_files_dir: Final = Path(__file__).parent / "test_files"
-
     @pytest.mark.skipif(
         not check_if_command_available("python"), reason="Python must be available within the terminal."
     )
@@ -66,6 +69,10 @@ class TestIntegration:
         self, strategies: ParsingStrategies, create_sample: Callable[[str], str], data_type: str, tmp_path: str
     ) -> None:
         data = create_sample(data_type)
+        try:
+            data_before: Optional[object] = deepcopy(data)
+        except TypeError:
+            data_before = None
         string = str(
             data_type_tree_factory(data, name="Example", strategies=strategies)._get_strs_all_nodes_unformatted(
                 include_imports=True
@@ -78,6 +85,13 @@ class TestIntegration:
         self.assert_basic_format(string)
         self.assert_no_broken_string_representation(string, tmp_path=tmp_path)
         self.assert_python_38_compatible(string)
+        if data_before is not None:
+            self.assert_input_object_is_not_modified(data_before, data)
+
+    @staticmethod
+    def assert_input_object_is_not_modified(data_before: object, data_after: object) -> None:
+        print(data_before)
+        assert str(data_before) == str(data_after)
 
     @staticmethod
     def assert_python_38_compatible(string: str) -> None:

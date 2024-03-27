@@ -42,7 +42,8 @@ class Comment:
         return "".join(lst)
 
 
-class YamlFileModifierError(Exception): ...
+class YamlFileModifierError(Exception):
+    ...
 
 
 class YamlFileModifier:
