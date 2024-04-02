@@ -1,9 +1,13 @@
 from types import MappingProxyType
-from typing import Any, Callable, Literal, Mapping, cast
+from typing import Any, Callable, List, Literal, Mapping, cast
 
 import pytest
 
 SAMPLE_TYPE = Literal["frozenset", "set", "list", "tuple", "dictionary", "mapping"]
+
+
+def random_func(a: int, b: Mapping[str, str]) -> List[bool]:  # type: ignore  # noqa: ARG001
+    ...
 
 
 samples: Mapping[SAMPLE_TYPE, Any] = {
@@ -26,6 +30,8 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
                 ],
             ],
             ("another", "tuple", [15, 16, 17]),
+            ("function", lambda x: None),  # noqa: ARG005
+            ("function2", random_func),
         ],
     ],
     "set": {
@@ -47,6 +53,8 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
         "tuple": (4, 5, 6),
         "set": {7, 8, 9},
         "dictionary": {"key": "value"},
+        "function": lambda x: None,  # noqa: ARG005
+        "function2": random_func,
         "none": None,
         "nested_levels": {
             "level_1": {

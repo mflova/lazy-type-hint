@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Set
 
 import pytest
 
@@ -37,6 +37,32 @@ class TestFormatSinglePackage:
         formatted_imports = import_manager._format_single_package("typing", ["List", "Tuple", "Dict"], line_length=30)
         expected_output = f"from typing import (\n{TAB}Dict,\n{TAB}List,\n{TAB}Tuple,\n)"
         assert formatted_imports == expected_output
+
+
+class TestAllUnknownSymbolsFromSignature:
+    @pytest.mark.parametrize(
+        "signature, expected_imports",
+        [
+            ("", set()),
+            ("def (a: float):", set()),
+            ("def (a: float, b: float):", set()),
+            ("def (a: float, /, b: float):", set()),
+            ("def (a: float, *, b: float):", set()),
+            ("def (a: Sequence[int]):", {"Sequence"}),
+            ("def (a: Sequence[int]) -> int:", {"Sequence"}),
+            ("def (a: Sequence[int]) -> Tuple[int, ...]:", {"Sequence", "tuple"}),
+        ],
+    )
+    def test_import_all_unknown_symbols_from_signature(
+        self, import_manager: ImportManager, signature: str, expected_imports: Set[str]
+    ) -> None:
+        import_manager.import_all_unkown_symbols_from_signature(signature=signature)
+        assert expected_imports == import_manager._set
+
+    def test_import_manager_format_no_imports(self, import_manager: ImportManager) -> None:
+        formatted_imports = import_manager.format(line_length=80)
+        expected_output = ""
+        assert expected_output == formatted_imports
 
 
 class TestFormat:

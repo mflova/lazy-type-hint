@@ -20,7 +20,7 @@ class TestGetStrPy:
             [6.7, f"{NAME} = float"],
         ],
     )
-    def test_get_str_py(self, data: object, expected_str: str) -> None:
+    def test_get_str_top_node(self, data: object, expected_str: str) -> None:
         data_type_tree = SimpleDataTypeTree(data, self.NAME)
         assert expected_str == data_type_tree.get_str_top_node()
 
@@ -49,5 +49,7 @@ class TestHash:
             [SimpleDataTypeTree(5.2, name="Data1"), SimpleDataTypeTree("str", name="Data2"), False],
         ],
     )
-    def test_get_str_py(self, tree1: SimpleDataTypeTree, tree2: SimpleDataTypeTree, expected_output: bool) -> None:
+    def test_get_str_top_node(
+        self, tree1: SimpleDataTypeTree, tree2: SimpleDataTypeTree, expected_output: bool
+    ) -> None:
         assert expected_output == (hash(tree1) == hash(tree2))

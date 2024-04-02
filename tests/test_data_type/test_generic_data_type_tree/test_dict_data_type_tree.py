@@ -111,7 +111,7 @@ class TestGetStrPy:
         assert_imports: Callable[[DictDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
-        Test the `get_str_py` method of the `DictDataTypeTree` class.
+        Test the `get_str_top_node` method of the `DictDataTypeTree` class.
 
         Args:
             tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.
@@ -181,7 +181,7 @@ class TestGetStrPy:
         assert_imports: Callable[[DictDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
-        Test the `get_str_py` method of the `DictDataTypeTree` class.
+        Test the `get_str_top_node` method of the `DictDataTypeTree` class.
 
         Args:
             tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.
@@ -225,13 +225,13 @@ class TestGetStrHeight:
             ),
         ],
     )
-    def test_get_str_py_based_on_height(
+    def test_get_str_top_node_based_on_height(
         self,
         tree: DictDataTypeTree,
         expected_output: str,
     ) -> None:
         """
-        Test the `get_str_py` method of the `DictDataTypeTree` class.
+        Test the `get_str_top_node` method of the `DictDataTypeTree` class.
 
         Args:
             tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.

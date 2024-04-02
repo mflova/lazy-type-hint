@@ -77,7 +77,6 @@ class TestIntegration:
             include_imports=True
         )
 
-        print(string)
         self.assert_no_unused_classes(string)
         self.assert_no_redefined_classes(string)
         self.assert_no_double_whitespace(string)
@@ -196,6 +195,9 @@ class TestHash:
             ({"age1": 21, "age2": 16}, {"age2": 22, "age3": 21}, ParsingStrategies(dict_strategy="TypedDict"), False),
             ({"age1": 21, "age2": 16}, {"age1": 22, "age2": 21}, ParsingStrategies(dict_strategy="TypedDict"), True),
             ({"age1": 21, "age2": 16}, {"age1": 22, "age2": "a"}, ParsingStrategies(dict_strategy="TypedDict"), False),
+            # Functions
+            ({lambda x: print("Hi")}, {lambda y: None}, ParsingStrategies(), True),  # noqa: ARG005
+            ({lambda x: print("Hi")}, {lambda y: None, lambda x: None}, ParsingStrategies(), True),  # noqa: ARG005
         ],
     )
     # fmt: on

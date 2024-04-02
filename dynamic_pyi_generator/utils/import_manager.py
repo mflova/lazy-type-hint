@@ -1,6 +1,9 @@
+import re
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, Final, List, Literal, Mapping, Sequence, Set, Tuple
+from typing import TYPE_CHECKING, Dict, Final, List, Literal, Mapping, Optional, Sequence, Set, Tuple
+
+from typing_extensions import TypeGuard
 
 from dynamic_pyi_generator.utils.utils import TAB
 
@@ -22,6 +25,8 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "Optional",
     "NotRequired",
     "ReadOnly",
+    "Callable",
+    "Protocol",
 ]
 
 
@@ -46,12 +51,50 @@ class ImportManager:
             "Optional": ("typing", "Optional"),
             "NotRequired": ("typing_extensions", "NotRequired"),
             "ReadOnly": ("typing_extensions", "ReadOnly"),
+            "Callable": ("typing", "Callable"),
+            "Protocol": ("typing", "Protocol"),
         }
     )
 
     def add(self, keyword: KEYWORDS_AVAILABLE) -> "Self":
         self._set.add(keyword)
         return self
+
+    def import_all_unkown_symbols_from_signature(self, signature: str) -> None:
+        """
+        Imports all unknown symbols from the given signature.
+
+        Args:
+            signature (str): The signature containing type hints.
+        """
+        hints = re.findall(r":\s*([^\s,]+)", signature)
+        for hint in hints:
+            hint_ = str(hint).strip().rstrip().replace("):", "")
+            self._import_symbols(hint_)
+
+        pattern = r"->\s*([^\s,]+|$)"
+        re_output = re.search(pattern, signature)
+        return_value: Optional[str] = None
+        if re_output:
+            return_value = re_output.group(1).rstrip(":")
+            self._import_symbols(return_value)
+
+    def _import_symbols(self, symbol: str) -> None:
+        """Import all unknown symbols. Including those belonging to generic type hints."""
+        symbols = re.findall(r"\b\w+\b", symbol)
+        for symbol in symbols:
+            symbol = self._cast_symbol(symbol)
+            if self._is_importable_symbol(symbol):
+                self.add(symbol)
+
+    @staticmethod
+    def _cast_symbol(symbol: str) -> str:
+        if symbol in ("List", "Tuple", "Set", "Dict"):
+            return symbol.lower()
+        return symbol
+
+    def _is_importable_symbol(self, symbol: str) -> TypeGuard[KEYWORDS_AVAILABLE]:
+        return symbol in self.PACKAGE
 
     def format(self, *, line_length: int = 90) -> str:
         import_statements: Dict[str, List[str]] = defaultdict(list)
@@ -61,7 +104,7 @@ class ImportManager:
             except KeyError as error:
                 raise ValueError(
                     f"The given keyword `{keyword}` could not be located among the available imports: "
-                    f"{''.join(self.PACKAGE.keys())}"
+                    f"{', '.join(self.PACKAGE.keys())}"
                 ) from error
             import_statements[".".join(reference[:-1])].append(reference[-1])
 
@@ -77,3 +120,6 @@ class ImportManager:
             string = self.TEMPLATE.format(package=package, name=f"(\n{TAB}{name}")
             string += ",\n)"
         return string
+
+    def __contains__(self, element: object) -> bool:
+        return element in self._set

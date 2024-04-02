@@ -36,7 +36,7 @@ class TestGetStrPy:
         ],
     )
     # fmt: on
-    def test_get_str_py(
+    def test_get_str_top_node(
         self,
         data: List[Any],
         strategies: ParsingStrategies,
@@ -45,7 +45,7 @@ class TestGetStrPy:
         assert_imports: Callable[[ListDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
-        Test the `get_str_py` method of the `ListDataTypeTree` class.
+        Test the `get_str_top_node` method of the `ListDataTypeTree` class.
 
         Args:
             data (List[Any]): The input data for the test.
@@ -96,7 +96,7 @@ class TestTypeAliasHeight:
         min_height: int,  # noqa: ARG002
     ) -> None:
         """
-        Test the `get_str_py` method of the `ListDataTypeTree` class.
+        Test the `get_str_top_node` method of the `ListDataTypeTree` class.
 
         Args:
             data (List[Any]): The input data for the test.

@@ -57,6 +57,7 @@ fixture-parentheses = false
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["E501"]
+"tests/**/test_func_data_type_tree.py" = ["ARG005", "ARG001"]
 
 [tool.pytest.ini_options]
 addopts = "-n auto"

@@ -55,7 +55,7 @@ class TestGetStrPy:
         ],
     )
     # fmt: on
-    def test_get_str_py(
+    def test_get_str_top_node(
         self,
         data: Mapping[Any, Any],
         expected_output: str,
@@ -64,7 +64,7 @@ class TestGetStrPy:
         assert_imports: Callable[[MappingDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
-        Test the `get_str_py` method of the `DictDataTypeTree` class.
+        Test the `get_str_top_node` method of the `DictDataTypeTree` class.
 
         Args:
             data (Mapping[Any, Any]): The input data for the test.
@@ -102,7 +102,7 @@ class TestGetAliasHeight:
     # fmt: on
     def test_type_alias_based_on_height(self, data: Mapping[Any, Any], expected_output: str, min_height: int) -> None:
         """
-        Test the `get_str_py` method of the `DictDataTypeTree` class.
+        Test the `get_str_top_node` method of the `DictDataTypeTree` class.
 
         Args:
             data (Mapping[Any, Any]): The input data for the test.

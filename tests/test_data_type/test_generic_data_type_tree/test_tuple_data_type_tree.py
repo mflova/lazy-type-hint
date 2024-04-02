@@ -40,7 +40,7 @@ class TestGetStrPy:
             (TupleDataTypeTree((), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Any, ...]", 0),
         ],
     )
-    def test_get_str_py(
+    def test_get_str_top_node(
         self,
         tree: TupleDataTypeTree,
         expected_output: str,
@@ -48,7 +48,7 @@ class TestGetStrPy:
         assert_imports: Callable[[TupleDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
-        Test the `get_str_py` method of the `TupleDataTypeTree` class.
+        Test the `get_str_top_node` method of the `TupleDataTypeTree` class.
 
         Args:
             tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.
@@ -94,11 +94,11 @@ class TestGetAliasHeight:
             expected_str: str,
         ) -> None:
             """
-            Test the `get_str_py` method of the `TupleDataTypeTree` class.
+            Test the `get_str_top_node` method of the `TupleDataTypeTree` class.
 
             Args:
                 tree (TupleDataTypeTree): An instance of the `TupleDataTypeTree` class.
                 expected_str (str): The expected output string.
             """
-            # Reminder: `get_str_py` does not work in a recursive manner
+            # Reminder: `get_str_top_node` does not work in a recursive manner
             assert expected_str == tree.get_str_top_node()
