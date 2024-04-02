@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, overload
 
-from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree, DataTypeTreeError
+from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
 from dynamic_pyi_generator.strategies import ParsingStrategies
 
 if TYPE_CHECKING:
@@ -141,12 +141,6 @@ def data_type_tree_factory(
     strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
     parent: "Optional[DataTypeTree]" = None,
 ) -> DataTypeTree:
-    try:
-        return DataTypeTree.subclasses[type(data)](
-            data=data, name=name, imports=imports, depth=depth, strategies=strategies, parent=parent
-        )
-    except KeyError as error:
-        raise DataTypeTreeError(
-            f"There is no {DataTypeTree.__name__} representation implemented for the given data type: "
-            f"{type(data).__name__}"
-        ) from error
+    return DataTypeTree.get_subclass(data)(
+        data=data, name=name, imports=imports, depth=depth, strategies=strategies, parent=parent
+    )

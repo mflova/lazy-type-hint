@@ -17,7 +17,7 @@ from dynamic_pyi_generator.data_type_tree.data_type_tree import ChildStructure, 
 
 
 class GenericDataTypeTree(DataTypeTree):
-    """Tree that holds any kind of object that must contain other inner structures."""
+    """Tree that holds any kind of object that must contain other inner structures (childs)."""
 
     childs: ChildStructure[DataTypeTree]
 

@@ -12,11 +12,12 @@ if TYPE_CHECKING:
 
 KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "list",
-    "Sequence",
-    "tuple",
     "set",
-    "FrozenSet",
+    "tuple",
     "dict",
+    "type",
+    "Sequence",
+    "FrozenSet",
     "Mapping",
     "MappingProxyType",
     "TypedDict",
@@ -38,11 +39,12 @@ class ImportManager:
     PACKAGE: Mapping[KEYWORDS_AVAILABLE, Tuple[str, ...]] = field(
         default_factory=lambda: {
             "list": ("typing", "List"),
-            "Sequence": ("typing", "Sequence"),
-            "tuple": ("typing", "Tuple"),
             "set": ("typing", "Set"),
-            "FrozenSet": ("typing", "FrozenSet"),
+            "tuple": ("typing", "Tuple"),
+            "type": ("typing", "Type"),
             "dict": ("typing", "Dict"),
+            "Sequence": ("typing", "Sequence"),
+            "FrozenSet": ("typing", "FrozenSet"),
             "Mapping": ("typing", "Mapping"),
             "MappingProxyType": ("types", "MappingProxyType"),
             "TypedDict": ("typing", "TypedDict"),

@@ -12,7 +12,7 @@ from dynamic_pyi_generator.utils import TAB
 
 
 class FunctionDataTypeTree(SimpleDataTypeTree):
-    wraps = (FunctionType, staticmethod, classmethod)  # type: ignore
+    wraps = (FunctionType, staticmethod, classmethod)
     data: Callable[[Any], Any]
 
     @property

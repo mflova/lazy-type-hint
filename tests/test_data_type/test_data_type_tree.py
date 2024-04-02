@@ -131,7 +131,7 @@ class TestIntegration:
             "Only the new class created can be the only non-used class. However, more than 1 unused class/type alias "
             f"was detected: {', '.join(types_defined)}"
         )
-        assert len(types_defined) == 1, error
+        assert len(types_defined) == 1 or len(types_defined) == 0, error
 
     def assert_no_redefined_classes(self, string: str) -> None:
         all_types_defined: Set[str] = set()

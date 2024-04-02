@@ -87,13 +87,8 @@ class DataTypeTree(ABC):
     ) -> None:
         # Validation
         self._validate_name(name)
-        wraps = self.wraps if isinstance(self.wraps, Iterable) else [self.wraps]
-        if type(data) not in wraps:
-            wraps_str = [element.__name__ for element in wraps]
-            raise DataTypeTreeError(
-                f"The given parser is meant to parse `{', '.join(wraps_str)}` data type but "
-                f"{type(data).__name__} was given"
-            )
+        self._check_tree_is_correct_one(data)
+
         self.data = data
         self.name = name
         self.holding_type = type(data)
@@ -105,6 +100,22 @@ class DataTypeTree(ABC):
         self.childs = self._instantiate_childs(data)
         self.height = self._get_height()
         self.__post_child_instantiation__()
+
+    @classmethod
+    def get_subclass(cls, data: object) -> Type[DataTypeTree]:
+        try:
+            return DataTypeTree.subclasses[type(data)]
+        except KeyError:
+            return DataTypeTree.subclasses[int]  # For instances created from any custom class.
+
+    def _check_tree_is_correct_one(self, data: object) -> None:
+        wraps = self.wraps if isinstance(self.wraps, Iterable) else [self.wraps]
+        if type(data) not in wraps:
+            wraps_str = [element.__name__ for element in wraps]
+            raise DataTypeTreeError(
+                f"The given parser ({type(self).__name__}) is meant to parse `{', '.join(wraps_str)}` data type but "
+                f"{type(data).__name__} was given"
+            )
 
     def __pre_child_instantiation__(self) -> None:
         ...

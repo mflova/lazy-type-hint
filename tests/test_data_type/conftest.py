@@ -10,10 +10,15 @@ def random_func(a: int, b: Mapping[str, str]) -> List[bool]:  # type: ignore  # 
     ...
 
 
+class DummyClass:
+    def __eq__(self, other: object) -> bool:
+        return True
+
+
 samples: Mapping[SAMPLE_TYPE, Any] = {
     "list": [
         42,
-        (3.14, "pi", {"key": "value"}),
+        (3.14, int, "pi", {"key": "value", "class": DummyClass}),
         (1, 2, 3, ("nested", "tuple", [4, 5, 6])),
         [
             {"nested_dict_1": ["a", "b", "c"], "nested_set_1": {7, 8, 9}},
@@ -32,6 +37,7 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
             ("another", "tuple", [15, 16, 17]),
             ("function", lambda x: None),  # noqa: ARG005
             ("function2", random_func),
+            ("dummy_class", DummyClass()),
         ],
     ],
     "set": {
@@ -48,6 +54,7 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
         "integer": 42,
         "float": 3.14,
         "string": "Hello, world!",
+        "a": float,
         "boolean": True,
         "list": [1, 2, 3],
         "tuple": (4, 5, 6),
@@ -55,6 +62,8 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
         "dictionary": {"key": "value"},
         "function": lambda x: None,  # noqa: ARG005
         "function2": random_func,
+        "class": DummyClass,
+        "instance": DummyClass(),
         "none": None,
         "nested_levels": {
             "level_1": {
