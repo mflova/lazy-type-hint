@@ -1,4 +1,4 @@
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
 from contextlib import suppress
 
 dct = {
@@ -7,6 +7,6 @@ dct = {
     "nested_dict": {"key1": "value1", "key2": "value2"},
 }
 
-data = PyiGenerator().from_data(dct, class_name="Example")
+data = LazyTypeHint().from_data(dct, class_name="Example")
 with suppress(KeyError):
     data["new_key"]  # Mypy should raise error here

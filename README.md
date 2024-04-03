@@ -1,5 +1,5 @@
-# dynamic_pyi_generator
-Work in progress tool that generates corresponding .pyi files in the fly from JSON, YAML...
+# LazyTypeHint
+Work in progress.
 
 ## Features
 

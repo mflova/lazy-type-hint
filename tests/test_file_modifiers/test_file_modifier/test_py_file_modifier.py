@@ -2,7 +2,7 @@ from typing import List, Tuple, Union
 
 import pytest
 
-from dynamic_pyi_generator.file_modifiers.py_file_modifier import PyFileModifier
+from lazy_type_hint.file_modifiers.py_file_modifier import PyFileModifier
 
 
 class TestPyFileModifier:
@@ -10,7 +10,7 @@ class TestPyFileModifier:
 
     @pytest.fixture
     def file_handler(self) -> PyFileModifier:
-        representation = """class PyiGenerator:
+        representation = """class LazyTypeHint:
 loader_pyi: str
 classes_created: "TypeAlias" = Any
 custom_class_dir: Final = "build"
@@ -31,7 +31,7 @@ def get_classes_added(self) -> Set[str]:
         if "classes_created" in line:
             break
     else:
-        raise PyiGeneratorError(f"No `{to_find}` was found in this file.")
+        raise LazyTypeHintError(f"No `{to_find}` was found in this file.")
 
     value = line.split("=")[-1].strip()
     if value == "Any":
@@ -49,7 +49,7 @@ def _find_line_idx(string: str, *, keyword: str) -> int:
     for idx, line in enumerate(string.splitlines()):
         if keyword in line and "test" not in line and "@overload" not in line:
             return idx
-    raise PyiGeneratorError(
+    raise LazyTypeHintError(
         f"It was not possible to find {keyword} among the lines of the given string."
     )
     
@@ -284,7 +284,7 @@ def method2(value: int):
 
 def _method2(value: int):...
 
-class PyiGenerator:
+class LazyTypeHint:
 
     @overload
     def _method3(self, a: int) -> None: 
@@ -315,7 +315,7 @@ def method2(value: int):...
 
 def _method2(value: int):...
 
-class PyiGenerator:
+class LazyTypeHint:
 
     @overload
     def _method3(self, a: int) -> None:...
@@ -342,7 +342,7 @@ def method1():
 def method2(value: int):
     return 2+2
 
-class PyiGenerator:
+class LazyTypeHint:
 
     @overload
     def method3(self):

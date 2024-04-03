@@ -2,8 +2,8 @@ from typing import Any, Callable, Final, Iterable, Set
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree.generic_type import SetDataTypeTree
-from dynamic_pyi_generator.strategies import ParsingStrategies
+from lazy_type_hint.data_type_tree.generic_type import SetDataTypeTree
+from lazy_type_hint.strategies import ParsingStrategies
 
 
 class TestGetStrPy:
@@ -14,7 +14,7 @@ class TestGetStrPy:
 
     # fmt: off
     @pytest.mark.parametrize(
-        "tree, expected_output, expected_n_childs",
+        "tree, expected_output, expected_n_children",
         [
             (SetDataTypeTree({1}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[int]", 1),
             (SetDataTypeTree({1, 2}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)), f"{NAME} = Set[int]", 1),
@@ -41,7 +41,7 @@ class TestGetStrPy:
         self,
         tree: SetDataTypeTree,
         expected_output: str,
-        expected_n_childs: int,
+        expected_n_children: int,
         assert_imports: Callable[[SetDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
@@ -50,10 +50,10 @@ class TestGetStrPy:
         Args:
             tree (SetDataTypeTree): An instance of the `SetDataTypeTree` class.
             expected_output (str): The expected output string.
-            expected_n_childs (int): The expected number of child nodes in the tree.
+            expected_n_children (int): The expected number of child nodes in the tree.
             assert_imports (Callable[[SetDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
         """
-        assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
+        assert expected_n_children == len(tree), "Not all children were correctly parsed"
         assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 

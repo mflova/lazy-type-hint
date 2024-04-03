@@ -2,8 +2,8 @@ from typing import Final, List, Sequence
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree.simple_data_type_tree.function_data_type_tree import FunctionDataTypeTree
-from dynamic_pyi_generator.utils import TAB
+from lazy_type_hint.data_type_tree.simple_data_type_tree.function_data_type_tree import FunctionDataTypeTree
+from lazy_type_hint.utils import TAB
 
 
 class TestLambda:

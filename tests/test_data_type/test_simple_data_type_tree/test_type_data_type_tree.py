@@ -2,7 +2,7 @@ from typing import Any, Final
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree.simple_data_type_tree.type_data_type_tree import TypeDataTypeTree
+from lazy_type_hint.data_type_tree.simple_data_type_tree.type_data_type_tree import TypeDataTypeTree
 
 
 class DummyClass:

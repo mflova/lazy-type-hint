@@ -1,4 +1,4 @@
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
 
 lst = [
     {
@@ -13,7 +13,7 @@ lst = [
     },
 ]
 
-data = PyiGenerator().from_data(lst, class_name="Example")
+data = LazyTypeHint().from_data(lst, class_name="Example")
 data[0]["list"]
 data[0]["int"]
 data[0]["nested_dict"]

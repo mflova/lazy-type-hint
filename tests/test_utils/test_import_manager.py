@@ -2,8 +2,8 @@ from typing import Any, Set
 
 import pytest
 
-from dynamic_pyi_generator.utils import TAB
-from dynamic_pyi_generator.utils.import_manager import ImportManager
+from lazy_type_hint.utils import TAB
+from lazy_type_hint.utils.import_manager import ImportManager
 
 
 @pytest.fixture

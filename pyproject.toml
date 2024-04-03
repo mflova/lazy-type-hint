@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "dynamic-pyi-generator"
+name = "lazy-type-hint"
 version = "0.1.0"
 description = ""
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
-packages = [{include = "dynamic_pyi_generator"}]
+packages = [{include = "lazy_type_hint"}]
 
 [tool.poetry.dependencies]
 python = "^3.8, <=3.12"
@@ -30,7 +30,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 120
 target-version = ["py38"]
-include = 'dynamic_pyi_generator/.*\.py$|tests/.*\.py$|check_code\.py$'
+include = 'lazy_type_hint/.*\.py$|tests/.*\.py$|check_code\.py$'
 force_exclude = """test_files/"""
 exclude = """test_files/"""
 
@@ -58,6 +58,9 @@ fixture-parentheses = false
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["E501"]
 "tests/**/test_func_data_type_tree.py" = ["ARG005", "ARG001"]
+
+[tool.codespell]
+ignore-words-list = "bu"  # Comma separated
 
 [tool.pytest.ini_options]
 addopts = "-n auto"

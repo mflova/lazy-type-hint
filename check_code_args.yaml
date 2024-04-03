@@ -10,7 +10,7 @@
 #   contains any of these strings.
 
 - tool: codespell
-  path: tests dynamic_pyi_generator
+  path: tests lazy_type_hint
   tool_desc: Check for typos
   suggestions: Fix typos found by the tool
 

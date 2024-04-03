@@ -1,4 +1,4 @@
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
 from contextlib import suppress
 
 lst = [
@@ -14,6 +14,6 @@ lst = [
     },
 ]
 
-data = PyiGenerator().from_data(lst, class_name="Example")
+data = LazyTypeHint().from_data(lst, class_name="Example")
 with suppress(KeyError):
     data[0]["number"]

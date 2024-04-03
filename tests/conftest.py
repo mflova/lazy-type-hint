@@ -6,8 +6,8 @@ import filelock
 import pytest
 from filelock import BaseFileLock
 
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
-from dynamic_pyi_generator.utils import Mypy
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
+from lazy_type_hint.utils import Mypy
 
 
 @pytest.fixture
@@ -28,6 +28,6 @@ def lock(tmp_path_factory: pytest.TempPathFactory) -> Any:
 def _serial(lock: BaseFileLock) -> Any:
     """Use this fixture to execute tests in a serial manner."""
     with lock.acquire(poll_interval=0.1):
-        PyiGenerator().reset()
+        LazyTypeHint().reset()
         yield
-        PyiGenerator().reset()
+        LazyTypeHint().reset()

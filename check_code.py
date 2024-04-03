@@ -212,8 +212,6 @@ def run_tool(
     Returns:
         bool: `True` if the tool succeeded.
     """
-    if path and not path.replace(" ", "").isalpha():
-        path = f'"{path}"'
     full_command = f"python3 -m poetry run {tool} {extra_args} {path}"
     process = subprocess.Popen(
         full_command,

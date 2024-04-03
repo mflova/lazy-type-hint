@@ -5,7 +5,7 @@ from typing import Final
 import pytest
 import yaml
 
-from dynamic_pyi_generator.data_type_tree import data_type_tree_factory
+from lazy_type_hint.data_type_tree import data_type_tree_factory
 
 
 class TestPerformance:

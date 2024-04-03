@@ -2,7 +2,7 @@ from typing import Callable, Iterable
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree.data_type_tree import DataTypeTree
+from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 
 
 @pytest.fixture

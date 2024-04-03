@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pytest
 
-from dynamic_pyi_generator.utils.docstring_formatter import _split_string, format_string_as_docstring
+from lazy_type_hint.utils.docstring_formatter import _split_string, format_string_as_docstring
 
 
 @pytest.mark.parametrize(

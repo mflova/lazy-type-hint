@@ -1,4 +1,4 @@
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
 from contextlib import suppress
 
 dct = {
@@ -7,6 +7,6 @@ dct = {
     "frozen_set": frozenset({1, 2, 3}),
 }
 
-data = PyiGenerator().from_data(dct, class_name="Example")
+data = LazyTypeHint().from_data(dct, class_name="Example")
 with suppress(AttributeError):
     data["frozen_set"].add([1, 2])

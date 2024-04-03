@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from dynamic_pyi_generator.utils import (
+from lazy_type_hint.utils import (
     cache_returned_value,
     compare_str_via_ast,
     is_string_python_keyword_compatible,
@@ -213,6 +213,7 @@ class MyClass(TypedDict):
         ("bu_ild", True),
         ("_build0", True),
         (".build", False),
+        # codespell-ignore-next
         ("bu.ild", False),
         ("bu ild", False),
         ("0build", False),

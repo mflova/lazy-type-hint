@@ -17,9 +17,9 @@ from typing import (
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree import DataTypeTree, data_type_tree_factory
-from dynamic_pyi_generator.strategies import ParsingStrategies
-from dynamic_pyi_generator.utils import TAB, check_if_command_available
+from lazy_type_hint.data_type_tree import DataTypeTree, data_type_tree_factory
+from lazy_type_hint.strategies import ParsingStrategies
+from lazy_type_hint.utils import TAB, check_if_command_available
 
 
 @dataclass(frozen=True)
@@ -45,7 +45,7 @@ class StrategiesTesting(ParsingStrategies):
 
 @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
 @pytest.mark.parametrize("to_check", ("imports", "strategies"))
-def test_all_childs_share(create_sample: Callable[[str], str], strategies: ParsingStrategies, to_check: str) -> None:
+def test_all_children_share(create_sample: Callable[[str], str], strategies: ParsingStrategies, to_check: str) -> None:
     data = create_sample("dictionary")
     tree = data_type_tree_factory(data, strategies=strategies, name="Example")
 
@@ -53,7 +53,7 @@ def test_all_childs_share(create_sample: Callable[[str], str], strategies: Parsi
 
     def check_objects_are_shared(tree: DataTypeTree) -> None:
         for child in tree:
-            assert id(parent_object) == id(getattr(child, to_check)), f"Not all childs are sharing same {to_check}"
+            assert id(parent_object) == id(getattr(child, to_check)), f"Not all children are sharing same {to_check}"
             check_objects_are_shared(child)
 
     check_objects_are_shared(tree)

@@ -1,4 +1,4 @@
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
 
 data = frozenset({1, 2, 3})
-data = PyiGenerator().from_data(data, class_name="Example")
+data = LazyTypeHint().from_data(data, class_name="Example")

@@ -1,4 +1,4 @@
-from dynamic_pyi_generator.pyi_generator import PyiGenerator
+from lazy_type_hint.lazy_type_hint import LazyTypeHint
 
 dct = {
     "list": [1, 2, 3],
@@ -6,6 +6,6 @@ dct = {
     "nested_lst": [1, 2, 3],
 }
 
-PyiGenerator().reset()
-data = PyiGenerator().from_data(dct, class_name="Example")
+LazyTypeHint().reset()
+data = LazyTypeHint().from_data(dct, class_name="Example")
 data["nested_lst"].append(["2"])

@@ -7,13 +7,13 @@ import pytest
 import yaml
 from yaml.parser import ParserError
 
-from dynamic_pyi_generator.file_modifiers.yaml_file_modifier import (
+from lazy_type_hint.file_modifiers.yaml_file_modifier import (
     YAML_COMMENTS_POSITION,
     Comment,
     YamlFileModifier,
     YamlFileModifierError,
 )
-from dynamic_pyi_generator.utils import TAB
+from lazy_type_hint.utils import TAB
 
 THIS_DIR: Final = Path(__file__).parent
 TEST_FILES_DIR: Final = THIS_DIR / "test_files"
@@ -79,9 +79,9 @@ class TestRemoveSpacing:
         assert expected_output == YamlFileModifier._remove_spacing(line)
 
 
-class TestFindFirstOccurenceThatIsNotBetween:
+class TestFindFirstOccurrenceThatIsNotBetween:
     @pytest.mark.parametrize(
-        "line, occurence, expected_output",
+        "line, occurrence, expected_output",
         [
             ("key: text", "j", None),
             ("key: text", " ", 4),
@@ -90,9 +90,9 @@ class TestFindFirstOccurenceThatIsNotBetween:
             ('key":" text:', ":", 11),
         ],
     )
-    def test_method(self, line: str, occurence: str, expected_output: Optional[int]) -> None:
-        assert expected_output == YamlFileModifier._find_first_occurence_that_is_not_between(
-            line, occurence=occurence, not_between=frozenset({"'", '"'})
+    def test_method(self, line: str, occurrence: str, expected_output: Optional[int]) -> None:
+        assert expected_output == YamlFileModifier._find_first_occurrence_that_is_not_between(
+            line, occurrence=occurrence, not_between=frozenset({"'", '"'})
         )
 
 
@@ -156,7 +156,7 @@ class TestCountSpacesOrTabs:
         ],
     )
     def test_method(self, line: str, expected_output: int, indentation: Literal["spaces", "tabs"]) -> None:
-        assert expected_output == YamlFileModifier._count_spaces_or_tabs_at_start(line, indendation=indentation)
+        assert expected_output == YamlFileModifier._count_spaces_or_tabs_at_start(line, indentation=indentation)
 
 
 class TestExtractSideComment:
@@ -680,7 +680,7 @@ class TestMergeComments:
 @pytest.mark.usefixtures("_serial")
 class TestIntegration:
     TEST_FILE: Final = TEST_FILES_DIR / "example.yaml"
-    PREFIX: Final = YamlFileModifier.preffix
+    PREFIX: Final = YamlFileModifier.prefix
 
     @pytest.mark.parametrize(
         "file, comments_are, object_to_be_created",

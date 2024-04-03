@@ -4,10 +4,8 @@
 
 TODO:
 - Cleanup: Create two main classes:
-  - `TypeHintGen`: One that returns a `Result` that has methods like:
-    - `as_str`
-    - `as_file`
-  - `TypeHintGenLive`: The current class
+  - `LazyTypeHint`: One that returns a `Result` that has methods like:
+  - `LazyTypeHintLive`
 
 - Tests with float and int. For example: 
   - is TypedDict similarity merge working with float vs int?

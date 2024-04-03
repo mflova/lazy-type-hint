@@ -2,8 +2,8 @@ from typing import Any, Callable, Final, Iterable, List
 
 import pytest
 
-from dynamic_pyi_generator.data_type_tree.generic_type import ListDataTypeTree
-from dynamic_pyi_generator.strategies import ParsingStrategies
+from lazy_type_hint.data_type_tree.generic_type import ListDataTypeTree
+from lazy_type_hint.strategies import ParsingStrategies
 
 
 class TestGetStrPy:
@@ -21,7 +21,7 @@ class TestGetStrPy:
         ],
     )
     @pytest.mark.parametrize(
-        "data, expected_output, expected_n_childs",
+        "data, expected_output, expected_n_children",
         [
             ([1], f"{NAME} = {{expected_container}}[int]", 1),
             ([1, 2], f"{NAME} = {{expected_container}}[int]", 1),
@@ -41,7 +41,7 @@ class TestGetStrPy:
         data: List[Any],
         strategies: ParsingStrategies,
         expected_output: str,
-        expected_n_childs: int,
+        expected_n_children: int,
         assert_imports: Callable[[ListDataTypeTree, Iterable[str]], None],
     ) -> None:
         """
@@ -51,7 +51,7 @@ class TestGetStrPy:
             data (List[Any]): The input data for the test.
             strategies (Strategies): The strategies object.
             expected_output (str): The expected output string.
-            expected_n_childs (int): The expected number of child nodes in the tree.
+            expected_n_children (int): The expected number of child nodes in the tree.
             assert_imports (Callable[[ListDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
 
         Returns:
@@ -63,7 +63,7 @@ class TestGetStrPy:
         tree = ListDataTypeTree(data, name=self.NAME, strategies=strategies)
 
         expected_output = expected_output.format(expected_container=strategies.list_strategy.capitalize())
-        assert expected_n_childs == len(tree), "Not all childs were correctly parsed"
+        assert expected_n_children == len(tree), "Not all children were correctly parsed"
         assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
 
