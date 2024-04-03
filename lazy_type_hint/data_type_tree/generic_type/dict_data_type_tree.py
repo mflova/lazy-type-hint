@@ -254,7 +254,7 @@ class DictDataTypeTree(MappingDataTypeTree):
                 if not value.permission_to_be_created_as_type_alias:
                     content[key] = value.get_str_top_node_without_lvalue()
                 else:
-                    name = f"{self.name}{self._to_camel_case(key)}"
+                    name = self._to_camel_case(value.name)
                     content[key] = name
                 if key in self.dict_metadata.key_info:
                     if not self.dict_metadata.key_info[key].required:

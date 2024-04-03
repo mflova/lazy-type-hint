@@ -56,7 +56,7 @@ convention = "google"  # Docstring convention. Accepts: "google", "numpy", or "p
 fixture-parentheses = false
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["E501"]
+"tests/**/*.py" = ["E501", "ARG002"]
 "tests/**/test_func_data_type_tree.py" = ["ARG005", "ARG001"]
 "lazy_type_hint/**/lazy_type_hint*.py" = ["ARG002"]
 

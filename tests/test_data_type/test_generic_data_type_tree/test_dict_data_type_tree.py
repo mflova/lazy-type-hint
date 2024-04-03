@@ -97,6 +97,18 @@ class TestGetStrPy:
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
+{TAB}kids: {NAME}List
+{TAB}parents: {NAME}List""",
+                3,
+            ),
+            (
+                DictDataTypeTree(
+                    {"name": "Joan", "kids": ["A", "B"], "parents": ["C", "D", 2]},
+                    name=NAME,
+                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                ),
+                f"""class {NAME}(TypedDict):
+{TAB}name: str
 {TAB}kids: {NAME}Kids
 {TAB}parents: {NAME}Parents""",
                 3,
@@ -165,8 +177,8 @@ class TestGetStrPy:
     "{NAME}",
     {{
         "$": int,
-        "my_list": {NAME}MyList,
-        "my_list2": {NAME}MyList2,
+        "my_list": {NAME}List,
+        "my_list2": {NAME}List,
     }},
 )""",
                 3,

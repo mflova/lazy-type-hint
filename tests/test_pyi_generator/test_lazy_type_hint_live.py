@@ -4,7 +4,6 @@ from typing import Final, Union
 import pytest
 import yaml
 
-from lazy_type_hint.generators.lazy_type_hint import LazyTypeHintError
 from lazy_type_hint.generators.lazy_type_hint_live import LazyTypeHintLive
 from lazy_type_hint.utils import Mypy
 

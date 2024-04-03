@@ -8,7 +8,6 @@ from typing import (
     Callable,
     Dict,
     Final,
-    Literal,
     Mapping,
     Optional,
     Sequence,

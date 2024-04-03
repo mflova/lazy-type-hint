@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Final, Union
+from typing import Union
 
 import pytest
 import yaml
 
-from lazy_type_hint.generators.lazy_type_hint import LazyTypeHint, LazyTypeHintError
-from lazy_type_hint.utils import Mypy
+from lazy_type_hint.generators.lazy_type_hint import LazyTypeHint
 
 
 @pytest.fixture
@@ -51,7 +50,13 @@ class TestLazyTypeHintFromYamlFile:
             [4, 5, 6],
         ),
     )
-    def test_from_yaml_file(self, lazy_type_hint: LazyTypeHint, data: object, yaml_file: Path, tmp_path: str) -> None:
+    def test_from_yaml_file(
+        self,
+        lazy_type_hint: LazyTypeHint,
+        data: object,
+        yaml_file: Path,
+        tmp_path: str,
+    ) -> None:
         result = lazy_type_hint.from_yaml_file(loader=self.yaml_file_loader, path=yaml_file, class_name="Example")
         result.as_string()
         result.to_file(Path(tmp_path) / "file.py")

@@ -51,5 +51,3 @@ ci:
 
 tests:
 - Test tht the pyi file generated is not broken. Read its string, compile and exec
-- test main API features:
-    - Add flag "if intefcace exists = Literal["validate", "overwrite"]"

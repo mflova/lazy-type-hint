@@ -23,7 +23,7 @@ class TestPerformance:
         return self.read_yaml_file(str(path))
 
     @pytest.mark.parametrize("file_name", ["big_file.yaml"])
-    def test_performance(self, file_name: str, sample: object) -> None:  # noqa: ARG002
+    def test_performance(self, file_name: str, sample: object) -> None:
         n = 10  # Number of executions
         total_time = timeit.timeit(lambda: data_type_tree_factory(sample, name="Example"), number=n)
 

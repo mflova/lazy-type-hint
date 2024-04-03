@@ -26,7 +26,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
             suffix = type(key).__name__ if not isinstance(key, str) else self._to_camel_case(key)
             if isinstance(key, str) and key.startswith(self.hidden_keys_prefix):
                 continue
-            children[key] = data_type_tree_factory(
+            child = data_type_tree_factory(
                 data=value,
                 name=f"{self.name}{suffix}",
                 imports=self.imports,
@@ -34,7 +34,30 @@ class MappingDataTypeTree(GenericDataTypeTree):
                 strategies=self.strategies,
                 parent=self,
             )
+            if child in children.values():
+                self._replace_old_childs_by_new_one(child, children)
+                children[key] = child
+            else:
+                children[key] = child
         return children
+
+    def _replace_old_childs_by_new_one(self, child: DataTypeTree, children: Dict[Hashable, DataTypeTree]) -> None:
+        """
+        Replaces old child nodes with a new one in the given dictionary of children.
+
+        Only replaced those children that are equal to the given child. In addition, naming is updated to
+        make them match.
+        """
+        name = f"{self.name}{type(child.data).__name__.capitalize()}"
+        modified_name = name
+        count = 2
+        while modified_name in children.values():
+            modified_name = f"{name}{count}"
+            count += 1
+        child.name = modified_name
+        for inserted_key in children:
+            if children[inserted_key] == child:
+                children[inserted_key] = child
 
     def _get_str_top_node(self) -> str:
         return self._parse_dict(self.children)

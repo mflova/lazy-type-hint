@@ -66,7 +66,8 @@ def compare_ast(
 class _AnyMethodProtocol(Protocol):
     __name__: str
 
-    def __call__(*args: Any, **kwargs: Any) -> Any: ...
+    def __call__(*args: Any, **kwargs: Any) -> Any:
+        ...
 
 
 _AnyMethodT = TypeVar("_AnyMethodT", bound=_AnyMethodProtocol)

@@ -83,7 +83,7 @@ class TestTypeAliasHeight:
         data: Set[Any],
         strategies: ParsingStrategies,
         expected_str: str,
-        min_height: int,  # noqa: ARG002
+        min_height: int,
     ) -> None:
         """
         Test the `get_str_top_node` method of the `ListDataTypeTree` class.
