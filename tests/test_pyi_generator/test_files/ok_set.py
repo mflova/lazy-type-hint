@@ -1,4 +1,4 @@
-from lazy_type_hint.lazy_type_hint import LazyTypeHint
+from lazy_type_hint import LazyTypeHintLive
 
 data = frozenset({1, 2, 3})
-data = LazyTypeHint().from_data(data, class_name="Example")
+data = LazyTypeHintLive().from_data(data, class_name="Example")

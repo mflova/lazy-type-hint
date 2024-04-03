@@ -1,4 +1,4 @@
-from lazy_type_hint.lazy_type_hint import LazyTypeHint
+from lazy_type_hint import LazyTypeHintLive
 
 lst = [
     {
@@ -13,7 +13,7 @@ lst = [
     },
 ]
 
-data = LazyTypeHint().from_data(lst, class_name="Example")
+data = LazyTypeHintLive().from_data(lst, class_name="Example")
 data[0]["list"]
 data[0]["int"]
 data[0]["nested_dict"]

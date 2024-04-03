@@ -63,26 +63,10 @@ def compare_ast(
         return node1 == node2  # type: ignore
 
 
-def compare_str_via_ast(string1: str, string2: str, /, *, ignore_imports: bool = False) -> bool:
-    """
-    Compare two strings using the AST (Abstract Syntax Tree) representation.
-
-    Args:
-        string1 (str): The first string to compare.
-        string2 (str): The second string to compare.
-        ignore_imports (bool): Whether to ignore import statements during comparison.
-
-    Returns:
-        bool: True if the AST representations of the strings are equal, False otherwise.
-    """
-    return compare_ast(ast.parse(string1), ast.parse(string2), ignore_imports=ignore_imports)
-
-
 class _AnyMethodProtocol(Protocol):
     __name__: str
 
-    def __call__(*args: Any, **kwargs: Any) -> Any:
-        ...
+    def __call__(*args: Any, **kwargs: Any) -> Any: ...
 
 
 _AnyMethodT = TypeVar("_AnyMethodT", bound=_AnyMethodProtocol)

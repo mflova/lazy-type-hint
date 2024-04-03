@@ -3,10 +3,6 @@
 
 
 TODO:
-- Cleanup: Create two main classes:
-  - `LazyTypeHint`: One that returns a `Result` that has methods like:
-  - `LazyTypeHintLive`
-
 - Tests with float and int. For example: 
   - is TypedDict similarity merge working with float vs int?
   - is merging of equal TypedDict working when float vs int

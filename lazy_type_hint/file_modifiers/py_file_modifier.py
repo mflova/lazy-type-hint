@@ -18,12 +18,10 @@ class PyFileModifier:
         return "\n".join(self.lines)
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> List[Tuple[int, str]]:
-        ...
+    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> List[Tuple[int, str]]: ...
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
-        ...
+    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]: ...
 
     def search_assignment(self, variable: str, only_values: bool = False) -> Union[List[Tuple[int, str]], List[str]]:
         """
@@ -239,7 +237,7 @@ class PyFileModifier:
         Args:
             class_name (str): The name of the class.
         """
-        upper_idx = self.search_line(f"class {class_name}:") + 1
+        upper_idx = self.search_line(f"class {class_name}(") + 1
 
         lower_idx = self.search_method("__init__", return_index_above_decorator=True)[-1]
         for idx in list(range(upper_idx, lower_idx))[::-1]:

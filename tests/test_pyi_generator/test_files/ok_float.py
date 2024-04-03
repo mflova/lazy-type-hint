@@ -1,4 +1,4 @@
-from lazy_type_hint.lazy_type_hint import LazyTypeHint
+from lazy_type_hint import LazyTypeHintLive
 
 num: int = 2
-data = LazyTypeHint().from_data(num, class_name="Example")
+data = LazyTypeHintLive().from_data(num, class_name="Example")

@@ -1,4 +1,4 @@
-from lazy_type_hint.lazy_type_hint import LazyTypeHint
+from lazy_type_hint import LazyTypeHintLive
 from contextlib import suppress
 
 lst = [
@@ -14,6 +14,6 @@ lst = [
     },
 ]
 
-data = LazyTypeHint().from_data(lst, class_name="Example")
+data = LazyTypeHintLive().from_data(lst, class_name="Example")
 with suppress(KeyError):
     data[0]["number"]

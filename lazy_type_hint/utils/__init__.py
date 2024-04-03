@@ -12,8 +12,5 @@ from lazy_type_hint.utils.utils import (
     check_if_command_available as check_if_command_available,
 )
 from lazy_type_hint.utils.utils import (
-    compare_str_via_ast as compare_str_via_ast,
-)
-from lazy_type_hint.utils.utils import (
     is_string_python_keyword_compatible as is_string_python_keyword_compatible,
 )
