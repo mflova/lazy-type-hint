@@ -4,3 +4,5 @@
 *build
 *.pyi
 delete.py
+*.whl
+*.tar.gz

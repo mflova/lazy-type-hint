@@ -87,8 +87,8 @@ pip install lazy-type-hint
 
    |   Imagen 1    |   Imagen 2    |
     |:-------------:|:-------------:|
-    | Perform static analysis to detect issues | ![After executing the code](img/error.PNG) |
-    | Reuse your available type hints | ![After executing the code](img/reuse.PNG) |
+    | Perform static analysis to detect issues | ![After executing the code](img/errors.PNG) |
+    | Reuse your available type hints | ![After executing the code](img/reuse_classes.PNG) |
     | Have full autocompletion support from your IDE | ![After executing the code](img/autocomplete.PNG) |
 
 
