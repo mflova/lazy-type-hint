@@ -1,0 +1,19 @@
+# Collection of sensors
+sensors:
+  - name: Sensor1
+    # Type of sensor used
+    # NOTE: Only 3 are available
+    type: Temperature
+    location: Living Room
+    # Maximum amount allowed
+    threshold: 25  # Units: [C]
+
+  - name: Sensor2
+    type: Humidity
+    location: Bedroom
+    threshold: 60
+
+  - name: Sensor3
+    type: Pressure
+    location: Kitchen
+    threshold: 1000

@@ -1,7 +1,177 @@
 # LazyTypeHint
-Work in progress.
 
-## Features
+Type hint any built-in Python data structure!
+
+```
+pip install lazy-type-hint
+```
+
+## Main features
+
+1. Get corresponding type hints from any given data structure and with mutltiple parsing
+   options. Export it as a file or as a string.
+
+   ```py
+      from lazy_type_hint import LazyTypeHint, ParsingStrategies
+
+      # INPUT
+      people = [
+          {
+              "name": "Peter",
+              "age": 40,
+              "kids": (
+                  {
+                      "name": "Peter Jr",
+                      "age": 10,
+                  },
+                  {
+                      "name": "Peter Jr2",
+                      "age": 8,
+                  },
+              ),
+          },
+          {
+              "name": "Kevin",
+              "age": 42,
+              "job": "Carpenter",
+              "kids": (
+                  {
+                      "name": "Peter Jr",
+                      "age": 10,
+                  },
+              ),
+          },
+      ]
+
+      people_type_hint = (
+          LazyTypeHint(
+              strategies=ParsingStrategies(
+                  min_height_to_define_type_alias=2,
+                  tuple_size_strategy="any size",
+              )
+          )
+          .from_data(people, class_name="People")
+          .as_string()
+      )
+      print(people_type_hint)
+   ```
+
+   ```py
+    # OUTPUT
+    from typing import List, Tuple, TypedDict
+    from typing_extensions import NotRequired
+
+
+    class PeopleDictKidsDict(TypedDict):
+        name: str
+        age: int
+
+
+    class PeopleDict(TypedDict):
+        name: str
+        age: int
+        kids: Tuple[PeopleDictKidsDict, ...]
+        job: NotRequired[str]
+
+    People = List[PeopleDict]
+   ```
+2. [EXPERIMENTAL] Get type hints live with `LazyTypeHintLive`. The API changes its local
+   interface as soon as you use it, allowing to automatically infer and reuse your type
+   hints after executing your program once.
+
+   |   Before executing the code    |   After executing the code    |
+    |:-------------:|:-------------:|
+    | ![Before executing the code](img/before.PNG) | ![After executing the code](img/after.PNG) |
+
+    This will allow you to:
+
+   |   Imagen 1    |   Imagen 2    |
+    |:-------------:|:-------------:|
+    | Perform static analysis to detect issues | ![After executing the code](img/error.PNG) |
+    | Reuse your available type hints | ![After executing the code](img/reuse.PNG) |
+    | Have full autocompletion support from your IDE | ![After executing the code](img/autocomplete.PNG) |
+
+
+
+
+3. Easily type hint your files (YAML, JSON) and parse extra comments found within this
+   file as part of the type hint docstrings. Given a yaml file like:
+
+   ```yaml
+    # Collection of sensors
+    sensors:
+      - name: Sensor1
+        # Type of sensor used
+        sensor_type: Temperature
+        location: Living Room
+        # Maximum amount allowed.
+        # NOTE: Only 3 are available
+        threshold: 25  # Units: [C]
+
+      - name: Sensor2
+        sensor_type: Humidity
+        location: Bedroom
+        threshold: 60
+
+      - name: Sensor3
+        sensor_type: Pressure
+        location: Kitchen
+        threshold: 1000
+   ```
+
+   And the code:
+   ```py
+      from lazy_type_hint import LazyTypeHint
+
+
+    def load_yaml_file(file_path):
+        with open(file_path, "r") as file:
+            data = yaml.safe_load(file)
+        return data
+
+
+    print(LazyTypeHint().from_yaml_file(
+        loader=load_yaml_file,
+        path="example.yaml",
+        class_name="Sensors",
+        comments_are=("above", "side"),
+    ).as_string())
+   ```
+
+   Generate type hints like:
+
+   ```py
+   from typing import List, TypedDict
+
+
+   class SensorsSensorsDict(TypedDict):
+       name: str
+       sensor_type: str
+       """Type of sensor used. NOTE: Only 3 are available."""
+       location: str
+       threshold: int
+       """
+       Maximum amount allowed.
+
+       Units: [C].
+       """
+
+   SensorsSensors = List[SensorsSensorsDict]
+
+
+   class Sensors(TypedDict):
+       sensors: SensorsSensors
+       """Collection of sensors."""
+   ```
+
+## What makes it a different tool?
+
+There are some tools that aim to perform something similar.
+`Cattrs` or `pydantic` require knowing the structure beforehand. Then, the developer is responsible for writing it. They are
+validation-oriented. This tool is more geared towards providing better type hints in an automated way and
+ensuring that the structure is accessed correctly. Although other tools such as `Stubgen` are able to generate `.pyi` files in an automated way, it might be required to edit the environment to indicate where these stub-based files are located.
+
+## All features
 
 Main features:
  - Type hint any (nested) structure.
