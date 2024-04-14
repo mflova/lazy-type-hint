@@ -1,6 +1,7 @@
 from types import MappingProxyType
 from typing import Any, Callable, List, Literal, Mapping, cast
 
+import pandas as pd
 import pytest
 
 SAMPLE_TYPE = Literal["frozenset", "set", "list", "tuple", "dictionary", "mapping"]
@@ -38,6 +39,10 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
             ("function", lambda x: None),  # noqa: ARG005
             ("function2", random_func),
             ("dummy_class", DummyClass()),
+            ("empty_pandas", pd.DataFrame()),
+            ("series", pd.Series([1, 2, 3])),
+            ("pandas", pd.DataFrame({"a": [1, 2, 3]})),
+            ("multi_level_pandas", pd.DataFrame({("a", "b"): [1, 2, 3]})),
         ],
     ],
     "set": {

@@ -30,6 +30,7 @@ class TestLazyTypeHintLive:
             "ok_float.py",
             "ok_int.py",
             "ok_set.py",
+            "ok_pandas_dataframe.py",
             "ok_frozenset.py",
             "ok_nested_list.py",
             "nok_append_list_wrong_type.py",
@@ -38,6 +39,7 @@ class TestLazyTypeHintLive:
             "nok_key_missing.py",
             "nok_list.py",
             "nok_modify_mapping.py",
+            "nok_pandas_dataframe.py",
         ),
     )
     def test_generated_interface(self, file: str, mypy: Mypy) -> None:

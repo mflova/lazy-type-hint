@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lazy-type-hint"
-version = "1.0.1"
+version = "2.0.0"
 description = "Automate type hint generation in an easy way."
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
@@ -23,6 +23,8 @@ pyyaml = "*"  # Used by the `check_code.py` script
 types-pyyaml = "*"
 filelock = "*"
 pytest_xdist = "*"  # Parallel execution tests
+pandas = "*"
+
 
 [build-system]
 requires = ["poetry-core"]
@@ -66,5 +68,6 @@ fixture-parentheses = false
 ignore-words-list = "bu"  # Comma separated
 
 [tool.pytest.ini_options]
+# addopts = "-vv"
 addopts = "-n auto"
 testpaths = ["tests"]

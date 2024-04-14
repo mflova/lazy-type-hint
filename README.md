@@ -1,6 +1,6 @@
 # LazyTypeHint
 
-Type hint any built-in Python data structure!
+Type hint any Python (nested) data structure! Dictionaries, callables, Pandas DataFrames...
 
 ```
 pip install lazy-type-hint
@@ -51,7 +51,7 @@ pip install lazy-type-hint
               )
           )
           .from_data(people, class_name="People")
-          .as_string()
+          .to_string()
       )
       print(people_type_hint)
    ```
@@ -135,7 +135,7 @@ pip install lazy-type-hint
         path="example.yaml",
         class_name="Sensors",
         comments_are=("above", "side"),
-    ).as_string())
+    ).to_string())
    ```
 
    Generate type hints like:
@@ -166,10 +166,12 @@ pip install lazy-type-hint
 
 ## What makes it a different tool?
 
-There are some tools that aim to perform something similar.
-`Cattrs` or `pydantic` require knowing the structure beforehand. Then, the developer is responsible for writing it. They are
-validation-oriented. This tool is more geared towards providing better type hints in an automated way and
-ensuring that the structure is accessed correctly. Although other tools such as `Stubgen` are able to generate `.pyi` files in an automated way, it might be required to edit the environment to indicate where these stub-based files are located.
+There are some tools that aim to perform something similar. `Cattrs` or `pydantic` require
+knowing the structure beforehand. Then, the developer is responsible for writing it. They
+are validation-oriented. This tool is more geared towards providing better type hints in
+an automated way and ensuring that the structure is accessed correctly. Although other
+tools such as `Stubgen` are able to generate `.pyi` files in an automated way, it might be
+required to edit the environment to indicate where these stub-based files are located.
 
 ## All features
 
@@ -199,6 +201,7 @@ Structures that can be type hinted:
  - Sequences: list, tuples
  - Sets: sets, frozensets
  - Dictionaries: dict, MappingProxyType
+ - Pandas DataFrame: Full support for string-based columns and `MultiIndex` columns
  - Simple built-in types: bool, int, float, range, slice, None, str
  - Callables: lambdas, functions, staticmethods, classmethods
  - Custom objects: instances and classes

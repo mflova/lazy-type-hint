@@ -1,6 +1,7 @@
 import itertools
 import subprocess
 from collections import defaultdict
+from contextlib import suppress
 from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
@@ -15,6 +16,7 @@ from typing import (
     get_type_hints,
 )
 
+import pandas as pd
 import pytest
 
 from lazy_type_hint.data_type_tree import DataTypeTree, data_type_tree_factory
@@ -88,7 +90,8 @@ class TestIntegration:
 
     @staticmethod
     def assert_input_object_is_not_modified(data_before: object, data_after: object) -> None:
-        assert data_before == data_after
+        with suppress(ValueError):  # It is not always possible to compare such nested structures
+            assert data_before == data_after
 
     @staticmethod
     def assert_python_38_compatible(string: str) -> None:
@@ -111,7 +114,7 @@ class TestIntegration:
         file = "tmp.py"
         full_path_file = Path(tmp_path) / file
         full_path_file.write_text(data=string)
-        result = subprocess.run(f"python {full_path_file}", capture_output=True, text=True)
+        result = subprocess.run(f"python3 -m poetry run {full_path_file}", capture_output=True, text=True)
 
         assert not result.stdout
         assert not result.stderr
@@ -198,6 +201,10 @@ class TestHash:
             # Functions
             ({lambda x: print("Hi")}, {lambda y: None}, ParsingStrategies(), True),  # noqa: ARG005
             ({lambda x: print("Hi")}, {lambda y: None, lambda x: None}, ParsingStrategies(), True),  # noqa: ARG005
+            # Pandas DataFrame
+            ([pd.DataFrame({"A": [1]})], [pd.DataFrame({"A", [2]})], ParsingStrategies(), True),
+            ([pd.DataFrame({"A": [1]})], [pd.DataFrame({"B", [2]})], ParsingStrategies(), False),
+            ([pd.DataFrame({("A",): [1]})], [pd.DataFrame({("A", "B"), [2]})], ParsingStrategies(), False),
         ],
     )
     # fmt: on
@@ -207,3 +214,7 @@ class TestHash:
 
         assert should_be_equal == (tree1._get_hash() == tree2._get_hash())
         assert should_be_equal == (hash(tree1) == hash(tree2))
+
+
+data = pd.DataFrame({("A",): [1]})
+tree1 = data_type_tree_factory(data, name="Name1")

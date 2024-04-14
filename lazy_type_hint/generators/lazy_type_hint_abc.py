@@ -29,7 +29,7 @@ PathT = TypeVar("PathT", str, Path)
 class Tree:
     _tree: DataTypeTree
 
-    def as_string(self, *, include_imports: bool = True) -> str:
+    def to_string(self, *, include_imports: bool = True) -> str:
         return self._tree.get_str_all_nodes(include_imports=include_imports)
 
     def to_file(self, path_to_py: Union[Path, str], *, create_non_existing_dir: bool = False) -> None:
@@ -41,7 +41,7 @@ class Tree:
                     "(create_non_existing_dir input argument) were not set"
                 )
             os.makedirs(path_to_py.parent)
-        path_to_py.write_text(self.as_string(include_imports=True))
+        path_to_py.write_text(self.to_string(include_imports=True))
 
 
 class LazyTypeHintABC(ABC):

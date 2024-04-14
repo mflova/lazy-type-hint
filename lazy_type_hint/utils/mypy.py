@@ -15,7 +15,7 @@ class Mypy:
 
     @staticmethod
     def is_available() -> bool:
-        return check_if_command_available("mypy")
+        return check_if_command_available("python3 -m poetry run mypy")
 
     class Result(NamedTuple):
         """Results returned by Mypy."""
@@ -63,13 +63,14 @@ class Mypy:
         Returns:
             Result: The result of the type checking, including success status, errors, and the scanned string.
         """
-        command = ["mypy"]
+        command = ["python3", "-m", "poetry", "run", "mypy"]
         if strict:
             command.append("--strict")
         command.append("--python-version")
         command.append(python_version)
         command.append("-c")
         command.append(string)
+        print(command)
         result = subprocess.run(command, capture_output=True)
         if result.stderr:
             return self.Result(success=False, errors=[str(result.stderr)], scanned=string)

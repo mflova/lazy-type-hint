@@ -24,7 +24,7 @@ class TestLazyTypeHintFromData:
     )
     def test_from_data(self, lazy_type_hint: LazyTypeHint, data: object, tmp_path: str) -> None:
         result = lazy_type_hint.from_data(data, class_name="Example")
-        result.as_string()
+        result.to_string()
         result.to_file(Path(tmp_path) / "file.py")
 
 
@@ -58,5 +58,5 @@ class TestLazyTypeHintFromYamlFile:
         tmp_path: str,
     ) -> None:
         result = lazy_type_hint.from_yaml_file(loader=self.yaml_file_loader, path=yaml_file, class_name="Example")
-        result.as_string()
+        result.to_string()
         result.to_file(Path(tmp_path) / "file.py")

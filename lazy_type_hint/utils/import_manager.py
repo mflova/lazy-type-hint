@@ -18,7 +18,9 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "type",
     "Sequence",
     "FrozenSet",
+    "Hashable",
     "Mapping",
+    "TypeAlias",
     "MappingProxyType",
     "TypedDict",
     "Any",
@@ -28,6 +30,12 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "ReadOnly",
     "Callable",
     "Protocol",
+    "Literal",
+    "overload",
+    "pandas",
+    "pd.Scalar",
+    "npt",
+    "numpy",
 ]
 
 
@@ -44,6 +52,7 @@ class ImportManager:
             "type": ("typing", "Type"),
             "dict": ("typing", "Dict"),
             "Sequence": ("typing", "Sequence"),
+            "Hashable": ("typing", "Hashable"),
             "FrozenSet": ("typing", "FrozenSet"),
             "Mapping": ("typing", "Mapping"),
             "MappingProxyType": ("types", "MappingProxyType"),
@@ -55,6 +64,13 @@ class ImportManager:
             "ReadOnly": ("typing_extensions", "ReadOnly"),
             "Callable": ("typing", "Callable"),
             "Protocol": ("typing", "Protocol"),
+            "Literal": ("typing", "Literal"),
+            "overload": ("typing", "overload"),
+            "pandas": ("pandas", "pandas"),
+            "npt": ("npt", "npt"),
+            "numpy": ("numpy", "numpy"),
+            "TypeAlias": ("typing_extenions", "TypeAlias"),
+            "pd.Scalar": ("pandas._typing", "Scalar"),
         }
     )
 
@@ -116,7 +132,14 @@ class ImportManager:
         return "\n".join(imports_lst)
 
     def _format_single_package(self, package: str, imports: Sequence[str], *, line_length: int) -> str:
-        string = self.TEMPLATE.format(package=package, name=", ".join(sorted(imports)))
+        if imports[0] == "pandas":
+            string = "import pandas as pd"
+        elif imports[0] == "npt":
+            string = "import numpy.typing as npt"
+        elif imports[0] == "numpy":
+            string = "import numpy as np"
+        else:
+            string = self.TEMPLATE.format(package=package, name=", ".join(sorted(imports)))
         if len(string) > line_length:
             name = f",\n{TAB}".join(sorted(imports))
             string = self.TEMPLATE.format(package=package, name=f"(\n{TAB}{name}")
