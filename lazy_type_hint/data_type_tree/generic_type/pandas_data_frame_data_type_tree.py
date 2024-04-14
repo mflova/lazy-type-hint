@@ -3,6 +3,7 @@ from typing import (
     Final,
     List,
     Mapping,
+    Set,
     Type,
 )
 
@@ -81,19 +82,18 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
             if not self.can_be_accessed_multilevel:  # Here all columns will  be str
                 children[column] = self._create_child(column)
             else:  # Here all columns will be tuple
+                columns_processed: Set[str] = set()
                 for column in self.data.columns:
-                    children[column[0]] = self._create_child(column[0])
+                    if column[0] not in columns_processed:
+                        columns_processed.add(column[0])
+                        children[column[0]] = self._create_child(column[0])
         return children
 
     @override
     def _get_hash(self) -> str:
         if not self.strategies.pandas_type_hint_columns:
             return "pd.DataFrame"
-        if self.all_columns_are(str):
-            return str(self.data.columns)
-        if self.all_columns_are(tuple):
-            return str(column[0] for column in self.data.columns)
-        return "pd.DataFrame"
+        return str(self.data.columns)
 
     @override
     def _get_str_top_node(self) -> str:
@@ -112,16 +112,10 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         self.imports.add("pd.Scalar")
 
         overloads: List[str] = []
-        for literal, child in zip(self.data.columns, self):
+        for literal, child in self.children.items():
             if child.permission_to_be_created_as_type_alias:
-                if self.all_columns_are(str):
-                    overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=child.name))
-                elif self.all_columns_are(tuple):
-                    overloads.append(OVERLOAD_TEMPLATE.format(literal=literal[0], rtype=child.name))
+                overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=child.name))
             else:
                 rtype = "Union[pd.DataFrame, pd.Series]"
-                if self.all_columns_are(str):
-                    overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=rtype))
-                elif self.all_columns_are(tuple):
-                    overloads.append(OVERLOAD_TEMPLATE.format(literal=literal[0], rtype=rtype))
+                overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=rtype))
         return TEMPLATE.format(class_name=self.name, overloads="\n".join(overloads))
