@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
+    Dict,
     Iterable,
     List,
     Sequence,
@@ -62,7 +63,8 @@ class SetAndSequenceOperations:
             if allow_repeated_children:
                 children = cast("List[DataTypeTree]", children)
                 children.append(child)
-                names_added.add(name)
+                self._simplify_children(children)
+                names_added.update(child.name for child in children)
             else:
                 children = cast("Set[DataTypeTree]", children)
                 if child in children and isinstance(child, DictDataTypeTree) and child.dict_metadata.is_typed_dict:
@@ -76,6 +78,16 @@ class SetAndSequenceOperations:
             merge_if_similarity_above=self.data_type_tree.strategies.merge_different_typed_dicts_if_similarity_above,
             allow_repeated_children=allow_repeated_children,
         )
+
+    @staticmethod
+    def _simplify_children(children: "List[DataTypeTree]") -> None:
+        """Detect which childs are repeated and assign them the same name."""
+        dct: Dict[DataTypeTree, str] = {}
+        for child in children:
+            if child not in dct:
+                dct[child] = child.name
+            else:
+                child.name = dct[child]
 
     def _update_existing_typed_dict_child_from_another_equal_child(
         self, children: "Iterable[DataTypeTree]", child: DictDataTypeTree
