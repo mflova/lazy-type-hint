@@ -70,7 +70,6 @@ class Mypy:
         command.append(python_version)
         command.append("-c")
         command.append(string)
-        print(command)
         result = subprocess.run(command, capture_output=True)
         if result.stderr:
             return self.Result(success=False, errors=[str(result.stderr)], scanned=string)

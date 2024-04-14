@@ -4,8 +4,8 @@ import pandas as pd
 import pytest
 
 from lazy_type_hint.data_type_tree import data_type_tree_factory
-from lazy_type_hint.strategies import ParsingStrategies
 from lazy_type_hint.data_type_tree.generic_type import PandasDataFrameDataTypeTree
+from lazy_type_hint.strategies import ParsingStrategies
 
 
 class TestInstantiation:
@@ -165,7 +165,6 @@ class TestGetStrPy:
             assert_imports (Callable[[DictDataTypeTree, Iterable[str]], None]): A callable that asserts the imports.
         """
         tree = PandasDataFrameDataTypeTree(data, name=self.NAME, strategies=self.STRATEGY)
-        print(tree.get_str_top_node())
         assert expected_n_children == len(tree)
         assert expected_output == tree.get_str_top_node()
 

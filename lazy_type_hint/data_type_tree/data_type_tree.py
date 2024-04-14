@@ -161,7 +161,6 @@ class DataTypeTree(ABC):
     @final
     def __hash__(self) -> int:
         """Unique hash that identifies whether the current tree is considered to be unique."""
-        print(hash(self._get_hash()))
         return hash(self._get_hash())
 
     @abstractmethod
