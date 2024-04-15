@@ -51,4 +51,3 @@ def _test_no_print_statements(
     msg = "Print statements were detected for the checks."
     assert not captured.out, msg
     assert not captured.err, msg
-

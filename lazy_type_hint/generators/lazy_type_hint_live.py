@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Dict,
     Final,
+    Literal,  # noqa: F401
     Mapping,
     Optional,
     Sequence,
@@ -126,6 +127,8 @@ class LazyTypeHintLive(LazyTypeHintABC):
             raise LazyTypeHintLiveError(
                 f"Given class_name is not compatible with Python class naming conventions: {class_name}"
             )
+        if class_name in self._get_classes_added():
+            return data
         string_representation = str(super().from_data(data=data, class_name=class_name))
         string_representation = self.header + "\n" + string_representation
         self._create_custom_class_py(string_representation, class_name)

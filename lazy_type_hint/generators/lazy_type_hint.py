@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
-    Literal,  # noqa: F401
     Optional,
     Sequence,
     TypeVar,

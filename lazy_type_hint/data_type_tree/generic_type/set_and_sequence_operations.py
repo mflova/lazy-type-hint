@@ -81,7 +81,7 @@ class SetAndSequenceOperations:
 
     @staticmethod
     def _simplify_children(children: "List[DataTypeTree]") -> None:
-        """Detect which childs are repeated and assign them the same name."""
+        """Detect which children are repeated and assign them the same name."""
         dct: Dict[DataTypeTree, str] = {}
         for child in children:
             if child not in dct:
