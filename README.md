@@ -81,15 +81,15 @@ pip install lazy-type-hint
 
    |   Before executing the code    |   After executing the code    |
     |:-------------:|:-------------:|
-    | ![Before executing the code](img/before.PNG) | ![After executing the code](img/after.PNG) |
+    | ![Before executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/before.PNG?raw=true) | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/after.PNG?raw=true) |
 
     This will allow you to:
 
-   |   Imagen 1    |   Imagen 2    |
+   |       |       |
     |:-------------:|:-------------:|
-    | Perform static analysis to detect issues | ![After executing the code](img/errors.PNG) |
-    | Reuse your available type hints | ![After executing the code](img/reuse_classes.PNG) |
-    | Have full autocompletion support from your IDE | ![After executing the code](img/autocomplete.PNG) |
+    | Perform static analysis to detect issues | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/errors.PNG?raw=true) |
+    | Reuse your available type hints | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/reuse_classes.PNG?raw=true) |
+    | Have full autocompletion support from your IDE | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/autocomplete.PNG?raw=true) |
 
 
 
