@@ -108,6 +108,11 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         children: Dict[str, DataTypeTree] = {}
         if not self.are_columns_either_all_str_or_all_tuple:
             return children
+
+        # Corner case to avoid infinite recursion
+        if all(isinstance(column, tuple) and len(column) == 1 for column in self.data.columns):
+            return {}
+
         for column in self.data.columns:
             if not self.can_be_accessed_multilevel:  # Here all columns will  be str
                 children[column] = self._create_child(column)

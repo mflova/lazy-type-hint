@@ -8,7 +8,6 @@ from lazy_type_hint.data_type_tree.generic_type.sequence_data_type_tree import S
 
 class TupleDataTypeTree(SequenceDataTypeTree):
     wraps = tuple
-    original_data = Tuple[object, ...]
 
     @override
     def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore

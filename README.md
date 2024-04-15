@@ -203,5 +203,8 @@ Structures that can be type hinted:
  - Dictionaries: dict, MappingProxyType
  - Pandas DataFrame: Full support for string-based columns and `MultiIndex` columns
  - Simple built-in types: bool, int, float, range, slice, None, str
- - Callables: lambdas, functions, staticmethods, classmethods
+ - Callables: lambdas, functions, staticmethods, classmethods, built-in functions
+ - Module types
+ - IOBase
+ - Iterators
  - Custom objects: instances and classes

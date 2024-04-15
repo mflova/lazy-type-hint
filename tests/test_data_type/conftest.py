@@ -41,6 +41,7 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
             ("dummy_class", DummyClass()),
             ("empty_pandas", pd.DataFrame()),
             ("series", pd.Series([1, 2, 3])),
+            ("module", pytest),
             ("pandas", pd.DataFrame({"a": [1, 2, 3]})),
             ("multi_level_pandas", pd.DataFrame({("a", "b"): [1, 2, 3]})),
         ],

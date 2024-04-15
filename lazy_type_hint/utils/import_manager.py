@@ -30,12 +30,15 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "ReadOnly",
     "Callable",
     "Protocol",
+    "Iterator",
     "Literal",
     "overload",
     "pandas",
     "pd.Scalar",
     "npt",
     "numpy",
+    "ModuleType",
+    "TextIO",
 ]
 
 
@@ -63,6 +66,7 @@ class ImportManager:
             "NotRequired": ("typing_extensions", "NotRequired"),
             "ReadOnly": ("typing_extensions", "ReadOnly"),
             "Callable": ("typing", "Callable"),
+            "ModuleType": ("types", "ModuleType"),
             "Protocol": ("typing", "Protocol"),
             "Literal": ("typing", "Literal"),
             "overload": ("typing", "overload"),
@@ -71,6 +75,8 @@ class ImportManager:
             "numpy": ("numpy", "numpy"),
             "TypeAlias": ("typing_extenions", "TypeAlias"),
             "pd.Scalar": ("pandas._typing", "Scalar"),
+            "TextIO": ("typing", "TextIO"),
+            "Iterator": ("typing", "Iterator"),
         }
     )
 

@@ -3,9 +3,7 @@ from typing import Final
 import pandas as pd
 import pytest
 
-from lazy_type_hint.data_type_tree.simple_data_type_tree.pandas_series_data_type_tree import (
-    PandasSeriesDataTypeTree as PandasSeriesDataTypeTree,
-)
+from lazy_type_hint.data_type_tree.simple_data_type_tree.pandas_series_data_type_tree import PandasSeriesDataTypeTree
 
 
 class TestSeries:

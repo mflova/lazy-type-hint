@@ -103,14 +103,17 @@ class DataTypeTree(ABC):
 
     @classmethod
     def get_subclass(cls, data: object) -> Type[DataTypeTree]:
-        try:
-            return DataTypeTree.subclasses[type(data)]
-        except KeyError:
-            return DataTypeTree.subclasses[int]  # For instances created from any custom class.
+        for subclass in DataTypeTree.subclasses.values():
+            wraps = [subclass.wraps] if not isinstance(subclass.wraps, Iterable) else subclass.wraps
+            for wrap in wraps:
+                if isinstance(data, wrap):
+                    return subclass
+        return DataTypeTree.subclasses[int]  # For instances created from any custom class.
 
     def _check_tree_is_correct_one(self, data: object) -> None:
         wraps = self.wraps if isinstance(self.wraps, Iterable) else [self.wraps]
-        if type(data) not in wraps:
+        if not any(isinstance(data, wraps_) for wraps_ in wraps):
+            # if type(data) not in wraps:
             wraps_str = [element.__name__ for element in wraps]
             raise DataTypeTreeError(
                 f"The given parser ({type(self).__name__}) is meant to parse `{', '.join(wraps_str)}` data type but "

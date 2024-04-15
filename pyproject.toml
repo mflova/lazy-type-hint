@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lazy-type-hint"
-version = "2.0.6"
+version = "2.0.7"
 description = "Automate type hint generation in an easy way."
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
@@ -69,5 +69,6 @@ ignore-words-list = "bu"  # Comma separated
 
 [tool.pytest.ini_options]
 # addopts = "-vv"
-addopts = "-n auto"
+# addopts = ["-n", "auto", "-m", "not integration"]
+addopts = ["-n", "auto"]  # All tests
 testpaths = ["tests"]

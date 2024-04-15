@@ -1,4 +1,4 @@
-from typing import Any, FrozenSet, Hashable, Literal, Sequence, Set, Tuple, Union
+from typing import Any, Hashable, Literal, Sequence, Set, Tuple
 
 from typing_extensions import override
 
@@ -12,7 +12,6 @@ from lazy_type_hint.data_type_tree.generic_type.set_and_sequence_operations impo
 class SetDataTypeTree(GenericDataTypeTree):
     wraps = (frozenset, set)
     children: Sequence[DataTypeTree]
-    original_data: Union[Set[object], FrozenSet[object]]
     operations: SetAndSequenceOperations
 
     @override

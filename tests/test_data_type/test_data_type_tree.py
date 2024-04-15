@@ -16,6 +16,7 @@ from typing import (
     get_type_hints,
 )
 
+import pandas as pd
 import pytest
 
 from lazy_type_hint.data_type_tree import DataTypeTree, data_type_tree_factory
@@ -61,6 +62,7 @@ def test_all_children_share(create_sample: Callable[[str], str], strategies: Par
 
 
 class TestIntegration:
+    @pytest.mark.integration
     @pytest.mark.skipif(
         not check_if_command_available("python"), reason="Python must be available within the terminal."
     )
@@ -201,9 +203,9 @@ class TestHash:
             ({lambda x: print("Hi")}, {lambda y: None}, ParsingStrategies(), True),  # noqa: ARG005
             ({lambda x: print("Hi")}, {lambda y: None, lambda x: None}, ParsingStrategies(), True),  # noqa: ARG005
             # Pandas DataFrame
-            # ([pd.DataFrame({"A": [1]})], [pd.DataFrame({"A", [2]})], ParsingStrategies(), True),  # TODO Fix test
-            # ([pd.DataFrame({"A": [1]})], [pd.DataFrame({"B", [2]})], ParsingStrategies(), False),  # TODO Fix test
-            # ([pd.DataFrame({("A",): [1]})], [pd.DataFrame({("A", "B"), [2]})], ParsingStrategies(), False),  # TODO. Fix test
+            ([pd.DataFrame({"A": [1]})], [pd.DataFrame({"A": [2]})], ParsingStrategies(), True),
+            ([pd.DataFrame({"A": [1]})], [pd.DataFrame({"B": [2]})], ParsingStrategies(), False),
+            ([pd.DataFrame({("A",): [1]})], [pd.DataFrame({("A", "B"): [2]})], ParsingStrategies(), False),
         ],
     )
     # fmt: on

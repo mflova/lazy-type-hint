@@ -16,12 +16,12 @@ class TestLambda:
             [lambda x: None, f"{NAME} = Callable[[Any], Any]"],
             [lambda x, y: None, f"{NAME} = Callable[[Any, Any], Any]"],
             [lambda x, y, z: None, f"{NAME} = Callable[[Any, Any, Any], Any]"],
+            [print, f"{NAME} = Callable"],
         ],
     )
     def test_get_str_top_node_lambda(self, data: object, expected_str: str) -> None:
         tree = FunctionDataTypeTree(data, self.NAME)
         assert expected_str == tree.get_str_top_node()
-        assert "Any" in tree.imports
         assert "Callable" in tree.imports
 
     @pytest.mark.parametrize(

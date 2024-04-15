@@ -1,4 +1,4 @@
-from typing import Hashable, List, Sequence
+from typing import Hashable, List
 
 from typing_extensions import override
 
@@ -9,7 +9,6 @@ from lazy_type_hint.data_type_tree.generic_type.set_and_sequence_operations impo
 
 
 class SequenceDataTypeTree(GenericDataTypeTree):
-    original_data = Sequence[object]
     operations: SetAndSequenceOperations
 
     @override

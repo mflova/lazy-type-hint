@@ -6,6 +6,7 @@ from lazy_type_hint.data_type_tree.simple_data_type_tree.simple_data_type_tree i
 
 
 class InstanceDataTypeTree(SimpleDataTypeTree):
+    # Change it by `NoneType` once I drop support with Python 3.8
     wraps = (bool, int, float, range, slice, str, type(None))  # + Custom classes
 
     @override

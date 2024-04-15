@@ -14,8 +14,8 @@ class TestInstantiation:
         [
             (pd.DataFrame()),
             (pd.DataFrame({"A": [1, 2, 3]})),
-            (pd.DataFrame({"A": [1]}))
-            # (pd.DataFrame({("A",): [1, 2, 3]}))),  # TODO Fix test
+            (pd.DataFrame({"A": [1]})),
+            (pd.DataFrame({("A",): [1, 2, 3]})),
         ],
     )
     def test(self, data: pd.DataFrame) -> None:

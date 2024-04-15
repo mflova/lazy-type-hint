@@ -2,7 +2,7 @@ import ast
 import inspect
 import textwrap
 from inspect import Parameter
-from types import FunctionType, MappingProxyType
+from types import BuiltinFunctionType, FunctionType, MappingProxyType, MethodType
 from typing import Any, Callable, Hashable, Optional
 
 from typing_extensions import override
@@ -12,7 +12,7 @@ from lazy_type_hint.utils import TAB
 
 
 class FunctionDataTypeTree(SimpleDataTypeTree):
-    wraps = (FunctionType, staticmethod, classmethod)
+    wraps = (FunctionType, staticmethod, classmethod, BuiltinFunctionType, MethodType)
     data: Callable[[Any], Any]
 
     @property
@@ -26,7 +26,18 @@ class FunctionDataTypeTree(SimpleDataTypeTree):
             return True
         return True
 
+    @property
+    def can_be_inspected(self) -> bool:
+        try:
+            inspect.signature(self.data)
+            return True
+        except ValueError:
+            return False
+
     def _get_str_top_node(self) -> str:
+        if not self.can_be_inspected:
+            self.imports.add("Callable")
+            return f"{self.name} = Callable"
         if self.is_lambda:
             return self._get_lambda_str()
         return self._get_protocol_str()
