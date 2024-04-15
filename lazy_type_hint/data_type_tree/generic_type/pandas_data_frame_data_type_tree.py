@@ -21,13 +21,42 @@ OVERLOAD_TEMPLATE: Final = """    @overload  # type: ignore
 TEMPLATE: Final = """class {class_name}(pd.DataFrame):
 
 {overloads}
+    @overload
     def __getitem__(
         self,
         key: Union[
             "pd.Series[bool]",
-            str,
+            {allowed_types},
             pd.DataFrame,
             pd.Index,
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        ...
+
+    def __getitem__(
+        self,
+        key: Union[
+            "pd.Series[bool]",
+            {allowed_types},
+            pd.DataFrame,
+            pd.Index,
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return super().__getitem__(key)"""
+
+TEMPLATE_NO_PD: Final = """class {class_name}(pd.DataFrame):
+
+{overloads}
+    def __getitem__(
+        self,
+        key: Union[
+            {allowed_types},
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
             List[Union[Scalar, Tuple[Hashable, ...]]],
@@ -39,6 +68,7 @@ TEMPLATE: Final = """class {class_name}(pd.DataFrame):
 class PandasDataFrameDataTypeTree(MappingDataTypeTree):
     wraps = pd.DataFrame
     data: pd.DataFrame
+    children: Mapping[str, DataTypeTree]  # type: ignore[assignment]
 
     @override
     @property
@@ -91,14 +121,14 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
 
     @override
     def _get_hash(self) -> str:
-        if not self.strategies.pandas_type_hint_columns:
+        if self.strategies.pandas_strategies == "Do not type hint columns":
             return "pd.DataFrame"
         return str(self.data.columns)
 
     @override
     def _get_str_top_node(self) -> str:
         self.imports.add("pandas")
-        if len(self) == 0 or not self.strategies.pandas_type_hint_columns:
+        if len(self) == 0 or not self.strategies.pandas_strategies:
             self.imports.add("TypeAlias")
             return f"{self.name}: TypeAlias = pd.DataFrame"
         self.imports.add("overload")
@@ -118,4 +148,11 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
             else:
                 rtype = "Union[pd.DataFrame, pd.Series]"
                 overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=rtype))
-        return TEMPLATE.format(class_name=self.name, overloads="\n".join(overloads))
+        if self.strategies.pandas_strategies == "Full type hint":
+            all_literals = ", ".join(f'"{key}"' for key in self.children)
+            allowed_types = f"Literal[{all_literals}]"
+            template = TEMPLATE_NO_PD
+        else:
+            allowed_types = "str"
+            template = TEMPLATE
+        return template.format(class_name=self.name, overloads="\n".join(overloads), allowed_types=allowed_types)

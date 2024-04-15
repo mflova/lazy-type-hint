@@ -4,6 +4,7 @@ from typing import Literal, get_args, get_type_hints
 LIST_STRATEGIES = Literal["Sequence", "list"]
 TUPLE_SIZE_STRATEGIES = Literal["fixed", "any size"]
 MAPPING_STRATEGIES = Literal["TypedDict", "Mapping", "dict"]
+PANDAS_STRATEGIES = Literal["Full type hint", "Type hint only for autocomplete", "Do not type hint columns"]
 
 
 @dataclass(frozen=True)
@@ -11,7 +12,7 @@ class ParsingStrategies:
     list_strategy: LIST_STRATEGIES = "list"
     tuple_size_strategy: TUPLE_SIZE_STRATEGIES = "fixed"
     dict_strategy: MAPPING_STRATEGIES = "TypedDict"
-    pandas_type_hint_columns: bool = True
+    pandas_strategies: PANDAS_STRATEGIES = "Full type hint"
     min_height_to_define_type_alias: int = 1
     key_used_as_doc: str = ""
     merge_different_typed_dicts_if_similarity_above: int = 50

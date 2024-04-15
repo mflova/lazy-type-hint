@@ -50,7 +50,6 @@ class LazyTypeHintABC(ABC):
 
     def __init__(
         self,
-        *,
         strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
         **kwargs: Any,
     ) -> None:
