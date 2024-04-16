@@ -40,15 +40,16 @@ class SetAndSequenceOperations:
             children: Union[Set[DataTypeTree], List[DataTypeTree]] = []
         else:
             children = set()
-        names_added: Set[str] = set()  # Used to generate new and unique cnames in a quicker way.
+        names_added: Dict[DataTypeTree, str] = {}  # Used to generate new and unique cnames in a quicker way.
 
+        child: DataTypeTree
         for element in data:
             name = f"{self.data_type_tree.name}{type(element).__name__.capitalize()}"
             # Generate new name in case this one was already added
-            if name in names_added:
+            if name in names_added.values():
                 modified_name = name
                 count = 2
-                while modified_name in names_added:
+                while modified_name in names_added.values():
                     modified_name = f"{name}{count}"
                     count += 1
                 name = modified_name
@@ -62,32 +63,31 @@ class SetAndSequenceOperations:
             )
             if allow_repeated_children:
                 children = cast("List[DataTypeTree]", children)
+                if child in names_added:
+                    # Rebuild the tree with the name that is already defined
+                    child = data_type_tree_factory(
+                        data=element,
+                        name=names_added[child],
+                        imports=self.data_type_tree.imports,
+                        depth=self.data_type_tree.depth + 1,
+                        parent=self.data_type_tree,
+                        strategies=self.data_type_tree.strategies,
+                    )
                 children.append(child)
-                self._simplify_children(children)
-                names_added.update(child.name for child in children)
+                names_added[child] = child.name
             else:
                 children = cast("Set[DataTypeTree]", children)
                 if child in children and isinstance(child, DictDataTypeTree) and child.dict_metadata.is_typed_dict:
                     self._update_existing_typed_dict_child_from_another_equal_child(children, child)
                 if child not in children:
                     children.add(child)
-                    names_added.add(name)
+                    names_added[child] = name
 
         return self._merge_similar_typed_dicts(
             children,
             merge_if_similarity_above=self.data_type_tree.strategies.merge_different_typed_dicts_if_similarity_above,
             allow_repeated_children=allow_repeated_children,
         )
-
-    @staticmethod
-    def _simplify_children(children: "List[DataTypeTree]") -> None:
-        """Detect which children are repeated and assign them the same name."""
-        dct: Dict[DataTypeTree, str] = {}
-        for child in children:
-            if child not in dct:
-                dct[child] = child.name
-            else:
-                child.name = dct[child]
 
     def _update_existing_typed_dict_child_from_another_equal_child(
         self, children: "Iterable[DataTypeTree]", child: DictDataTypeTree
