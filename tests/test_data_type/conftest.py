@@ -1,3 +1,4 @@
+import tempfile
 from types import MappingProxyType
 from typing import Any, Callable, List, Literal, Mapping, cast
 
@@ -44,6 +45,9 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
             ("module", pytest),
             ("pandas", pd.DataFrame({"a": [1, 2, 3]})),
             ("multi_level_pandas", pd.DataFrame({("a", "b"): [1, 2, 3]})),
+            ("iterator", enumerate([1,2,3])),
+            ("built-in function", print)
+
         ],
     ],
     "set": {
