@@ -177,6 +177,7 @@ required to edit the environment to indicate where these stub-based files are lo
 
 Main features:
  - Type hint any (nested) structure.
+ - Validate structures by comparising its string representation via `LazyTypeHintLive`
  - Dictionaries can be type hinted as `TypedDict`, meaning that the IDE will have extra
    information about its underlying structures. Developer can therefore benefit from extra
    static analysis or autcomplete features.

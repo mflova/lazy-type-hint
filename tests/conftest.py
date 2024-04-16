@@ -30,9 +30,11 @@ def lock(tmp_path_factory: pytest.TempPathFactory) -> Any:
 def _serial(lock: BaseFileLock) -> Any:
     """Use this fixture to execute tests in a serial manner."""
     with lock.acquire(poll_interval=0.1):
-        LazyTypeHintLive().reset()
-        yield
-        LazyTypeHintLive().reset()
+        LazyTypeHintLive.reset()
+        try:
+            yield
+        finally:
+            LazyTypeHintLive.reset()
 
 
 @pytest.fixture(scope="session", autouse=True)
