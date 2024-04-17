@@ -6,6 +6,7 @@ Performance:
     - This will reduce the number of branches within "operations" + easier to read
 - Evaluate hash computation:
   - If it is retrieved multiple times due to recursion/trees, consider caching the value
+  - Can I predict the hash of an object before creating data type tree?
 - When creating new childs, check if `len(data)` is higher than a given number. If it is,
   check only first N first elements and assume all the other elements will be of same
   type.

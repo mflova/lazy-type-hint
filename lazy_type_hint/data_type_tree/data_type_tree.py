@@ -74,6 +74,9 @@ class DataTypeTree(ABC):
     wraps: ClassVar[Union[Type[object], Sequence[Type[object]]]] = object
     """Object type that the tree is able to parse."""
 
+    _cached_hash: Optional[int]
+    """Pre-computed hash of the instance assuming the inner state of the DataTypeTree does not change."""
+
     @final
     def __init__(
         self,
@@ -164,7 +167,9 @@ class DataTypeTree(ABC):
     @final
     def __hash__(self) -> int:
         """Unique hash that identifies whether the current tree is considered to be unique."""
-        return hash(self._get_hash())
+        if self._cached_hash is None:
+            self._cached_hash = hash(self._get_hash())
+        return self._cached_hash
 
     @abstractmethod
     def _get_str_top_node(self) -> str:
