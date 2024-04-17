@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from lazy_type_hint.data_type_tree.generic_type.iterator_data_type_tree import IteratorDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.list_data_type_tree import ListDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
+    from lazy_type_hint.data_type_tree.generic_type.mapping_proxy_data_type_tree import MappingProxyDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.pandas_data_frame_data_type_tree import PandasDataFrameDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.sequence_data_type_tree import SequenceDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.set_data_type_tree import SetDataTypeTree
@@ -37,6 +38,19 @@ if TYPE_CHECKING:
     )
     from lazy_type_hint.data_type_tree.simple_data_type_tree.simple_data_type_tree import SimpleDataTypeTree
     from lazy_type_hint.utils import ImportManager
+
+
+@overload
+def data_type_tree_factory(  # type: ignore[overload-overlap]
+    data: "MappingProxyType[Any, Any]",
+    name: str,
+    *,
+    imports: "Optional[ImportManager]" = None,
+    depth: int = 0,
+    strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
+    parent: "Optional[DataTypeTree]" = None,
+) -> "MappingProxyDataTypeTree":
+    ...
 
 
 @overload
@@ -184,7 +198,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Union[Mapping[Any, Any], MappingProxyType[Any, Any]]",
+    data: "Mapping[Any, Any]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,

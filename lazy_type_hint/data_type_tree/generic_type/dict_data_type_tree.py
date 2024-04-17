@@ -1,6 +1,7 @@
 import keyword
 from collections import defaultdict
 from dataclasses import dataclass, field
+from itertools import islice
 from typing import (
     Any,
     Dict,
@@ -217,6 +218,9 @@ class DictDataTypeTree(MappingDataTypeTree):
 
     @override
     def __pre_child_instantiation__(self) -> None:
+        check_n_max = self.strategies.check_max_n_elements_within_container
+        if self.strategies.dict_strategy != "TypedDict" and check_n_max:
+            self.data = dict(islice(self.data.items(), check_n_max))
         self.dict_metadata = DictMetadata(
             self.data, hidden_key_prefix=self.hidden_keys_prefix, strategies=self.strategies
         )

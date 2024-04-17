@@ -24,6 +24,7 @@ types-pyyaml = "*"
 filelock = "*"
 pytest_xdist = "*"  # Parallel execution tests
 pandas = "*"
+pyinstrument = "^4.6.2"
 
 
 [build-system]
@@ -68,6 +69,7 @@ fixture-parentheses = false
 ignore-words-list = "bu"  # Comma separated
 
 [tool.pytest.ini_options]
+markers = "integration"
 # addopts = "-vv"
 # addopts = ["-n", "auto", "-m", "not integration"]
 addopts = ["-n", "auto"]  # All tests

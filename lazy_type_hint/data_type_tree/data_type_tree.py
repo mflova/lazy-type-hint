@@ -101,7 +101,7 @@ class DataTypeTree(ABC):
         self.imports = ImportManager() if imports is None else imports
         self.parent = parent
         self.__pre_child_instantiation__()
-        self.children = self._instantiate_children(data)
+        self.children = self._instantiate_children(self.data)
         self.height = self._get_height()
         self.__post_child_instantiation__()
 
@@ -116,6 +116,7 @@ class DataTypeTree(ABC):
                     return subclass
         return DataTypeTree.subclasses[int]  # For instances created from any custom class.
 
+    # TODO: Speed up
     def _check_tree_is_correct_one(self, data: object) -> None:
         wraps = self.wraps if isinstance(self.wraps, Iterable) else [self.wraps]
         if not any(isinstance(data, wraps_) for wraps_ in wraps):
@@ -304,4 +305,3 @@ class DataTypeTree(ABC):
             self.name = new_name + self.name[len_old_name:]
         else:
             self.name = new_name
-

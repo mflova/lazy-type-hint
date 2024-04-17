@@ -19,6 +19,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
     @override
     def _instantiate_children(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
         children: Dict[Hashable, DataTypeTree] = {}
+
         for key, value in data.items():
             suffix = type(key).__name__ if not isinstance(key, str) else self._to_camel_case(key)
             if isinstance(key, str) and key.startswith(self.hidden_keys_prefix):
@@ -106,7 +107,10 @@ class MappingDataTypeTree(GenericDataTypeTree):
             else:
                 removed = True
 
-        new_string[0] = new_string[0].upper()
+        try:
+            new_string[0] = new_string[0].upper()
+        except IndexError:
+            return string
         return "".join(new_string)
 
     @override
