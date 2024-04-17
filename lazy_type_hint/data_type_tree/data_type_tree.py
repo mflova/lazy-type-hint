@@ -12,7 +12,6 @@ from typing import (
     ClassVar,
     FrozenSet,
     Hashable,
-    Iterable,
     Mapping,
     Optional,
     Sequence,
@@ -116,12 +115,9 @@ class DataTypeTree(ABC):
                     return subclass
         return DataTypeTree.subclasses[int]  # For instances created from any custom class.
 
-    # TODO: Speed up
     def _check_tree_is_correct_one(self, data: object) -> None:
-        wraps = self.wraps if isinstance(self.wraps, Iterable) else [self.wraps]
-        if not any(isinstance(data, wraps_) for wraps_ in wraps):
-            # if type(data) not in wraps:
-            wraps_str = [element.__name__ for element in wraps]
+        if not any(isinstance(data, wraps_) for wraps_ in self.wraps):
+            wraps_str = [element.__name__ for element in self.wraps]
             raise DataTypeTreeError(
                 f"The given parser ({type(self).__name__}) is meant to parse `{', '.join(wraps_str)}` data type but "
                 f"{type(data).__name__} was given"
