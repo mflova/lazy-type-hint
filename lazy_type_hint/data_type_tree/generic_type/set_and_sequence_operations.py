@@ -64,15 +64,7 @@ class SetAndSequenceOperations:
             if allow_repeated_children:
                 children = cast("List[DataTypeTree]", children)
                 if child in names_added:
-                    # Rebuild the tree with the name that is already defined
-                    child = data_type_tree_factory(
-                        data=element,
-                        name=names_added[child],
-                        imports=self.data_type_tree.imports,
-                        depth=self.data_type_tree.depth + 1,
-                        parent=self.data_type_tree,
-                        strategies=self.data_type_tree.strategies,
-                    )
+                    child.rename(names_added[child])
                 children.append(child)
                 names_added[child] = child.name
             else:

@@ -168,6 +168,18 @@ class TestIntegration:
             return line.split("(TypedDict)")[0].split(" ")[-1].strip().rstrip()
         return ""
 
+class TestRename:
+    def test(self):
+        tree = data_type_tree_factory([1,2,3, [1,2,3]], name="Example")
+        self.assert_names("Example", tree)
+        tree.rename("Example2")
+        self.assert_names("Example2", tree)
+
+    @staticmethod
+    def assert_names(name: str, tree: DataTypeTree) -> None:
+        assert f"{name}Int" == tree.children[0].name
+        assert f"{name}List" == tree.children[1].name
+        assert f"{name}ListInt" == tree.children[1].children[0].name
 
 class TestHash:
     # fmt: off

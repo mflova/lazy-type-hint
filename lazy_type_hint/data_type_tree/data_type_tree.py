@@ -288,3 +288,20 @@ class DataTypeTree(ABC):
         if type(self) is type(other_object):
             return hash(self) == hash(other_object)
         return False
+
+    @final
+    def rename(self, new_name: str) -> None:
+        """Rename the current node and all its subsequent children."""
+        self._rename(new_name, len_old_name=len(self.name))
+
+    @final
+    def _rename(self, new_name: str, *, len_old_name: int) -> None:
+        """Rename the current node and all its subsequent children."""
+        if self.children:
+            for child in self:
+                child._rename(new_name=new_name, len_old_name=len_old_name)
+        if self.parent is not None:
+            self.name = new_name + self.name[len_old_name:]
+        else:
+            self.name = new_name
+
