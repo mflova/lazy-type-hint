@@ -66,7 +66,7 @@ TEMPLATE_NO_PD: Final = """class {class_name}(pd.DataFrame):
 
 
 class PandasDataFrameDataTypeTree(MappingDataTypeTree):
-    wraps = pd.DataFrame
+    wraps = (pd.DataFrame,)
     data: pd.DataFrame
     children: Mapping[str, DataTypeTree]  # type: ignore[assignment]
 

@@ -198,7 +198,7 @@ class DictMetadata:
 
 
 class DictDataTypeTree(MappingDataTypeTree):
-    wraps = dict  # type: ignore
+    wraps = (dict,)
     data: Dict[Hashable, object]
     dict_metadata: DictMetadata
 

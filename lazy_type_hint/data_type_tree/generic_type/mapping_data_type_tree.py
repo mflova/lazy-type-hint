@@ -1,5 +1,4 @@
 import re
-from types import MappingProxyType
 from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set
 
 from typing_extensions import override
@@ -12,7 +11,6 @@ from lazy_type_hint.file_modifiers.yaml_file_modifier import YamlFileModifier
 
 class MappingDataTypeTree(GenericDataTypeTree):
     children: Mapping[Hashable, DataTypeTree]
-    wraps = MappingProxyType
     hidden_keys_prefix: Final = YamlFileModifier.prefix
 
     # Iterable-protocol related

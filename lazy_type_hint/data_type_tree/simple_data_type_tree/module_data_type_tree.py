@@ -6,7 +6,7 @@ from lazy_type_hint.data_type_tree.simple_data_type_tree.simple_data_type_tree i
 
 
 class ModuleTypeDataTypeTree(SimpleDataTypeTree):
-    wraps = ModuleType
+    wraps = (ModuleType,)
 
     @override
     def _get_str_top_node(self) -> str:

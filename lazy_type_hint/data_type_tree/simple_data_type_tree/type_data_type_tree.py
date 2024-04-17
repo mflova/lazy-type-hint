@@ -7,7 +7,7 @@ from lazy_type_hint.data_type_tree.simple_data_type_tree.simple_data_type_tree i
 
 
 class TypeDataTypeTree(SimpleDataTypeTree):
-    wraps = type
+    wraps = (type,)
     data: Type[object]
 
     @override

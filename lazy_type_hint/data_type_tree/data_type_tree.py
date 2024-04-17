@@ -71,7 +71,7 @@ class DataTypeTree(ABC):
 
     subclasses: ClassVar[Mapping[Type[object], Type[DataTypeTree]]] = {}
     """Available subclasses according to the type they are able to parse."""
-    wraps: ClassVar[Union[Type[object], Sequence[Type[object]]]] = object
+    wraps: ClassVar[Sequence[Type[object]]] = (object,)
     """Object type that the tree is able to parse."""
 
     _cached_hash: Optional[int]
@@ -94,6 +94,7 @@ class DataTypeTree(ABC):
 
         self.data = data
         self.name = name
+        self._cached_hash = None
         self.holding_type = type(data)
         self.strategies = strategies
         self.depth = depth
@@ -106,9 +107,11 @@ class DataTypeTree(ABC):
 
     @classmethod
     def get_subclass(cls, data: object) -> Type[DataTypeTree]:
+        if type(data) in DataTypeTree.subclasses:
+            return DataTypeTree.subclasses[type(data)]
+
         for subclass in DataTypeTree.subclasses.values():
-            wraps = [subclass.wraps] if not isinstance(subclass.wraps, Iterable) else subclass.wraps
-            for wrap in wraps:
+            for wrap in subclass.wraps:
                 if isinstance(data, wrap):
                     return subclass
         return DataTypeTree.subclasses[int]  # For instances created from any custom class.
@@ -153,8 +156,7 @@ class DataTypeTree(ABC):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Populate `subclasses` with all subclasses of this same class."""
         super().__init_subclass__(**kwargs)
-        wraps = cls.wraps if isinstance(cls.wraps, Iterable) else [cls.wraps]
-        for type_ in wraps:
+        for type_ in cls.wraps:
             if type_ != object:
                 if type_ in cls.subclasses:
                     raise DataTypeTreeError(f"A parser for {type_.__name__} was already found")
