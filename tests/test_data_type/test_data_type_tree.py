@@ -1,19 +1,19 @@
 import itertools
 import subprocess
-from collections import defaultdict
+import timeit
 from contextlib import suppress
 from copy import deepcopy
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 from typing import (
+    Any,
     Callable,
     Iterable,
     List,
-    Mapping,
+    Literal,
     Optional,
     Set,
-    get_args,
-    get_type_hints,
 )
 
 import pandas as pd
@@ -28,21 +28,21 @@ from lazy_type_hint.utils import TAB, check_if_command_available
 class StrategiesTesting(ParsingStrategies):
     @classmethod
     def generate_all(cls) -> Iterable[ParsingStrategies]:
-        type_hints = get_type_hints(cls)
-        input_dict: Mapping[str, List[str]] = defaultdict(list)
-        for field in fields(cls):
-            for arg in get_args(type_hints[field.name]):
-                input_dict[field.name].append(arg)
-
+        # Must be defined with all input arguments and in otder
+        input_dict = {
+            "list_strategy": ["Sequence", "list"],
+            "tuple_size_strategy": ["fixed", "any size"],
+            "dict_strategy": ["TypedDict", "Mapping", "dict"],
+            "pandas_strategies": ["Full type hint", "Type hint only for autocomplete", "Do not type hint columns"],
+            "min_height_to_define_type_alias": [2],
+            "key_used_as_doc": [""],
+            "merge_different_typed_dicts_if_similarity_above": [20, 80],
+            "typed_dict_read_only_values": [True, False],
+            "check_max_n_type_elements_within_container": [1, 100],
+        }
         # Generate all combinations of values
-        for combination in itertools.product(*input_dict.values()):
-            for height in range(0, 5):
-                for merge_different_typed_dicts_if_similarity_above in range(25, 101, 25):
-                    yield cls(  # type: ignore[misc]
-                        *combination,
-                        min_height_to_define_type_alias=height,
-                        merge_different_typed_dicts_if_similarity_above=merge_different_typed_dicts_if_similarity_above,
-                    )
+        for combination in itertools.product(*input_dict.values()):  # type: ignore
+            yield cls(*combination)
 
 
 @pytest.mark.parametrize("strategies", StrategiesTesting.generate_all())
@@ -169,6 +169,20 @@ class TestIntegration:
         return ""
 
 
+class TestRename:
+    def test(self) -> None:
+        tree = data_type_tree_factory([1, 2, 3, [1, 2, 3]], name="Example")
+        self.assert_names("Example", tree)
+        tree.rename("Example2")
+        self.assert_names("Example2", tree)
+
+    @staticmethod
+    def assert_names(name: str, tree: DataTypeTree) -> None:
+        assert f"{name}Int" == tree.children[0].name  # type: ignore
+        assert f"{name}List" == tree.children[1].name  # type: ignore
+        assert f"{name}ListInt" == tree.children[1].children[0].name  # type: ignore
+
+
 class TestHash:
     # fmt: off
     @pytest.mark.parametrize(
@@ -215,3 +229,68 @@ class TestHash:
 
         assert should_be_equal == (tree1._get_hash() == tree2._get_hash())
         assert should_be_equal == (hash(tree1) == hash(tree2))
+
+
+class TestCheckNMaxElementsFeature:
+    @pytest.mark.parametrize("type_", [set, frozenset, list, tuple])
+    def test_sequence_and_set(self, type_: Any) -> None:
+        iterable = type_(list(range(1_000_000)))
+        n = 10  # Number of executions
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                iterable, name="Example", strategies=ParsingStrategies(check_max_n_elements_within_container=100)
+            ),
+            number=n,
+        )
+
+        average_time = total_time / n
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                iterable, name="Example", strategies=ParsingStrategies(check_max_n_elements_within_container=200)
+            ),
+            number=n,
+        )
+
+        assert average_time * 1.5 < (
+            total_time / n
+        ), "It seems changing the strategy to check more elements does not affect the performance"
+
+    @pytest.mark.parametrize("strategy", ["dict", "Mapping"])
+    @pytest.mark.parametrize("type_", [dict, MappingProxyType])
+    def test_mapping(self, strategy: Literal["dict", "Mapping"], type_: Any) -> None:
+        n_elements = 1_000_000
+        dct = type_(dict(zip(range(n_elements), range(n_elements))))
+        n = 10  # Number of executions
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                dct,
+                name="Example",
+                strategies=ParsingStrategies(dict_strategy=strategy, check_max_n_elements_within_container=100),
+            ),
+            number=n,
+        )
+
+        average_time = total_time / n
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                dct,
+                name="Example",
+                strategies=ParsingStrategies(dict_strategy=strategy, check_max_n_elements_within_container=200),
+            ),
+            number=n,
+        )
+
+        assert average_time * 1.5 < (
+            total_time / n
+        ), "It seems changing the strategy to check more elements does not affect the performance"
+
+
+class TestCachedHash:
+    def test(self, generate_tree_based_list: Callable[[int, int], List[Any]]) -> None:
+        lst = generate_tree_based_list(depth=10, n_elements=3)  # type: ignore
+        tree = data_type_tree_factory(lst, name="Example")
+
+        time_before_cache = timeit.timeit(lambda: hash(tree), number=1)
+        time_after_cache = timeit.timeit(lambda: hash(tree), number=1)
+
+        assert time_after_cache < time_before_cache / 1_000

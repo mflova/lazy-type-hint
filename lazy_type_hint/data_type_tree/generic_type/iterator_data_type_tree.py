@@ -9,7 +9,7 @@ from lazy_type_hint.data_type_tree.generic_type.sequence_data_type_tree import (
 
 
 class IteratorDataTypeTree(SequenceDataTypeTree):
-    wraps = Iterator
+    wraps = (Iterator,)
 
     @override
     def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore

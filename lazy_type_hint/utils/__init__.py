@@ -6,7 +6,7 @@ from lazy_type_hint.utils.utils import (
     TAB as TAB,
 )
 from lazy_type_hint.utils.utils import (
-    cache_returned_value as cache_returned_value,
+    cache_returned_value_per_instance as cache_returned_value_per_instance,
 )
 from lazy_type_hint.utils.utils import (
     check_if_command_available as check_if_command_available,

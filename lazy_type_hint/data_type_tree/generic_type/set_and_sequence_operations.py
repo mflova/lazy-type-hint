@@ -43,7 +43,10 @@ class SetAndSequenceOperations:
         names_added: Dict[DataTypeTree, str] = {}  # Used to generate new and unique cnames in a quicker way.
 
         child: DataTypeTree
-        for element in data:
+        n_elements_to_check = self.data_type_tree.strategies.check_max_n_elements_within_container
+        for idx, element in enumerate(data):
+            if n_elements_to_check and idx >= n_elements_to_check:
+                break
             name = f"{self.data_type_tree.name}{type(element).__name__.capitalize()}"
             # Generate new name in case this one was already added
             if name in names_added.values():
@@ -62,20 +65,14 @@ class SetAndSequenceOperations:
                 strategies=self.data_type_tree.strategies,
             )
             if allow_repeated_children:
+                # Tuple case
                 children = cast("List[DataTypeTree]", children)
                 if child in names_added:
-                    # Rebuild the tree with the name that is already defined
-                    child = data_type_tree_factory(
-                        data=element,
-                        name=names_added[child],
-                        imports=self.data_type_tree.imports,
-                        depth=self.data_type_tree.depth + 1,
-                        parent=self.data_type_tree,
-                        strategies=self.data_type_tree.strategies,
-                    )
+                    child.rename(names_added[child])
                 children.append(child)
                 names_added[child] = child.name
             else:
+                # List and Set cases
                 children = cast("Set[DataTypeTree]", children)
                 if child in children and isinstance(child, DictDataTypeTree) and child.dict_metadata.is_typed_dict:
                     self._update_existing_typed_dict_child_from_another_equal_child(children, child)

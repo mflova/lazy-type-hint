@@ -12,7 +12,6 @@ from typing import (
     ClassVar,
     FrozenSet,
     Hashable,
-    Iterable,
     Mapping,
     Optional,
     Sequence,
@@ -27,7 +26,7 @@ from lazy_type_hint.strategies import ParsingStrategies
 from lazy_type_hint.utils import (
     ImportManager,
     OrderedSet,
-    cache_returned_value,
+    cache_returned_value_per_instance,
     is_string_python_keyword_compatible,
 )
 
@@ -71,7 +70,7 @@ class DataTypeTree(ABC):
 
     subclasses: ClassVar[Mapping[Type[object], Type[DataTypeTree]]] = {}
     """Available subclasses according to the type they are able to parse."""
-    wraps: ClassVar[Union[Type[object], Sequence[Type[object]]]] = object
+    wraps: ClassVar[Sequence[Type[object]]] = (object,)
     """Object type that the tree is able to parse."""
 
     @final
@@ -97,24 +96,24 @@ class DataTypeTree(ABC):
         self.imports = ImportManager() if imports is None else imports
         self.parent = parent
         self.__pre_child_instantiation__()
-        self.children = self._instantiate_children(data)
+        self.children = self._instantiate_children(self.data)
         self.height = self._get_height()
         self.__post_child_instantiation__()
 
     @classmethod
     def get_subclass(cls, data: object) -> Type[DataTypeTree]:
+        if type(data) in DataTypeTree.subclasses:
+            return DataTypeTree.subclasses[type(data)]
+
         for subclass in DataTypeTree.subclasses.values():
-            wraps = [subclass.wraps] if not isinstance(subclass.wraps, Iterable) else subclass.wraps
-            for wrap in wraps:
+            for wrap in subclass.wraps:
                 if isinstance(data, wrap):
                     return subclass
         return DataTypeTree.subclasses[int]  # For instances created from any custom class.
 
     def _check_tree_is_correct_one(self, data: object) -> None:
-        wraps = self.wraps if isinstance(self.wraps, Iterable) else [self.wraps]
-        if not any(isinstance(data, wraps_) for wraps_ in wraps):
-            # if type(data) not in wraps:
-            wraps_str = [element.__name__ for element in wraps]
+        if not any(isinstance(data, wraps_) for wraps_ in self.wraps):
+            wraps_str = [element.__name__ for element in self.wraps]
             raise DataTypeTreeError(
                 f"The given parser ({type(self).__name__}) is meant to parse `{', '.join(wraps_str)}` data type but "
                 f"{type(data).__name__} was given"
@@ -150,8 +149,7 @@ class DataTypeTree(ABC):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Populate `subclasses` with all subclasses of this same class."""
         super().__init_subclass__(**kwargs)
-        wraps = cls.wraps if isinstance(cls.wraps, Iterable) else [cls.wraps]
-        for type_ in wraps:
+        for type_ in cls.wraps:
             if type_ != object:
                 if type_ in cls.subclasses:
                     raise DataTypeTreeError(f"A parser for {type_.__name__} was already found")
@@ -162,6 +160,7 @@ class DataTypeTree(ABC):
         """Get a unique hash that identifies the current data type."""
 
     @final
+    @cache_returned_value_per_instance
     def __hash__(self) -> int:
         """Unique hash that identifies whether the current tree is considered to be unique."""
         return hash(self._get_hash())
@@ -198,7 +197,7 @@ class DataTypeTree(ABC):
         return self._format_node_strings(self.get_strs_all_nodes_unformatted(include_imports=include_imports))
 
     @final
-    @cache_returned_value
+    @cache_returned_value_per_instance
     def get_strs_all_nodes_unformatted(self, *, include_imports: bool = True) -> Tuple[str, ...]:
         """Get, ordered by dependencies, all strings representing the whole tree."""
         strings: OrderedSet[str] = OrderedSet()
@@ -281,3 +280,19 @@ class DataTypeTree(ABC):
         if type(self) is type(other_object):
             return hash(self) == hash(other_object)
         return False
+
+    @final
+    def rename(self, new_name: str) -> None:
+        """Rename the current node and all its subsequent children."""
+        self._rename(new_name, len_old_name=len(self.name))
+
+    @final
+    def _rename(self, new_name: str, *, len_old_name: int) -> None:
+        """Rename the current node and all its subsequent children."""
+        if self.children:
+            for child in self:
+                child._rename(new_name=new_name, len_old_name=len_old_name)
+        if self.parent is not None:
+            self.name = new_name + self.name[len_old_name:]
+        else:
+            self.name = new_name

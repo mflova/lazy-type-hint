@@ -60,14 +60,18 @@ class FunctionDataTypeTree(SimpleDataTypeTree):
 
     def _get_lambda_str(self) -> str:
         self.imports.add("Callable").add("Any")
-        return f"{self.name} = Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]"
+        if self.can_be_inspected:
+            return f"{self.name} = Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]"
+        return f"{self.name} = Callable"
 
     @override
     def _get_hash(self) -> Hashable:
-        if self.is_lambda:
+        if self.is_lambda and self.can_be_inspected:
             return str(f"Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]")
         else:
-            return str(inspect.signature(self.data))
+            if self.can_be_inspected:
+                return str(inspect.signature(self.data))
+            return "Callable"
 
     def _has_return(self) -> Optional[bool]:
         code = textwrap.dedent(inspect.getsource(self.data))

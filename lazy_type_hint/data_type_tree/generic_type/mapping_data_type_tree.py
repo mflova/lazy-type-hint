@@ -1,5 +1,4 @@
 import re
-from types import MappingProxyType
 from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set
 
 from typing_extensions import override
@@ -12,7 +11,6 @@ from lazy_type_hint.file_modifiers.yaml_file_modifier import YamlFileModifier
 
 class MappingDataTypeTree(GenericDataTypeTree):
     children: Mapping[Hashable, DataTypeTree]
-    wraps = MappingProxyType
     hidden_keys_prefix: Final = YamlFileModifier.prefix
 
     # Iterable-protocol related
@@ -21,6 +19,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
     @override
     def _instantiate_children(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
         children: Dict[Hashable, DataTypeTree] = {}
+
         for key, value in data.items():
             suffix = type(key).__name__ if not isinstance(key, str) else self._to_camel_case(key)
             if isinstance(key, str) and key.startswith(self.hidden_keys_prefix):
@@ -34,13 +33,13 @@ class MappingDataTypeTree(GenericDataTypeTree):
                 parent=self,
             )
             if child in children.values():
-                self._replace_old_childs_by_new_one(child, children)
+                self._replace_old_children_by_new_one(child, children)
                 children[key] = child
             else:
                 children[key] = child
         return children
 
-    def _replace_old_childs_by_new_one(self, child: DataTypeTree, children: Dict[Hashable, DataTypeTree]) -> None:
+    def _replace_old_children_by_new_one(self, child: DataTypeTree, children: Dict[Hashable, DataTypeTree]) -> None:
         """
         Replaces old child nodes with a new one in the given dictionary of children.
 
@@ -108,7 +107,10 @@ class MappingDataTypeTree(GenericDataTypeTree):
             else:
                 removed = True
 
-        new_string[0] = new_string[0].upper()
+        try:
+            new_string[0] = new_string[0].upper()
+        except IndexError:
+            return string
         return "".join(new_string)
 
     @override
