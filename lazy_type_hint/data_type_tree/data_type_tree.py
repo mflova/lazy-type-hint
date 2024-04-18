@@ -26,7 +26,7 @@ from lazy_type_hint.strategies import ParsingStrategies
 from lazy_type_hint.utils import (
     ImportManager,
     OrderedSet,
-    cache_returned_value,
+    cache_returned_value_per_instance,
     is_string_python_keyword_compatible,
 )
 
@@ -73,9 +73,6 @@ class DataTypeTree(ABC):
     wraps: ClassVar[Sequence[Type[object]]] = (object,)
     """Object type that the tree is able to parse."""
 
-    _cached_hash: Optional[int]
-    """Pre-computed hash of the instance assuming the inner state of the DataTypeTree does not change."""
-
     @final
     def __init__(
         self,
@@ -93,7 +90,6 @@ class DataTypeTree(ABC):
 
         self.data = data
         self.name = name
-        self._cached_hash = None
         self.holding_type = type(data)
         self.strategies = strategies
         self.depth = depth
@@ -164,11 +160,10 @@ class DataTypeTree(ABC):
         """Get a unique hash that identifies the current data type."""
 
     @final
+    @cache_returned_value_per_instance
     def __hash__(self) -> int:
         """Unique hash that identifies whether the current tree is considered to be unique."""
-        if self._cached_hash is None:
-            self._cached_hash = hash(self._get_hash())
-        return self._cached_hash
+        return hash(self._get_hash())
 
     @abstractmethod
     def _get_str_top_node(self) -> str:
@@ -202,7 +197,7 @@ class DataTypeTree(ABC):
         return self._format_node_strings(self.get_strs_all_nodes_unformatted(include_imports=include_imports))
 
     @final
-    @cache_returned_value
+    @cache_returned_value_per_instance
     def get_strs_all_nodes_unformatted(self, *, include_imports: bool = True) -> Tuple[str, ...]:
         """Get, ordered by dependencies, all strings representing the whole tree."""
         strings: OrderedSet[str] = OrderedSet()

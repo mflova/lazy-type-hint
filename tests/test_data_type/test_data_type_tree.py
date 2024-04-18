@@ -1,12 +1,17 @@
 import itertools
 import subprocess
+import timeit
 from contextlib import suppress
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 from typing import (
+    Any,
     Callable,
     Iterable,
+    List,
+    Literal,
     Optional,
     Set,
 )
@@ -224,3 +229,68 @@ class TestHash:
 
         assert should_be_equal == (tree1._get_hash() == tree2._get_hash())
         assert should_be_equal == (hash(tree1) == hash(tree2))
+
+
+class TestCheckNMaxElementsFeature:
+    @pytest.mark.parametrize("type_", [set, frozenset, list, tuple])
+    def test_sequence_and_set(self, type_: Any) -> None:
+        iterable = type_(list(range(1_000_000)))
+        n = 10  # Number of executions
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                iterable, name="Example", strategies=ParsingStrategies(check_max_n_elements_within_container=100)
+            ),
+            number=n,
+        )
+
+        average_time = total_time / n
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                iterable, name="Example", strategies=ParsingStrategies(check_max_n_elements_within_container=200)
+            ),
+            number=n,
+        )
+
+        assert average_time * 1.5 < (
+            total_time / n
+        ), "It seems changing the strategy to check more elements does not affect the performance"
+
+    @pytest.mark.parametrize("strategy", ["dict", "Mapping"])
+    @pytest.mark.parametrize("type_", [dict, MappingProxyType])
+    def test_mapping(self, strategy: Literal["dict", "Mapping"], type_: Any) -> None:
+        n_elements = 1_000_000
+        dct = type_(dict(zip(range(n_elements), range(n_elements))))
+        n = 10  # Number of executions
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                dct,
+                name="Example",
+                strategies=ParsingStrategies(dict_strategy=strategy, check_max_n_elements_within_container=100),
+            ),
+            number=n,
+        )
+
+        average_time = total_time / n
+        total_time = timeit.timeit(
+            lambda: data_type_tree_factory(
+                dct,
+                name="Example",
+                strategies=ParsingStrategies(dict_strategy=strategy, check_max_n_elements_within_container=200),
+            ),
+            number=n,
+        )
+
+        assert average_time * 1.5 < (
+            total_time / n
+        ), "It seems changing the strategy to check more elements does not affect the performance"
+
+
+class TestCachedHash:
+    def test(self, generate_tree_based_list: Callable[[int, int], List[Any]]) -> None:
+        lst = generate_tree_based_list(depth=10, n_elements=3)  # type: ignore
+        tree = data_type_tree_factory(lst, name="Example")
+
+        time_before_cache = timeit.timeit(lambda: hash(tree), number=1)
+        time_after_cache = timeit.timeit(lambda: hash(tree), number=1)
+
+        assert time_after_cache < time_before_cache / 1_000

@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 
 from lazy_type_hint.utils import (
-    cache_returned_value,
+    cache_returned_value_per_instance,
     is_string_python_keyword_compatible,
 )
 
@@ -44,7 +44,7 @@ class TestCacheReturnedValue:
         def __init__(self) -> None:
             self.cache_attr = None
 
-        @cache_returned_value
+        @cache_returned_value_per_instance
         def dummy_method(self, arg: Any) -> Any:
             self.cache_attr = arg
             return arg

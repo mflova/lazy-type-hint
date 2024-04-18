@@ -33,13 +33,13 @@ class MappingDataTypeTree(GenericDataTypeTree):
                 parent=self,
             )
             if child in children.values():
-                self._replace_old_childs_by_new_one(child, children)
+                self._replace_old_children_by_new_one(child, children)
                 children[key] = child
             else:
                 children[key] = child
         return children
 
-    def _replace_old_childs_by_new_one(self, child: DataTypeTree, children: Dict[Hashable, DataTypeTree]) -> None:
+    def _replace_old_children_by_new_one(self, child: DataTypeTree, children: Dict[Hashable, DataTypeTree]) -> None:
         """
         Replaces old child nodes with a new one in the given dictionary of children.
 

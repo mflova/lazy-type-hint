@@ -23,7 +23,12 @@ from typing_extensions import Self, TypeGuard, override
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
 from lazy_type_hint.strategies import ParsingStrategies
-from lazy_type_hint.utils import TAB, format_string_as_docstring, is_string_python_keyword_compatible
+from lazy_type_hint.utils import (
+    TAB,
+    cache_returned_value_per_instance,
+    format_string_as_docstring,
+    is_string_python_keyword_compatible,
+)
 
 ValueT = TypeVar("ValueT")
 
@@ -110,6 +115,7 @@ class DictMetadata:
         return False
 
     @property
+    @cache_returned_value_per_instance
     def is_functional_syntax(self) -> bool:
         if self._all_keys_are_string(self._data) and self._all_keys_are_parsable():
             return False
@@ -119,6 +125,7 @@ class DictMetadata:
     def _all_keys_are_string(dct: Mapping[Hashable, ValueT]) -> "TypeGuard[Mapping[str, ValueT]]":
         return all(isinstance(key, str) for key in dct)
 
+    @cache_returned_value_per_instance
     def _all_keys_are_parsable(self) -> bool:
         if self._all_keys_are_string(self._data) and all(key not in keyword.kwlist for key in self._data):
             return all(is_string_python_keyword_compatible(key) for key in self._data)

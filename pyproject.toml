@@ -25,6 +25,7 @@ filelock = "*"
 pytest_xdist = "*"  # Parallel execution tests
 pandas = "*"
 pyinstrument = "^4.6.2"
+pytest-benchmark = "^4.0.0"
 
 
 [build-system]
@@ -74,3 +75,6 @@ markers = "integration"
 # addopts = ["-n", "auto", "-m", "not integration"]
 addopts = ["-n", "auto"]  # All tests
 testpaths = ["tests"]
+
+# Commands:
+# poetry run pytest --benchmark-only

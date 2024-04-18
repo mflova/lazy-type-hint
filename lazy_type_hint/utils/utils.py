@@ -73,7 +73,7 @@ class _AnyMethodProtocol(Protocol):
 _AnyMethodT = TypeVar("_AnyMethodT", bound=_AnyMethodProtocol)
 
 
-def cache_returned_value(method: _AnyMethodT) -> _AnyMethodT:
+def cache_returned_value_per_instance(method: _AnyMethodT) -> _AnyMethodT:
     """
     A decorator that caches the returned value of a method.
 
