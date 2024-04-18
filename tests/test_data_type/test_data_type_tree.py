@@ -1,8 +1,6 @@
 import itertools
 import subprocess
 import timeit
-from contextlib import suppress
-from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -12,7 +10,6 @@ from typing import (
     Iterable,
     List,
     Literal,
-    Optional,
     Set,
 )
 

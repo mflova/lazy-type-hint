@@ -1,5 +1,6 @@
 import re
-from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set
+from collections import defaultdict
+from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set, Type
 
 from typing_extensions import override
 
@@ -19,6 +20,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
     @override
     def _instantiate_children(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
         children: Dict[Hashable, DataTypeTree] = {}
+        children_info: Dict[DataTypeTree, Set[Hashable]] = defaultdict(set)
 
         for key, value in data.items():
             suffix = type(key).__name__ if not isinstance(key, str) else self._to_camel_case(key)
@@ -32,30 +34,33 @@ class MappingDataTypeTree(GenericDataTypeTree):
                 strategies=self.strategies,
                 parent=self,
             )
-            if child in children.values():
-                self._replace_old_children_by_new_one(child, children)
-                children[key] = child
-            else:
-                children[key] = child
+            children_info[child].add(key)
+            children[key] = child
+        self._assign_same_data_type_tree_to_keys_with_same_value_type(children, children_info=children_info)
         return children
 
-    def _replace_old_children_by_new_one(self, child: DataTypeTree, children: Dict[Hashable, DataTypeTree]) -> None:
+    def _assign_same_data_type_tree_to_keys_with_same_value_type(
+        self, children: Dict[Hashable, DataTypeTree], *, children_info: Dict[DataTypeTree, Set[Hashable]]
+    ) -> None:
         """
-        Replaces old child nodes with a new one in the given dictionary of children.
+        Simplify the tree.
 
-        Only replaced those children that are equal to the given child. In addition, naming is updated to
-        make them match.
+        Find all values sharing the same data type tree, create a unique one and use this new one to replace all same
+        values.
         """
-        name = f"{self.name}{type(child.data).__name__.capitalize()}"
-        modified_name = name
-        count = 2
-        while modified_name in children.values():
-            modified_name = f"{name}{count}"
-            count += 1
-        child.name = modified_name
-        for inserted_key in children:
-            if children[inserted_key] == child:
-                children[inserted_key] = child
+        last_name_added: Dict[Type[object], int] = {}
+        for data_type_tree, values in children_info.items():
+            if len(values) > 1:  # Perform replacement if some values were detected to be the same in terms of types
+                parent_name = data_type_tree.parent.name if data_type_tree.parent is not None else ""
+                new_name = f"{parent_name}{data_type_tree.holding_type.__name__.capitalize()}"
+                if data_type_tree.holding_type in last_name_added:
+                    new_name += str(last_name_added[data_type_tree.holding_type] + 1)
+                    last_name_added[data_type_tree.holding_type] += 1
+                else:
+                    last_name_added[data_type_tree.holding_type] = 1
+                data_type_tree.rename(new_name)
+                for hashable in values:
+                    children[hashable] = data_type_tree
 
     def _get_str_top_node(self) -> str:
         return self._parse_dict(self.children)
