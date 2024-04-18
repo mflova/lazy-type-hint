@@ -8,7 +8,7 @@ dct = {
     "nested_dict": {"key1": "value1", "key2": "value2"},
 }
 
-data = LazyTypeHintLive(strategies=ParsingStrategies(dict_strategy="Mapping")).from_data(
+dct = LazyTypeHintLive(strategies=ParsingStrategies(dict_strategy="Mapping")).from_data(
     dct, class_name="Example"
 )
-data["list"] = [1, 2, 3]
+dct["list"] = [1, 2, 3]

@@ -14,6 +14,6 @@ lst = [
     },
 ]
 
-data = LazyTypeHintLive().from_data(lst, class_name="Example")
+lst = LazyTypeHintLive().from_data(lst, class_name="Example")
 with suppress(KeyError):
-    data[0]["number"]
+    lst[0]["number"]

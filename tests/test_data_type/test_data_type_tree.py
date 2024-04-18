@@ -11,6 +11,7 @@ from typing import (
     List,
     Literal,
     Set,
+    Tuple,
 )
 
 import pandas as pd
@@ -286,3 +287,18 @@ class TestCachedHash:
         time_after_cache = timeit.timeit(lambda: hash(tree), number=1)
 
         assert time_after_cache < time_before_cache / 1_000
+
+
+class TestRenameDeclaration:
+    @pytest.mark.parametrize(
+        "declaration, new_name, expected_output",
+        [
+            ("MyList = List[str]", "New", ("New = List[str]", "MyList")),
+            ("MyDict = Dict[str, Any]", "New", ("New = Dict[str, Any]", "MyDict")),
+            (f"class MyClass(Protocol):\n{TAB}...", "New", (f"class New(Protocol):\n{TAB}...", "MyClass")),
+            (f"class MyClass():\n{TAB}...", "New", (f"class New():\n{TAB}...", "MyClass")),
+            (f"class MyClass:\n{TAB}...", "New", (f"class New:\n{TAB}...", "MyClass")),
+        ],
+    )
+    def test(self, declaration: str, new_name: str, expected_output: Tuple[str, str]) -> None:
+        assert expected_output == DataTypeTree.rename_declaration(declaration, new_name=new_name)

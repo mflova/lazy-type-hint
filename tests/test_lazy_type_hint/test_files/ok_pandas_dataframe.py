@@ -3,21 +3,21 @@ import pandas as pd
 from contextlib import suppress
 
 df = pd.DataFrame({"a": [1,2,3]})
-data = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Full type hint")).from_data(df, class_name="Example")
-data["a"]
+df = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Full type hint")).from_data(df, class_name="Example")
+df["a"]
 
-df = pd.DataFrame({("a", "b"): [1,2,3], ("a", "c"): [1,2,3]})
-data2 = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Full type hint")).from_data(df, class_name="Example2")
-data2["a"]
-data2["a"]["b"]
-data2["a"]["c"]
+df2 = pd.DataFrame({("a", "b"): [1,2,3], ("a", "c"): [1,2,3]})
+df2 = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Full type hint")).from_data(df2, class_name="Example2")
+df2["a"]
+df2["a"]["b"]
+df2["a"]["c"]
 
-df = pd.DataFrame({("a", "b"): [1,2,3], ("a", "c"): [1,2,3]})
-data3 = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Type hint only for autocomplete")).from_data(df, class_name="Example3")
+df3 = pd.DataFrame({("a", "b"): [1,2,3], ("a", "c"): [1,2,3]})
+df3 = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Type hint only for autocomplete")).from_data(df3, class_name="Example3")
 with suppress(KeyError):
-    data3["v"]
+    df3["v"]
 
-df = pd.DataFrame({("a", "b"): [1,2,3], ("a", "c"): [1,2,3]})
-data4 = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Do not type hint columns")).from_data(df, class_name="Example4")
+df4 = pd.DataFrame({("a", "b"): [1,2,3], ("a", "c"): [1,2,3]})
+df4 = LazyTypeHintLive(ParsingStrategies(pandas_strategies="Do not type hint columns")).from_data(df4, class_name="Example4")
 with suppress(KeyError):
-    data4["v"]
+    df4["v"]
