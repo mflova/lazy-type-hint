@@ -72,10 +72,7 @@ class TestIntegration:
         self, strategies: ParsingStrategies, create_sample: Callable[[str], str], data_type: str, tmp_path: str
     ) -> None:
         data = create_sample(data_type)
-        try:
-            data_before: Optional[object] = deepcopy(data)
-        except TypeError:
-            data_before = None
+        data_before = str(data)
         string = data_type_tree_factory(data, name="Example", strategies=strategies).get_str_all_nodes(
             include_imports=True
         )
@@ -86,13 +83,11 @@ class TestIntegration:
         self.assert_basic_format(string)
         self.assert_no_broken_string_representation(string, tmp_path=tmp_path)
         self.assert_python_38_compatible(string)
-        if data_before is not None:
-            self.assert_input_object_is_not_modified(data_before, data)
+        self.assert_input_object_is_not_modified(data_before, str(data))
 
     @staticmethod
-    def assert_input_object_is_not_modified(data_before: object, data_after: object) -> None:
-        with suppress(ValueError):  # It is not always possible to compare such nested structures
-            assert data_before == data_after
+    def assert_input_object_is_not_modified(data_before: str, data_after: str) -> None:
+        assert data_before == data_after
 
     @staticmethod
     def assert_python_38_compatible(string: str) -> None:
