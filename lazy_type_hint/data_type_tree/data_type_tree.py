@@ -214,6 +214,9 @@ class DataTypeTree(ABC):
         strings: OrderedSet[str] = OrderedSet()
         self._get_strs_all_nodes_unformatted(types=strings)
         strings_lst = strings.as_list()
+        if not strings_lst:
+            raise DataTypeTreeError("No type hints could be built")
+
         if include_imports:
             strings_lst.insert(0, self.imports.format())
 
