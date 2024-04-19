@@ -18,26 +18,7 @@ def is_string_python_keyword_compatible(string: str) -> bool:
     Returns:
         bool: True if the string is compatible with Python keywords, False otherwise.
     """
-    if bool(re.compile(r"^[a-zA-Z0-9_]+$").match(string)):
-        if not string[0].isnumeric():
-            return True
-    return False
-
-
-def is_string_python_keyword_compatible2(string: str) -> bool:
-    """
-    Checks if a string is compatible with Python keywords.
-
-    Args:
-        string (str): The string to be checked.
-
-    Returns:
-        bool: True if the string is compatible with Python keywords, False otherwise.
-    """
-    if bool(re.compile(r"^[a-zA-Z0-9_]+$").match(string)):
-        if not string[0].isnumeric():
-            return True
-    return False
+    return bool(string.replace("_", "").isalnum() and not string[0].isnumeric())
 
 
 def compare_ast(

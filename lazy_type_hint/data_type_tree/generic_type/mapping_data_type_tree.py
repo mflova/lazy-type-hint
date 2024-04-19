@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set, Type
 
-from typing_extensions import override
+from typing_extensions import Self, override
 
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.data_type_tree.factory import data_type_tree_factory
@@ -16,6 +16,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
 
     # Iterable-protocol related
     _keys: Iterator[Hashable]
+    _iterator: Iterator[Hashable]
 
     @override
     def _instantiate_children(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
@@ -126,3 +127,16 @@ class MappingDataTypeTree(GenericDataTypeTree):
         for name, child in self.children.items():
             hashes.append(("mapping", hash(type(name)), child._get_hash()))
         return frozenset(hashes)
+
+    @override
+    def __iter__(self) -> "Self":
+        self._iterator = iter(self.children.keys())
+        return self
+
+    @override
+    def __next__(self) -> DataTypeTree:
+        key = next(self._iterator, None)
+        if key is not None:
+            return self.children[key]
+        else:
+            raise StopIteration

@@ -4,7 +4,6 @@ import pandas as pd
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from lazy_type_hint.data_type_tree import data_type_tree_factory
-from lazy_type_hint.utils.utils import is_string_python_keyword_compatible
 
 
 def dataframe_factory(*, n_columns: int, column_depth: int) -> pd.DataFrame:
@@ -46,14 +45,3 @@ class TestDeepColumns:
 
         launcher()
         assert benchmark.stats.stats.mean < 0
-
-
-class TestString:
-    def test_ast(self, benchmark) -> None:
-        def func():
-            return isinstance(ast.parse("class Class2:\n    ...").body[0], ast.ClassDef)
-
-        benchmark(func)
-
-    def test_regex(self, benchmark) -> None:
-        benchmark(lambda: is_string_python_keyword_compatible("Class2"))

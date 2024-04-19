@@ -18,6 +18,7 @@ from lazy_type_hint.utils import (
         ("bu.ild", False),
         ("bu ild", False),
         ("0build", False),
+        (" build", False),
     ],
 )
 def test_is_string_python_keyword_compatible(string: str, expected_output: bool) -> None:
