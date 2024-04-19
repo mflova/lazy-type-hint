@@ -95,6 +95,8 @@ class MappingDataTypeTree(GenericDataTypeTree):
         match = re.match(r"^\d+", string)
         if match:
             number = match.group()
+            if not string[len(number) :]:
+                return string
             string = string[len(number) :]
 
         new_string = [""] * len(string)

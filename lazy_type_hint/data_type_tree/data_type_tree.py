@@ -308,8 +308,12 @@ class DataTypeTree(ABC):
         """Iterate over the children of the tree."""
 
     @final
-    def print_children(self) -> None:
-        print(repr(self))
+    def print_all_children(self, *, recursive: bool = True) -> None:
+        print("    " * self.depth + repr(self))
+        if not self.children:
+            return
+        for child in self:
+            child.print_all_children(recursive=recursive)
 
     @final
     def __eq__(self, other_object: object) -> bool:

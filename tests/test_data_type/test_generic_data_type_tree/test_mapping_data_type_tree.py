@@ -15,6 +15,7 @@ from lazy_type_hint.strategies import ParsingStrategies
         ["a b", "AB"],
         ["Name$age", "NameAge"],
         ["2Name$age", "NameAge"],
+        [str(2), "2"],
     ),
 )
 def test_to_camel_case(string: str, expected_out: str) -> None:

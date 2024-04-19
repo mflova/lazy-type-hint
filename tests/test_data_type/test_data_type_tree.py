@@ -224,6 +224,7 @@ class TestHash:
         assert should_be_equal == (hash(tree1) == hash(tree2))
 
 
+@pytest.mark.usefixtures("_serial")
 class TestCheckNMaxElementsFeature:
     @pytest.mark.parametrize("type_", [set, frozenset, list, tuple])
     def test_sequence_and_set(self, type_: Any) -> None:

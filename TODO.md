@@ -1,9 +1,11 @@
 # TODO
 
+- Refactor `__next__` of GenericType to be `abstractmethod`
 - Fix: Pandas dataframe columns can be any other type than str (like int):
   - If the column is Hashable: Just type hint the type of the column
   - If the column is Hashable AND str/bool/int: Type hint Literal
 - Fix: Fix cases where no string is returned:
+- Feat: Return Narrow down Union[pd.Dataframe, pd.Series]
 
   ```py
     df = pd.DataFrame(({1: [1,2]}))

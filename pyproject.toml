@@ -71,9 +71,9 @@ ignore-words-list = "bu"  # Comma separated
 
 [tool.pytest.ini_options]
 markers = "integration"
-# addopts = "-vv"
+addopts = "-vv"
 # addopts = ["-n", "auto", "-m", "not integration"]
-addopts = ["-n", "auto"]  # All tests
+# addopts = ["-n", "auto"]  # All tests
 testpaths = ["tests"]
 
 # Commands:

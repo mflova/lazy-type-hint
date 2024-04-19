@@ -24,6 +24,22 @@ def is_string_python_keyword_compatible(string: str) -> bool:
     return False
 
 
+def is_string_python_keyword_compatible2(string: str) -> bool:
+    """
+    Checks if a string is compatible with Python keywords.
+
+    Args:
+        string (str): The string to be checked.
+
+    Returns:
+        bool: True if the string is compatible with Python keywords, False otherwise.
+    """
+    if bool(re.compile(r"^[a-zA-Z0-9_]+$").match(string)):
+        if not string[0].isnumeric():
+            return True
+    return False
+
+
 def compare_ast(
     node1: Union[ast.expr, List[ast.expr], ast.Module],
     node2: Union[ast.expr, List[ast.expr], ast.Module],

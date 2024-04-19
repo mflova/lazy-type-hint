@@ -1,12 +1,10 @@
-from types import MappingProxyType
-from typing import Any, Literal
+import ast
 
 import pandas as pd
-import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from lazy_type_hint.data_type_tree import data_type_tree_factory
-from lazy_type_hint.strategies import ParsingStrategies
+from lazy_type_hint.utils.utils import is_string_python_keyword_compatible
 
 
 def dataframe_factory(*, n_columns: int, column_depth: int) -> pd.DataFrame:
@@ -25,7 +23,7 @@ class TestManyColumns:
     def test_get_str(self, benchmark: BenchmarkFixture) -> None:
         df = dataframe_factory(n_columns=100_000, column_depth=1)
 
-        def launcher():
+        def launcher() -> None:
             tree = data_type_tree_factory(df, name="Example")
             benchmark(lambda: tree.get_str_all_nodes())
 
@@ -42,9 +40,20 @@ class TestDeepColumns:
     def test_get_str(self, benchmark: BenchmarkFixture) -> None:
         df = dataframe_factory(n_columns=1, column_depth=1_000)
 
-        def launcher():
+        def launcher() -> None:
             tree = data_type_tree_factory(df, name="Example")
             benchmark(lambda: tree.get_str_all_nodes())
 
         launcher()
         assert benchmark.stats.stats.mean < 0
+
+
+class TestString:
+    def test_ast(self, benchmark) -> None:
+        def func():
+            return isinstance(ast.parse("class Class2:\n    ...").body[0], ast.ClassDef)
+
+        benchmark(func)
+
+    def test_regex(self, benchmark) -> None:
+        benchmark(lambda: is_string_python_keyword_compatible("Class2"))
