@@ -1,6 +1,6 @@
 # LazyTypeHint
 
-Type hint any Python (nested) data structure! Dictionaries, callables, Pandas DataFrames...
+Type hint any Python (nested) data structure! Dictionaries, callables, Pandas DataFrames, numpy arrays...
 
 ```
 pip install lazy-type-hint
@@ -11,7 +11,7 @@ pip install lazy-type-hint
 ```py
 from lazy_type_hint import LazyTypeHint, LazyTypeHintLive
 
-data = [1,2,3]
+data = [1,2,{"a", 2}]
 LazyTypeHint().from_data(data, class_name="MyClass").to_file("file.py")
 LazyTypeHint().from_data(data, class_name="MyClass").to_string()
 data_type_hinted = LazyTypeHintLive().from_data(data, class_name="MyClass")
@@ -214,6 +214,7 @@ Structures that can be type hinted:
  - Sets: sets, frozensets
  - Dictionaries: dict, MappingProxyType
  - Pandas DataFrame: Full support for string-based columns and `MultiIndex` columns
+ - Numpy arrays
  - Simple built-in types: bool, int, float, range, slice, None, str
  - Callables: lambdas, functions, staticmethods, classmethods, built-in functions
  - Module types

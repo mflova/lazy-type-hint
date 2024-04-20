@@ -31,7 +31,7 @@ class TestGetStrPy:
     def test_none(self) -> None:
         data_type_tree = InstanceDataTypeTree(None, self.NAME)
         assert f"{self.NAME} = Optional[object]" == data_type_tree.get_str_top_node()
-        assert "Optional" in data_type_tree.imports._set
+        assert "Optional" in data_type_tree.imports
 
     def test_custom_class(self) -> None:
         data_type_tree = InstanceDataTypeTree(DummyClass(), self.NAME)

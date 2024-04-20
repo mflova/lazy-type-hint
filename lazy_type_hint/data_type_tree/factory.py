@@ -18,6 +18,8 @@ if TYPE_CHECKING:
         Tuple,
     )
 
+    import numpy as np
+    from numpy.typing import NDArray
     import pandas as pd
 
     from lazy_type_hint.data_type_tree.generic_type.dict_data_type_tree import DictDataTypeTree
@@ -31,11 +33,25 @@ if TYPE_CHECKING:
     from lazy_type_hint.data_type_tree.generic_type.tuple_data_type_tree import TupleDataTypeTree
     from lazy_type_hint.data_type_tree.simple_data_type_tree.io_data_type_tree import IoDataTypeTree
     from lazy_type_hint.data_type_tree.simple_data_type_tree.module_data_type_tree import ModuleTypeDataTypeTree
+    from lazy_type_hint.data_type_tree.simple_data_type_tree.numpy_data_type_tree import NumpyDataTypeTree
     from lazy_type_hint.data_type_tree.simple_data_type_tree.pandas_series_data_type_tree import (
         PandasSeriesDataTypeTree,
     )
     from lazy_type_hint.data_type_tree.simple_data_type_tree.simple_data_type_tree import SimpleDataTypeTree
     from lazy_type_hint.utils import ImportManager
+
+
+@overload
+def data_type_tree_factory(  # type: ignore[overload-overlap]
+    data: "NDArray[np.generic]",
+    name: str,
+    *,
+    imports: "Optional[ImportManager]" = None,
+    depth: int = 0,
+    strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
+    parent: "Optional[DataTypeTree]" = None,
+) -> "NumpyDataTypeTree":
+    ...
 
 
 @overload

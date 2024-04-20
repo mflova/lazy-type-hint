@@ -39,7 +39,7 @@ def assert_imports() -> Callable[[DataTypeTree, Iterable[str]], None]:
             )
             if import__ in tree.get_str_top_node():
                 assert (
-                    import_ in tree.imports._set
+                    import_ in tree.imports
                 ), f"Not all needed imports were detected. Expected to import {import_} but only found {tree.imports._set}"
 
     return _assert_imports

@@ -1,6 +1,7 @@
 from types import MappingProxyType
 from typing import Any, Callable, List, Literal, Mapping, cast
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -46,6 +47,8 @@ samples: Mapping[SAMPLE_TYPE, Any] = {
             ("multi_level_pandas", pd.DataFrame({("a", "b"): [1, 2, 3]})),
             ("iterator", enumerate([1, 2, 3])),
             ("built-in function", print),
+            ("numpy array", np.array([12, 3])),
+            ("numpy array 2", np.array([12.3])),
         ],
     ],
     "set": {

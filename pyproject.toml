@@ -24,6 +24,7 @@ types-pyyaml = "*"
 filelock = "*"
 pytest_xdist = "*"  # Parallel execution tests
 pandas = "*"
+numpy = "*"
 pyinstrument = "^4.6.2"
 pytest-benchmark = "^4.0.0"
 
