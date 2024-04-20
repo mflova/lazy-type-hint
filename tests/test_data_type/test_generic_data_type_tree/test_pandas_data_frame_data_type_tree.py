@@ -369,6 +369,82 @@ class TestGetStrPyForAutocomplete:
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
+            (pd.DataFrame({"A": [1], 2: [2]}), """class Example(pd.DataFrame):
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal['A']) -> ExampleA:
+        ...
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal[2]) -> ExampleC:
+        ...
+
+    @overload
+    def __getitem__(
+        self,
+        key: Union[
+            "pd.Series[bool]",
+            str,
+            pd.DataFrame,
+            pd.Index,
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        ...
+
+    def __getitem__(
+        self,
+        key: Union[
+            "pd.Series[bool]",
+            str,
+            pd.DataFrame,
+            pd.Index,
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return super().__getitem__(key)""", 2),
+            (pd.DataFrame({("A",): [1], 2: [2]}), """class Example(pd.DataFrame):
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal['A']) -> ExampleA:
+        ...
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal[2]) -> ExampleC:
+        ...
+
+    @overload
+    def __getitem__(
+        self,
+        key: Union[
+            "pd.Series[bool]",
+            str,
+            pd.DataFrame,
+            pd.Index,
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        ...
+
+    def __getitem__(
+        self,
+        key: Union[
+            "pd.Series[bool]",
+            str,
+            pd.DataFrame,
+            pd.Index,
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return super().__getitem__(key)""", 2),
         ],
     )
     # fmt: on
@@ -573,6 +649,46 @@ class TestGetStrPyFullTypeHint:
         self,
         key: Union[
             Literal['A', 'C'],
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return super().__getitem__(key)""", 2),
+            (pd.DataFrame({"A": [1,2,3], 1: [1,2,3]}), """class Example(pd.DataFrame):
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal['A']) -> ExampleA:
+        ...
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal[1]) -> ExampleC:
+        ...
+
+    def __getitem__(
+        self,
+        key: Union[
+            Literal['A', 1],
+            npt.NDArray[np.bool_],
+            npt.NDArray[np.str_],
+            List[Union[Scalar, Tuple[Hashable, ...]]],
+        ],
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return super().__getitem__(key)""", 2),
+            (pd.DataFrame({("A",): [1,2,3], 1: [1,2,3]}), """class Example(pd.DataFrame):
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal['A']) -> ExampleA:
+        ...
+
+    @overload  # type: ignore
+    def __getitem__(self, key: Literal[1]) -> ExampleC:
+        ...
+
+    def __getitem__(
+        self,
+        key: Union[
+            Literal['A', 1],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
             List[Union[Scalar, Tuple[Hashable, ...]]],
