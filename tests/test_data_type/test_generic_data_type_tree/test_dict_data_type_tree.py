@@ -183,6 +183,24 @@ class TestGetStrPy:
 )""",
                 3,
             ),
+            (
+                DictDataTypeTree(
+                    {"$": 22, "my_list": [1, 2, 3], "my_list2": [2, 3], "my_list3": ["a"], "my_list4": ["b"]},
+                    name=NAME,
+                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                ),
+                f"""{NAME} = TypedDict(
+    "{NAME}",
+    {{
+        "$": int,
+        "my_list": {NAME}List,
+        "my_list2": {NAME}List,
+        "my_list3": {NAME}List2,
+        "my_list4": {NAME}List2,
+    }},
+)""",
+                5,
+            ),
         ],
     )
     def test_get_str_typed_dict_functional_syntax_py(

@@ -1,6 +1,5 @@
 import ast
 import os
-import re
 import subprocess
 from itertools import zip_longest
 from typing import Any, Final, List, Protocol, TypeVar, Union, cast
@@ -18,10 +17,7 @@ def is_string_python_keyword_compatible(string: str) -> bool:
     Returns:
         bool: True if the string is compatible with Python keywords, False otherwise.
     """
-    if bool(re.compile(r"^[a-zA-Z0-9_]+$").match(string)):
-        if not string[0].isnumeric():
-            return True
-    return False
+    return bool(string.replace("_", "").isalnum() and not string[0].isnumeric())
 
 
 def compare_ast(

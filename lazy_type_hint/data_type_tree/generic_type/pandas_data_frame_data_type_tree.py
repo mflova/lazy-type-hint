@@ -1,10 +1,14 @@
 from typing import (
     Dict,
     Final,
+    Hashable,
     List,
     Mapping,
     Set,
+    Tuple,
     Type,
+    Union,
+    cast,
 )
 
 import pandas as pd
@@ -13,9 +17,14 @@ from typing_extensions import override
 from lazy_type_hint.data_type_tree import data_type_tree_factory
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
+from lazy_type_hint.utils.utils import cache_returned_value_per_instance
 
+LITERAL_OVERLOAD_TEMPLATE: Final = """    @overload  # type: ignore
+    def __getitem__(self, key: Literal[{literal}]) -> {rtype}:
+        ...
+"""
 OVERLOAD_TEMPLATE: Final = """    @overload  # type: ignore
-    def __getitem__(self, key: Literal["{literal}"]) -> {rtype}:
+    def __getitem__(self, key: {input_type}) -> {rtype}:
         ...
 """
 TEMPLATE: Final = """class {class_name}(pd.DataFrame):
@@ -72,10 +81,27 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
 
     @override
     @property
+    @cache_returned_value_per_instance
     def permission_to_be_created_as_type_alias(self) -> bool:
-        return bool(len(self) >= 1 and self.are_columns_either_all_str_or_all_tuple)
+        """
+        Set the permissions of this class to be created as a type alias.
+
+        Situations where permission is given:
+            - If columns are tuples: And first level are str, int or bool
+            - If columns are not tuples: And columns are str, int, bool
+
+        Otherwise delegate to super class
+        """
+        if all(isinstance(column, tuple) for column in self.data.columns):
+            if all(isinstance(column[0], (str, bool, int)) for column in self.data.columns):
+                return True
+        else:
+            if all(isinstance(column, (str, bool, int)) for column in self.data.columns):
+                return True
+        return super().permission_to_be_created_as_type_alias
 
     @property
+    @cache_returned_value_per_instance
     def can_be_accessed_multilevel(self) -> bool:
         return self.all_columns_are(tuple)
 
@@ -89,11 +115,11 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
     @property
     def are_columns_either_all_str_or_all_tuple(self) -> bool:
         if self.are_column_same_type:
-            return all(isinstance(column, (str, tuple)) for column in self.data.columns)
+            return all(isinstance(column, (str, int, tuple)) for column in self.data.columns)
         return False
 
-    def _create_child(self, column: str) -> DataTypeTree:
-        suffix = self._to_camel_case(column)
+    def _create_child(self, column: Hashable) -> DataTypeTree:
+        suffix = self._to_camel_case(str(column))
         return data_type_tree_factory(  # type: ignore
             data=self.data[column],
             name=f"{self.name}{suffix}",
@@ -104,23 +130,25 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         )
 
     @override
-    def _instantiate_children(self, data: Mapping[str, object]) -> Mapping[str, DataTypeTree]:  # type: ignore
-        children: Dict[str, DataTypeTree] = {}
+    def _instantiate_children(self, data: pd.DataFrame) -> Mapping[Hashable, DataTypeTree]:
+        children: Dict[Hashable, DataTypeTree] = {}
         if not self.are_columns_either_all_str_or_all_tuple:
-            return children
+            return {}
 
         # Corner case to avoid infinite recursion
         if all(isinstance(column, tuple) and len(column) == 1 for column in self.data.columns):
             return {}
 
-        for column in self.data.columns:
-            if not self.can_be_accessed_multilevel:  # Here all columns will  be str
+        for column in data.columns:
+            if not self.can_be_accessed_multilevel:  # Here all columns will  be Hashable
+                column = cast(Hashable, column)
                 children[column] = self._create_child(column)
             else:  # Here all columns will be tuple
-                columns_processed: Set[str] = set()
-                for column in self.data.columns:
-                    if column[0] not in columns_processed:
-                        columns_processed.add(column[0])
+                multi_column = cast(Tuple[Hashable, ...], column)
+                columns_processed: Set[Union[bool, str, int]] = set()
+                if multi_column[0] not in columns_processed:
+                    if isinstance(multi_column[0], (str, int, bool)):
+                        columns_processed.add(multi_column[0])
                         children[column[0]] = self._create_child(column[0])
         return children
 
@@ -149,12 +177,12 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         overloads: List[str] = []
         for literal, child in self.children.items():
             if child.permission_to_be_created_as_type_alias:
-                overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=child.name))
+                overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=child.name))
             else:
-                rtype = "Union[pd.DataFrame, pd.Series]"
-                overloads.append(OVERLOAD_TEMPLATE.format(literal=literal, rtype=rtype))
+                rtype = "pd.Series" if isinstance(self.data[literal], pd.Series) else "pd.DataFrame"
+                overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=rtype))
         if self.strategies.pandas_strategies == "Full type hint":
-            all_literals = ", ".join(f'"{key}"' for key in self.children)
+            all_literals = ", ".join(repr(key) for key in self.children)
             allowed_types = f"Literal[{all_literals}]"
             template = TEMPLATE_NO_PD
         else:

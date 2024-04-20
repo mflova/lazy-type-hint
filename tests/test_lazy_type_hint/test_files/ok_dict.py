@@ -6,7 +6,7 @@ dct = {
     "nested_dict": {"key1": "value1", "key2": "value2"},
 }
 
-data = LazyTypeHintLive().from_data(dct, class_name="Example")
-data["list"]
-data["int"]
-data["nested_dict"]["key1"]
+dct2 = LazyTypeHintLive().from_data(dct, class_name="Example")
+dct2["list"]
+dct2["int"]
+dct2["nested_dict"]["key1"]

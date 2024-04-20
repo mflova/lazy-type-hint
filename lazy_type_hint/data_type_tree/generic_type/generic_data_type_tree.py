@@ -2,16 +2,13 @@ from abc import abstractmethod
 from typing import (
     Hashable,
     Iterable,
-    Iterator,
     List,
-    Mapping,
     Sequence,
     Tuple,
-    Union,
     final,
 )
 
-from typing_extensions import Self, override
+from typing_extensions import override
 
 from lazy_type_hint.data_type_tree.data_type_tree import ChildrenStructure, DataTypeTree
 
@@ -20,9 +17,6 @@ class GenericDataTypeTree(DataTypeTree):
     """Tree that holds any kind of object that must contain other inner structures (children)."""
 
     children: ChildrenStructure[DataTypeTree]
-
-    # Iterable-protocol related
-    _iterator: Union[int, Iterator[Hashable]]
 
     @abstractmethod
     def _instantiate_children(self, data: object) -> ChildrenStructure[DataTypeTree]:
@@ -82,30 +76,6 @@ class GenericDataTypeTree(DataTypeTree):
                 child_types_set.remove("int")
             return tuple(sorted(child_types_set))
         return tuple(child_types)
-
-    def __iter__(self) -> "Self":
-        if isinstance(self.children, Mapping):
-            self._iterator = iter(self.children.keys())
-        else:
-            self._iterator = 0  # Reset the index to zero when starting a new iteration
-        return self
-
-    @override
-    def __next__(self) -> DataTypeTree:
-        # Many type ignores here but everything is safe
-        if isinstance(self.children, Mapping):
-            key = next(self._iterator, None)  # type: ignore
-            if key is not None:
-                return self.children[key]
-            else:
-                raise StopIteration
-        else:
-            if self._iterator < len(self.children):  # type: ignore
-                element = list(self.children)[self._iterator]  # type: ignore
-                self._iterator += 1  # type: ignore
-                return element
-            else:
-                raise StopIteration
 
     @override
     def _get_hash(self) -> Hashable:

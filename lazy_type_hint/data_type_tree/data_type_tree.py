@@ -5,6 +5,7 @@ This data can then be parsed to a .py compatible file that will type hint your c
 
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -29,6 +30,7 @@ from lazy_type_hint.utils import (
     cache_returned_value_per_instance,
     is_string_python_keyword_compatible,
 )
+from lazy_type_hint.utils.utils import TAB
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -192,20 +194,54 @@ class DataTypeTree(ABC):
         return self._get_str_top_node()
 
     @final
-    def get_str_all_nodes(self, include_imports: bool = True) -> str:
+    def get_str_all_nodes(
+        self, include_imports: bool = True, make_parent_class_inherit_from_original_type: bool = False
+    ) -> str:
         """String that represents the .py file created from the tree."""
-        return self._format_node_strings(self.get_strs_all_nodes_unformatted(include_imports=include_imports))
+        return self._format_node_strings(
+            self.get_strs_all_nodes_unformatted(
+                include_imports=include_imports,
+                make_parent_class_inherit_from_original_type=make_parent_class_inherit_from_original_type,
+            )
+        )
 
     @final
     @cache_returned_value_per_instance
-    def get_strs_all_nodes_unformatted(self, *, include_imports: bool = True) -> Tuple[str, ...]:
+    def get_strs_all_nodes_unformatted(
+        self, *, include_imports: bool = True, make_parent_class_inherit_from_original_type: bool = False
+    ) -> Tuple[str, ...]:
         """Get, ordered by dependencies, all strings representing the whole tree."""
         strings: OrderedSet[str] = OrderedSet()
         self._get_strs_all_nodes_unformatted(types=strings)
         strings_lst = strings.as_list()
+        if not strings_lst:
+            raise DataTypeTreeError("No type hints could be built")
+
         if include_imports:
             strings_lst.insert(0, self.imports.format())
+
+        if make_parent_class_inherit_from_original_type:
+            strings_lst[-1], old_name = self.rename_declaration(strings_lst[-1], new_name="_{name}")
+            strings_lst.append(f"class {old_name}(_{old_name}):\n{TAB}...")
         return tuple(strings_lst)
+
+    @staticmethod
+    def rename_declaration(declaration: str, new_name: str) -> Tuple[str, str]:
+        if "=" in declaration:
+            declarations = declaration.split("=")
+            old_name = declarations[0].rstrip().strip()
+            new_name = new_name.format(name=old_name)
+            declaration = f"{new_name} =" + "".join(declarations[1:])
+        elif declaration.startswith("class "):
+            pattern = r"class\s+(\w+)\b"
+            match = re.search(pattern, declaration)
+            old_name = match.group(1) if match else ""
+            new_name = new_name.format(name=old_name)
+            if old_name:
+                declaration = re.sub(pattern, f"class {new_name}", declaration)
+        else:
+            old_name = ""
+        return declaration, old_name
 
     @final
     def _get_strs_all_nodes_unformatted(self, *, types: Optional[OrderedSet[str]] = None) -> None:
@@ -272,8 +308,12 @@ class DataTypeTree(ABC):
         """Iterate over the children of the tree."""
 
     @final
-    def print_children(self) -> None:
-        print(repr(self))
+    def print_all_children(self, *, recursive: bool = True) -> None:
+        print("    " * self.depth + repr(self))
+        if not self.children:
+            return
+        for child in self:
+            child.print_all_children(recursive=recursive)
 
     @final
     def __eq__(self, other_object: object) -> bool:

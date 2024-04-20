@@ -7,7 +7,7 @@ dct = {
     "nested_lst": [1, 2, 3],
 }
 
-data = LazyTypeHintLive(strategies=ParsingStrategies(list_strategy="Sequence")).from_data(
+dct = LazyTypeHintLive(strategies=ParsingStrategies(list_strategy="Sequence")).from_data(
     dct, class_name="Example"
 )
-data["nested_lst"].append([1, 2])
+dct["nested_lst"].append([1, 2])

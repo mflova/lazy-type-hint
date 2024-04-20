@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Iterator, overload
+from typing import TYPE_CHECKING, Any, Iterator, Union, overload
 
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.strategies import ParsingStrategies
@@ -6,7 +6,6 @@ from lazy_type_hint.strategies import ParsingStrategies
 if TYPE_CHECKING:
     from types import MappingProxyType, ModuleType
     from typing import (
-        Any,
         Dict,
         FrozenSet,
         Iterator,
@@ -17,7 +16,6 @@ if TYPE_CHECKING:
         Set,
         TextIO,
         Tuple,
-        Union,
     )
 
     import pandas as pd
@@ -211,7 +209,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: object,
+    data: Union[object, Any],
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -223,7 +221,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 
 def data_type_tree_factory(
-    data: object,
+    data: Union[object, Any],
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,

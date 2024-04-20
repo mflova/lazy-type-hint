@@ -13,12 +13,14 @@ from typing import (
     Sequence,
     TypeVar,
     Union,
+    cast,
     final,
     overload,  # noqa: F401
 )
 
 from typing_extensions import TypeAlias, override
 
+from lazy_type_hint.data_type_tree import DataTypeTree
 from lazy_type_hint.file_modifiers.py_file_modifier import PyFileModifier
 from lazy_type_hint.file_modifiers.yaml_file_modifier import YAML_COMMENTS_POSITION
 from lazy_type_hint.generators.lazy_type_hint_abc import LazyTypeHintABC
@@ -64,7 +66,7 @@ class LazyTypeHintLive(LazyTypeHintABC):
     def __init__(
         self,
         strategies: ParsingStrategies = ParsingStrategies(),  # noqa: B008
-        if_type_hint_exists: Literal["overwrite", "validate"] = "validate",
+        if_type_hint_exists: Literal["overwrite", "validate"] = "overwrite",
     ) -> None:
         self.strategies = strategies
         self.if_type_hint_exists = if_type_hint_exists
@@ -121,16 +123,20 @@ class LazyTypeHintLive(LazyTypeHintABC):
         custom_class_file_path = self._custom_class_dir_path / f"{class_name}.py"
 
         if class_name in self._get_classes_added() and self.if_type_hint_exists == "validate":
-            string_representation = str(super().from_data(data=data, class_name=class_name))
+            string_representation = cast(
+                DataTypeTree, super().from_data(data=data, class_name=class_name)
+            ).get_str_all_nodes(make_parent_class_inherit_from_original_type=False)
             if self._remove_docstrings(string_representation) != self._remove_docstrings(
                 custom_class_file_path.read_text(encoding="utf-8")
             ):
                 raise LazyTypeHintLiveError(
-                    "The given object did not generate the same string representation (type hints) for "
-                    f"the existing `{class_name}`"
+                    f"Error in validation: Existing type hints were found for `{class_name}` and this one does not "
+                    "match the inner structure of the input data given."
                 )
         else:
-            string_representation = str(super().from_data(data=data, class_name=class_name))
+            string_representation = cast(
+                DataTypeTree, super().from_data(data=data, class_name=class_name)
+            ).get_str_all_nodes(make_parent_class_inherit_from_original_type=False)
 
         self._create_custom_class_py(string_representation, class_name)
         if class_name in self._get_classes_added():

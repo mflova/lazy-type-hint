@@ -7,5 +7,5 @@ dct = {
 }
 
 LazyTypeHintLive().reset()
-data = LazyTypeHintLive().from_data(dct, class_name="Example")
-data["nested_lst"].append(["2"])
+dct = LazyTypeHintLive().from_data(dct, class_name="Example")
+dct["nested_lst"].append(["2"])

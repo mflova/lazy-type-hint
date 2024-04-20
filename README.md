@@ -6,6 +6,17 @@ Type hint any Python (nested) data structure! Dictionaries, callables, Pandas Da
 pip install lazy-type-hint
 ```
 
+## Quick examples
+
+```py
+from lazy_type_hint import LazyTypeHint, LazyTypeHintLive
+
+data = [1,2,3]
+LazyTypeHint().from_data(data, class_name="MyClass").to_file("file.py")
+LazyTypeHint().from_data(data, class_name="MyClass").to_string()
+data_type_hinted = LazyTypeHintLive().from_data(data, class_name="MyClass")
+```
+
 ## Main features
 
 1. Get corresponding type hints from any given data structure and with mutltiple parsing

@@ -7,6 +7,6 @@ dct = {
     "frozen_set": frozenset({1, 2, 3}),
 }
 
-data = LazyTypeHintLive().from_data(dct, class_name="Example")
+dct = LazyTypeHintLive().from_data(dct, class_name="Example")
 with suppress(AttributeError):
-    data["frozen_set"].add([1, 2])
+    dct["frozen_set"].add([1, 2])
