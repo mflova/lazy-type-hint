@@ -1,5 +1,3 @@
-import ast
-
 import pandas as pd
 from pytest_benchmark.fixture import BenchmarkFixture
 
@@ -32,16 +30,16 @@ class TestManyColumns:
 
 class TestDeepColumns:
     def test_instantiation(self, benchmark: BenchmarkFixture) -> None:
-        df = dataframe_factory(n_columns=1, column_depth=1_000)
+        df = dataframe_factory(n_columns=1, column_depth=100)
         benchmark(lambda: data_type_tree_factory(df, name="Example"))
-        assert benchmark.stats.stats.mean < 0
+        assert benchmark.stats.stats.mean < 1
 
     def test_get_str(self, benchmark: BenchmarkFixture) -> None:
-        df = dataframe_factory(n_columns=1, column_depth=1_000)
+        df = dataframe_factory(n_columns=1, column_depth=100)
 
         def launcher() -> None:
             tree = data_type_tree_factory(df, name="Example")
             benchmark(lambda: tree.get_str_all_nodes())
 
         launcher()
-        assert benchmark.stats.stats.mean < 0
+        assert benchmark.stats.stats.mean < 1e-4

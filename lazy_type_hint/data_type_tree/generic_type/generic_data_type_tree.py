@@ -2,16 +2,13 @@ from abc import abstractmethod
 from typing import (
     Hashable,
     Iterable,
-    Iterator,
     List,
-    Mapping,
     Sequence,
     Tuple,
-    Union,
     final,
 )
 
-from typing_extensions import Self, override
+from typing_extensions import override
 
 from lazy_type_hint.data_type_tree.data_type_tree import ChildrenStructure, DataTypeTree
 
@@ -79,7 +76,6 @@ class GenericDataTypeTree(DataTypeTree):
                 child_types_set.remove("int")
             return tuple(sorted(child_types_set))
         return tuple(child_types)
-
 
     @override
     def _get_hash(self) -> Hashable:

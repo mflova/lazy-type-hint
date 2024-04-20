@@ -1,4 +1,3 @@
-
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from lazy_type_hint.utils.utils import (

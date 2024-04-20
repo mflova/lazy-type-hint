@@ -13,8 +13,8 @@ lst = [
     },
 ]
 
-lst = LazyTypeHintLive().from_data(lst, class_name="Example")
-lst[0]["list"]
-lst[0]["int"]
-lst[0]["nested_dict"]
-lst[0]["nested_dict"]["key1"]
+lst2 = LazyTypeHintLive().from_data(lst, class_name="Example")
+lst2[0]["list"]
+lst2[0]["int"]
+lst2[0]["nested_dict"]
+lst2[0]["nested_dict"]["key1"]

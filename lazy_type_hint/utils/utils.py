@@ -1,6 +1,5 @@
 import ast
 import os
-import re
 import subprocess
 from itertools import zip_longest
 from typing import Any, Final, List, Protocol, TypeVar, Union, cast

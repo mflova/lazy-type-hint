@@ -1,4 +1,5 @@
 import itertools
+import re
 import subprocess
 import timeit
 from dataclasses import dataclass
@@ -7,9 +8,12 @@ from types import MappingProxyType
 from typing import (
     Any,
     Callable,
+    Dict,
+    Final,
     Iterable,
     List,
     Literal,
+    Mapping,
     Set,
     Tuple,
 )
@@ -60,6 +64,8 @@ def test_all_children_share(create_sample: Callable[[str], str], strategies: Par
 
 
 class TestIntegration:
+    name: Final = "Example"
+
     @pytest.mark.integration
     @pytest.mark.skipif(
         not check_if_command_available("python"), reason="Python must be available within the terminal."
@@ -71,11 +77,12 @@ class TestIntegration:
     ) -> None:
         data = create_sample(data_type)
         data_before = str(data)
-        string = data_type_tree_factory(data, name="Example", strategies=strategies).get_str_all_nodes(
-            include_imports=True
-        )
+        tree = data_type_tree_factory(data, name=self.name, strategies=strategies)
 
-        self.assert_no_unused_classes(string)
+        string = tree.get_str_all_nodes(include_imports=True)
+        strings_unformatted = tree.get_strs_all_nodes_unformatted(include_imports=False)
+
+        self.assert_no_unused_classes(strings_unformatted)
         self.assert_no_redefined_classes(string)
         self.assert_no_double_whitespace(string)
         self.assert_basic_format(string)
@@ -113,22 +120,39 @@ class TestIntegration:
         assert not result.stdout
         assert not result.stderr
 
-    def assert_no_unused_classes(self, string: str) -> None:
-        types_defined: Set[str] = set()
-        for line in string.splitlines():
-            for type_defined in types_defined.copy():
-                if type_defined in line:
-                    idx = line.find(type_defined) + len(type_defined)
-                    if idx >= len(line) or idx < len(line) and not line[idx].isalpha():
-                        types_defined.remove(type_defined)
-            name = self._get_name_type_alias(line)
-            if name:
-                types_defined.add(name)
-        error = (
-            "Only the new class created can be the only non-used class. However, more than 1 unused class/type alias "
-            f"was detected: {', '.join(types_defined)}"
-        )
-        assert len(types_defined) == 1 or len(types_defined) == 0, error
+    def assert_no_unused_classes(self, strings: Tuple[str, ...]) -> None:
+        def find_symbols(strings: Tuple[str, ...]) -> Mapping[str, str]:
+            dct: Dict[str, str] = {}
+            for line in strings:
+                if "=" in line:
+                    before_equal = line.split("=")[0].strip().rstrip()
+                    if ":" in before_equal:
+                        dct[before_equal.split(":")[0].strip().rstrip()] = line
+                    else:
+                        dct[before_equal] = line
+                if line.startswith("class"):
+                    pattern = r"class\s+(\w+)\b"
+                    match = re.search(pattern, line)
+                    if match and match.group(1):
+                        dct[match.group(1)] = line
+            return dct
+
+        symbols = find_symbols(strings)
+        referenced_symbols: Set[str] = set()
+        for symbol in symbols:
+            if symbol == "ExampleNestedLevelsLevel1":
+                pass
+            for declaration in strings:
+                if symbol in declaration:
+                    pass
+                if any(f"{symbol}{expr}" in declaration for expr in (",", ")", "]", "\n", ":")):
+                    referenced_symbols.add(symbol)
+                if declaration.endswith(symbol):
+                    referenced_symbols.add(symbol)
+        unused_classes = symbols.keys() - referenced_symbols
+        assert (
+            len(unused_classes) == 1
+        ), f"Only expected one unused class ({self.name}) but found others: {', '.join(unused_classes - {self.name})}"
 
     def assert_no_redefined_classes(self, string: str) -> None:
         all_types_defined: Set[str] = set()

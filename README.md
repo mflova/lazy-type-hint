@@ -14,7 +14,7 @@ from lazy_type_hint import LazyTypeHint, LazyTypeHintLive
 data = [1,2,3]
 LazyTypeHint().from_data(data, class_name="MyClass").to_file("file.py")
 LazyTypeHint().from_data(data, class_name="MyClass").to_string()
-data = LazyTypeHintLive().from_data(data, class_name="MyClass")
+data_type_hinted = LazyTypeHintLive().from_data(data, class_name="MyClass")
 ```
 
 ## Main features

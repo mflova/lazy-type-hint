@@ -84,13 +84,14 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
     @cache_returned_value_per_instance
     def permission_to_be_created_as_type_alias(self) -> bool:
         """
-        Situations where it is True:
-        True when:
-        - If columns are tuples: And first level are str, int or bool
-        - If columns are not tuples: And columns are str, int, bool
+        Set the permissions of this class to be created as a type alias.
+
+        Situations where permission is given:
+            - If columns are tuples: And first level are str, int or bool
+            - If columns are not tuples: And columns are str, int, bool
+
         Otherwise delegate to super class
         """
-        # TODO limit to X number of columns?
         if all(isinstance(column, tuple) for column in self.data.columns):
             if all(isinstance(column[0], (str, bool, int)) for column in self.data.columns):
                 return True
@@ -129,7 +130,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         )
 
     @override
-    def _instantiate_children(self, data: pd.DataFrame) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
+    def _instantiate_children(self, data: pd.DataFrame) -> Mapping[Hashable, DataTypeTree]:
         children: Dict[Hashable, DataTypeTree] = {}
         if not self.are_columns_either_all_str_or_all_tuple:
             return {}

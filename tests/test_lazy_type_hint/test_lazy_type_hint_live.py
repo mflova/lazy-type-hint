@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Final, Literal, Union
+from typing import Any, Final, Literal, Mapping, Union, cast
 
 import pytest
 import yaml
@@ -7,6 +7,16 @@ import yaml
 from lazy_type_hint.generators.lazy_type_hint_live import LazyTypeHintLive, LazyTypeHintLiveError
 from lazy_type_hint.strategies import ParsingStrategies
 from lazy_type_hint.utils import Mypy
+
+
+def yaml_file_loader(path: Union[Path, str]) -> object:
+    with open(path) as f:
+        return yaml.load(f, Loader=yaml.SafeLoader)
+
+
+@pytest.fixture
+def lazy_type_hint_live() -> LazyTypeHintLive:
+    return LazyTypeHintLive()
 
 
 @pytest.mark.usefixtures("_serial")
@@ -64,7 +74,6 @@ class TestLazyTypeHintLive:
 class TestLazyTypeHintLiveValidationFromData:
     name: Final = "Example"
 
-    @pytest.mark.parametrize("if_type_hint_exists", ["overwrite", "validate"])
     @pytest.mark.parametrize(
         "data1, data2, expected_ok",
         [
@@ -72,6 +81,7 @@ class TestLazyTypeHintLiveValidationFromData:
             ([1, 2], [1, "2"], False),
         ],
     )
+    @pytest.mark.parametrize("if_type_hint_exists", ["overwrite", "validate"])
     def test_validation(
         self, data1: object, data2: object, if_type_hint_exists: Literal["overwrite", "validate"], expected_ok: bool
     ) -> None:
@@ -156,15 +166,6 @@ class TestLazyTypeHintLiveFromYaml:
             yaml.dump(data, f)
         return path
 
-    @staticmethod
-    def yaml_file_loader(path: Union[Path, str]) -> object:
-        with open(path) as f:
-            return yaml.load(f, Loader=yaml.SafeLoader)
-
-    @pytest.fixture
-    def lazy_type_hint(self) -> LazyTypeHintLive:
-        return LazyTypeHintLive()
-
     @pytest.mark.parametrize(
         "data",
         (
@@ -175,7 +176,51 @@ class TestLazyTypeHintLiveFromYaml:
         ),
     )
     def test_from_yaml_file(
-        self, lazy_type_hint: LazyTypeHintLive, data: object, yaml_file: Path, tmp_path: str
+        self, lazy_type_hint_live: LazyTypeHintLive, data: object, yaml_file: Path, tmp_path: str
     ) -> None:
-        lazy_type_hint.reset()
-        lazy_type_hint.from_yaml_file(loader=self.yaml_file_loader, path=yaml_file, class_name="Example")
+        lazy_type_hint_live.reset()
+        lazy_type_hint_live.from_yaml_file(loader=yaml_file_loader, path=yaml_file, class_name="Example")
+
+
+@pytest.mark.usefixtures("_serial")
+class TestLazyTypeHintFromYamlFileMutation:
+    CONTENT_FILE: Final = """---
+# Comment for level1
+level1:
+  # Comment for list1
+  list1:
+    - item1
+    - item2
+    - item3
+  list2:
+    # Non valid comment for subitem1
+    - subitem1:  # Comment for subitem1
+        # Comment for subkey1
+        subkey1: subvalue1  # [mm]
+      # Comment not valid for subkey1
+        subkey2: subvalue2#Not a comment
+    - subitem2:
+        subkey3: subvalue3
+        subkey4: subvalue4
+"""
+
+    @pytest.fixture
+    def yaml_file(self, tmp_path: str) -> Path:
+        path = Path(tmp_path) / "file.yaml"
+        with open(path, mode="w", encoding="UTF-8") as f:
+            yaml.dump(self.CONTENT_FILE, f)
+        return path
+
+    @pytest.fixture
+    def original_content_of_yaml_file(self, yaml_file: Path) -> Mapping[str, Any]:
+        with open(yaml_file) as f:
+            return cast(Mapping[str, Any], yaml.load(f, Loader=yaml.FullLoader))
+
+    def test_from_yaml_file(
+        self,
+        lazy_type_hint_live: LazyTypeHintLive,
+        yaml_file: Path,
+        original_content_of_yaml_file: Mapping[str, Any],
+    ) -> None:
+        output = lazy_type_hint_live.from_yaml_file(loader=yaml_file_loader, path=yaml_file, class_name="Example")
+        assert original_content_of_yaml_file == output, "The YAML data was mutated"
