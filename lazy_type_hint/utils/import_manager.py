@@ -37,6 +37,7 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "pd.Scalar",
     "npt",
     "numpy",
+    "NDArray",
     "ModuleType",
     "TextIO",
 ]
@@ -72,8 +73,9 @@ class ImportManager:
             "overload": ("typing", "overload"),
             "pandas": ("pandas", "pandas"),
             "npt": ("npt", "npt"),
+            "NDArray": ("numpy.typing", "NDArray"),
             "numpy": ("numpy", "numpy"),
-            "TypeAlias": ("typing_extenions", "TypeAlias"),
+            "TypeAlias": ("typing_extensions", "TypeAlias"),
             "pd.Scalar": ("pandas._typing", "Scalar"),
             "TextIO": ("typing", "TextIO"),
             "Iterator": ("typing", "Iterator"),
