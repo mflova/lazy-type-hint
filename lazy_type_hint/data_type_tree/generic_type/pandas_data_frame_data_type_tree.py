@@ -113,10 +113,18 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         return all(isinstance(column, type_) for column in self.data.columns)
 
     @property
-    def are_columns_either_all_str_or_all_tuple(self) -> bool:
-        if self.are_column_same_type:
-            return all(isinstance(column, (str, int, tuple)) for column in self.data.columns)
-        return False
+    def literal_compatible_types(self) -> Tuple[Type[str], Type[bool], Type[int]]:
+        return str, bool, int
+
+    @property
+    def are_all_columns_literal_compatible(self) -> bool:
+        column: Hashable
+        for column in self.data.columns:
+            if isinstance(column, tuple):
+                column = column[0]
+            if not isinstance(column, self.literal_compatible_types):
+                return False
+        return True
 
     def _create_child(self, column: Hashable) -> DataTypeTree:
         suffix = self._to_camel_case(str(column))
@@ -132,7 +140,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
     @override
     def _instantiate_children(self, data: pd.DataFrame) -> Mapping[Hashable, DataTypeTree]:
         children: Dict[Hashable, DataTypeTree] = {}
-        if not self.are_columns_either_all_str_or_all_tuple:
+        if not self.are_all_columns_literal_compatible:
             return {}
 
         # Corner case to avoid infinite recursion
@@ -147,7 +155,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
                 multi_column = cast(Tuple[Hashable, ...], column)
                 columns_processed: Set[Union[bool, str, int]] = set()
                 if multi_column[0] not in columns_processed:
-                    if isinstance(multi_column[0], (str, int, bool)):
+                    if isinstance(multi_column[0], self.literal_compatible_types):
                         columns_processed.add(multi_column[0])
                         children[column[0]] = self._create_child(column[0])
         return children
@@ -176,14 +184,23 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
 
         overloads: List[str] = []
         for literal, child in self.children.items():
-            if child.permission_to_be_created_as_type_alias:
-                overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=child.name))
-            else:
-                rtype = "pd.Series" if isinstance(self.data[literal], pd.Series) else "pd.DataFrame"
-                overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=rtype))
+            if isinstance(literal, self.literal_compatible_types):
+                if child.permission_to_be_created_as_type_alias:
+                    overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=child.name))
+                else:
+                    rtype = "pd.Series" if isinstance(self.data[literal], pd.Series) else "pd.DataFrame"
+                    overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=rtype))
         if self.strategies.pandas_strategies == "Full type hint":
-            all_literals = ", ".join(repr(key) for key in self.children)
-            allowed_types = f"Literal[{all_literals}]"
+            literal_compatible_keys: List[str] = []
+            extra_types = ""
+            for key in self.children:
+                if isinstance(key, self.literal_compatible_types):
+                    literal_compatible_keys.append(repr(key))
+                else:
+                    self.imports.add("Hashable")
+                    extra_types = ", Hashable"  # This can be more precise, but not supported yet
+            all_literals = ", ".join(literal_compatible_keys)
+            allowed_types = f"Literal[{all_literals}]" + extra_types
             template = TEMPLATE_NO_PD
         else:
             allowed_types = "str"

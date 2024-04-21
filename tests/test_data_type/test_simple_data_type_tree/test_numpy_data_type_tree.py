@@ -13,9 +13,9 @@ class TestGetStr:
     @pytest.mark.parametrize(
         "input_arr, expected_str",
         [
-            (np.array([1]), f"{name}: TypeAlias = NDArray[np.int32]"),
-            (np.array([1.0]), f"{name}: TypeAlias = NDArray[np.float64]"),
-            (np.zeros((2, 2), dtype=np.complex128), f"{name}: TypeAlias = NDArray[np.complex128]"),
+            (np.array([1]), f'{name}: TypeAlias = "NDArray[np.int32]"'),
+            (np.array([1.0]), f'{name}: TypeAlias = "NDArray[np.float64]"'),
+            (np.zeros((2, 2), dtype=np.complex128), f'{name}: TypeAlias = "NDArray[np.complex128]"'),
         ],
     )
     def test_get_str_top_node(self, input_arr: NDArray[np.generic], expected_str: str) -> None:
