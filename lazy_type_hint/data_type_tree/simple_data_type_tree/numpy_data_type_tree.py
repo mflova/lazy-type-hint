@@ -14,4 +14,4 @@ class NumpyDataTypeTree(SimpleDataTypeTree):
         self.imports.add("NDArray")
         self.imports.add("numpy")
         self.imports.add("TypeAlias")
-        return f"{self.name}: TypeAlias = NDArray[np.{self.data.dtype}]"
+        return f'{self.name}: TypeAlias = "NDArray[np.{self.data.dtype}]"'
