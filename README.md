@@ -23,8 +23,8 @@ data_type_hinted = LazyTypeHintLive().from_data(data, class_name="MyClass")
 
 ## Tools
 
-
-`LazyTypeHint` comes equipped with tools to generate type hints for:
+`lazy-type-hint` comes with 2 tools (`LazyTypeHint` and `LazyTypeHintLive`) to generate
+type hints for:
 
 - `from_data`: Any Python built-in data structure and more. This encompasses large or
   deeply nested structures, regular or multi-index `Pandas` `DataFrames`, `numpy` arrays, etc.
@@ -108,14 +108,14 @@ benefits of their own type hints without managing anything related to the files.
 
 ## Fine tuning type hint generation: All features
 
-Different strategies can be passed to the initializer in order to fine tune the type hint
-generations. These are:
+`LazyTypeHint` offers a range of strategies that can be passed to the initializer to
+customize the tool's behavior and refine the generation of type hints:
 
 ### Data structure validation
 
-Make use `if_type_hint_exists` in order to define the strategy to follow if type hints
-were already generated. `validate` will perform string based validation with respect to
-the previously generated type hints for the same `class_name`
+Use `if_type_hint_exists` to specify the strategy if type hints were already generated.
+`validate` provides a string-based validation with respect to the previously generated type
+hints for the same `class_name`
 
 ```py
 from lazy_type_hint import LazyTypeHintLive
@@ -128,7 +128,7 @@ data2_type_hinted = LazyTypeHintLive(if_type_hint_exists="validate").from_data(d
  
 ### Type hint YAML files
 
-Type hint content of YAML files. This method will also parse all found comments
+You can type hint the content of YAML files. This method will also parse all found comments.
 
 ```py
 LazyTypeHint().from_yaml_file(
@@ -155,9 +155,8 @@ class Example:
 ```
 ### Documenting type hints
 
-You can specific a reserved keyword within your dictionaries that will be used to hold
-documentation. This is a common practice for file formats such as JSON where comments must
-be stored this way.
+Define a reserved keyword within your dictionaries to hold documentation. This is a common
+practice for file formats such as JSON where comments must be stored in this way.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -182,9 +181,9 @@ class Example(TypedDict):
 ### Similarity based merge
 
 If two data structures within a container are detected to be the same, only one type alias
-will be created. However, it is also possible to merge different but similar mapping-based
-structures. By default, all dictionaries sharing 80% similarity will be merged, but this
-parameter can be also tuned:
+will be created. Moreover, by default, all dictionaries sharing 80% similarity will be
+merged. However, this parameter can be adjusted for different but similar mapping-based
+structures.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -226,8 +225,8 @@ MyClass = Tuple[MyClassDict, MyClassDict]
 
 ### Type hinting dictionaries
 
-The user can select between `Mapping`, `dict` or `TypedDict` (default). Additionally, `TypedDict`
-also allows for `read-only` fields.
+Choose between `Mapping`, `dict`, or `TypedDict` (default) for type hinting dictionaries.
+Additionally, TypedDict allows for read-only fields.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -251,9 +250,8 @@ class MyClass(TypedDict):
 
 ### Type hinting lists
 
-The user can select between `list` (default) and `Sequence`:
+Choose between `list` (default) and `Sequence` for type hinting lists.
 
-   - Which kind of container is preferred (`Sequence`/`list`)
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
 
@@ -266,7 +264,7 @@ LazyTypeHint(ParsingStrategies(list_strategy="Sequence")).from_data(data, class_
 
 ### Type hinting tuples
 
-The user can select between type hinting its size (default) or leave it as an arbitrary size:
+Choose between type hinting its size (default) or leaving it as an arbitrary size for tuples.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -280,8 +278,15 @@ LazyTypeHint(ParsingStrategies(tuple_size_strategy="fixed")).from_data(data, cla
 
 ### Type hinting Pandas based objects
 
-Any `Pandas` dataframe can be tpye hinted as well. Simple columns but also `MultiIndex`
-will be type hinted.
+Any Pandas dataframe, including those with simple and `MultiIndex` columns, can be type
+hinted. When initializing any of the tools, `ParsingStrategies(pandas_strategies=[...])`
+can be set. Available options are:
+
+ - `Do not type hint columns`
+ - `Type hint only for autocomplete` This one will only create the minimum amount of type
+   hints to be used for IDE autocompletion.
+ - `Full type hint` (default): In addition to the previous one, this one will also raise
+   static analysis errors if a wrong column is accessed.
 
 ```py
 import pandas as pd
@@ -295,10 +300,9 @@ LazyTypeHint().from_data(data, class_name="MyClass").to_string()
 ```
 
 ### Depth of the type aliases
-   
-In order to simplify the creation of type aliases, the user can use
-`min_height_to_define_type_alias`. The higher the number, the less type aliases will be
-created:
+
+To simplify the creation of type aliases, use `min_height_to_define_type_alias`. Higher
+numbers will result in fewer type aliases being created.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
