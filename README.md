@@ -1,179 +1,81 @@
 # LazyTypeHint
 
-Type hint any Python (nested) data structure! Dictionaries, callables, Pandas DataFrames, numpy arrays...
+Type hint any Python (nested) data structure! Dictionaries, callables, Pandas DataFrames,
+numpy arrays...
 
 ```
 pip install lazy-type-hint
 ```
 
-## Quick examples
-
+Some quick examples you can try:
 ```py
 from lazy_type_hint import LazyTypeHint, LazyTypeHintLive
 
-data = [1,2,{"a", 2}]
+data = ({"name": "Peter", "age": 22},)
 LazyTypeHint().from_data(data, class_name="MyClass").to_file("file.py")
 LazyTypeHint().from_data(data, class_name="MyClass").to_string()
 data_type_hinted = LazyTypeHintLive().from_data(data, class_name="MyClass")
 ```
 
-## Main features
+## Tools
 
-1. Get corresponding type hints from any given data structure and with mutltiple parsing
-   options. Export it as a file or as a string.
+All tools support generating type hints...
+ - `from_data`: Type hint any Python built-in data structures and more. These include big
+   or deep nested structures, normal/multiindex Pandas DataFrames or numpy arrays.
+ - `from_yaml_file`: Performs same as `from_data`. However, if comments are found within
+   the YAML file, these will be parsed as docstrings.
+   
+In addition, all of them support a wide range of input parameters in the initializer in
+order to fine tune type hint generation or to validate your data structures.
 
-   ```py
-      from lazy_type_hint import LazyTypeHint, ParsingStrategies
+### LazyTypeHintLive
 
-      # INPUT
-      people = [
-          {
-              "name": "Peter",
-              "age": 40,
-              "kids": (
-                  {
-                      "name": "Peter Jr",
-                      "age": 10,
-                  },
-                  {
-                      "name": "Peter Jr2",
-                      "age": 8,
-                  },
-              ),
-          },
-          {
-              "name": "Kevin",
-              "age": 42,
-              "job": "Carpenter",
-              "kids": (
-                  {
-                      "name": "Peter Jr",
-                      "age": 10,
-                  },
-              ),
-          },
-      ]
+Type hint any data structure in a single line and reuse it out of the box after the code
+is executed once. The original data and its class always remains untouched, as this only
+affects at type hint level
 
-      people_type_hint = (
-          LazyTypeHint(
-              strategies=ParsingStrategies(
-                  min_height_to_define_type_alias=2,
-                  tuple_size_strategy="any size",
-              )
-          )
-          .from_data(people, class_name="People")
-          .to_string()
-      )
-      print(people_type_hint)
-   ```
+```py
+from lazy_type_hint import LazyTypeHintLive
 
-   ```py
-    # OUTPUT
-    from typing import List, Tuple, TypedDict
-    from typing_extensions import NotRequired
+data = ({"name": "Peter", "age": 22},)
+data_type_hinted = LazyTypeHintLive().from_data(data, class_name="Data")
+# After executing this snippet, an interface `Data` is locally created and
+# can be reused anywhere in any other file as long as `class_name="Data"`
+#
+# `LazyTypeHintLive.reset()` will erase all type hints created by this class.
+```
+
+Out of the box and only with this line, this will allow you to:
+
+|       |       |
+|:-------------:|:-------------:|
+| Perform static analysis to detect issues | ![After executing the code](https://github.com/mflova/lazy-type-hint/assets/67102627/ebd3f488-e3b5-400f-abd7-fccab7063773) |
+| Have full autocompletion support from your IDE | ![After executing the code](https://github.com/mflova/lazy-type-hint/assets/67102627/46c0ff38-9332-4795-b36c-86e8086eeaef) |
 
 
-    class PeopleDictKidsDict(TypedDict):
-        name: str
-        age: int
+### LazyTypeHint
 
+This tool will also generate type hints for any given data. The difference with respect to
+`LazyTypeHintLive` is that this one will allow you to manage them on your own. By using
+`to_file()` method you can export an importable module that can be used to type hint and
+update your data structures at any moment.
 
-    class PeopleDict(TypedDict):
-        name: str
-        age: int
-        kids: Tuple[PeopleDictKidsDict, ...]
-        job: NotRequired[str]
+```py
+from lazy_type_hint import LazyTypeHint
 
-    People = List[PeopleDict]
-   ```
-2. [EXPERIMENTAL] Get type hints live with `LazyTypeHintLive`. The API changes its local
-   interface as soon as you use it, allowing to automatically infer and reuse your type
-   hints after executing your program once.
+data = {"name": "Peter", "age": 22}
+LazyTypeHint().from_data(data, class_name="Data").to_string()
+LazyTypeHint().from_data(data, class_name="Data").to_file("my_file.py")
+```
 
-   |   Before executing the code    |   After executing the code    |
-    |:-------------:|:-------------:|
-    | ![Before executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/before.PNG?raw=true) | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/after.PNG?raw=true) |
+## When this tool can be useful?
 
-    This will allow you to:
-
-   |       |       |
-    |:-------------:|:-------------:|
-    | Perform static analysis to detect issues | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/errors.PNG?raw=true) |
-    | Reuse your available type hints | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/reuse_classes.PNG?raw=true) |
-    | Have full autocompletion support from your IDE | ![After executing the code](https://github.com/mflova/lazy-type-hint/blob/main/img/autocomplete.PNG?raw=true) |
-
-
-
-
-3. Easily type hint your files (YAML, JSON) and parse extra comments found within this
-   file as part of the type hint docstrings. Given a yaml file like:
-
-   ```yaml
-    # Collection of sensors
-    sensors:
-      - name: Sensor1
-        # Type of sensor used
-        sensor_type: Temperature
-        location: Living Room
-        # Maximum amount allowed.
-        # NOTE: Only 3 are available
-        threshold: 25  # Units: [C]
-
-      - name: Sensor2
-        sensor_type: Humidity
-        location: Bedroom
-        threshold: 60
-
-      - name: Sensor3
-        sensor_type: Pressure
-        location: Kitchen
-        threshold: 1000
-   ```
-
-   And the code:
-   ```py
-      from lazy_type_hint import LazyTypeHint
-
-
-    def load_yaml_file(file_path):
-        with open(file_path, "r") as file:
-            data = yaml.safe_load(file)
-        return data
-
-
-    print(LazyTypeHint().from_yaml_file(
-        loader=load_yaml_file,
-        path="example.yaml",
-        class_name="Sensors",
-        comments_are=("above", "side"),
-    ).to_string())
-   ```
-
-   Generate type hints like:
-
-   ```py
-   from typing import List, TypedDict
-
-
-   class SensorsSensorsDict(TypedDict):
-       name: str
-       sensor_type: str
-       """Type of sensor used. NOTE: Only 3 are available."""
-       location: str
-       threshold: int
-       """
-       Maximum amount allowed.
-
-       Units: [C].
-       """
-
-   SensorsSensors = List[SensorsSensorsDict]
-
-
-   class Sensors(TypedDict):
-       sensors: SensorsSensors
-       """Collection of sensors."""
-   ```
+As said before, type hinting your input/output data structures makes it easier for
+developers since it gives you extra IDE information in order to develop code and detect
+extra issues. While developing code I realized that keeping up to date type hints of some
+data structures is boring and error prone. Whenever they are updated, a person must
+remember to update it. The target of this tool is to enjoy the advantages of type hinted
+data structures without having to worry about it.
 
 ## What makes it a different tool?
 
@@ -183,6 +85,18 @@ are validation-oriented. This tool is more geared towards providing better type 
 an automated way and ensuring that the structure is accessed correctly. Although other
 tools such as `Stubgen` are able to generate `.pyi` files in an automated way, it might be
 required to edit the environment to indicate where these stub-based files are located.
+
+## How does it work?
+
+Both tools parse the data structure to a tree-based data structure. Each node represents a
+different type or container (`list`, `dict`...). This tree will allow to 1) detect and
+simplify equal nodes from the point of view of type hinting, 2) perform similarity based
+merges or 3) have full control of how each type alias is generated.
+
+On top of that, `LazyTypeHintLive` will locally update its own internal API and its `pyi`
+files to include or remove new type hints generated by the tree mentioned above. This
+feature allows the user to use its own type hints without having to manage anything
+related to its files.
 
 ## All features
 
@@ -210,14 +124,15 @@ Main features:
    - Mutable or read-only based `TypedDict`.
  
 Structures that can be type hinted:
- - Sequences: list, tuples
- - Sets: sets, frozensets
- - Dictionaries: dict, MappingProxyType
- - Pandas DataFrame: Full support for string-based columns and `MultiIndex` columns
- - Numpy arrays
- - Simple built-in types: bool, int, float, range, slice, None, str
- - Callables: lambdas, functions, staticmethods, classmethods, built-in functions
- - Module types
- - IOBase
- - Iterators
+ - Sequence based: `list`, `tuple`
+ - Set based: `set`, `frozenset`
+ - Mapping based: `dict`, `MappingProxyType`
+ - Simple built-in types: `bool`, `int`, `float`, `range`, `slice`, `None`, `str`
+ - Callables: `lambda`, functions, `staticmethod`, `classmethod`, built-in functions
+ - `ModuleType`
+ - `IOBase`
+ - `Iterator`
  - Custom objects: instances and classes
+ - `Pandas` based structures: Including `DataFrame` (with `MultiIndex` and `Index`) and
+   `Series`.
+ - `numpy` arrays
