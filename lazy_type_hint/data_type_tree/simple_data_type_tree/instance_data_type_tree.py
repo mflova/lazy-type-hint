@@ -11,14 +11,23 @@ class InstanceDataTypeTree(SimpleDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("TypeAlias")
         if self.holding_type == type(None):
+            self.imports.add("TypeAlias")
             self.imports.add("Optional")
             return f"{self.name}: TypeAlias = Optional[object]"
 
         if self._is_builtin_class():
-            return f"{self.name}: TypeAlias = {self.holding_type.__name__}"
-        return f'{self.name}: TypeAlias = "{self.holding_type.__name__}"'
+            if self.parent is None:
+                self.imports.add("TypeAlias")
+                return f"{self.name}: TypeAlias = {self.holding_type.__name__}"
+            else:
+                return f"{self.name} = {self.holding_type.__name__}"
+        
+        if self.parent is None:
+            self.imports.add("TypeAlias")
+            return f'{self.name}: TypeAlias = "{self.holding_type.__name__}"'
+        else:
+            return f'{self.name} = "{self.holding_type.__name__}"'
 
     @override
     def _check_tree_is_correct_one(self, data: object) -> None:

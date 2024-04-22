@@ -61,7 +61,9 @@ class FunctionDataTypeTree(SimpleDataTypeTree):
     def _get_lambda_str(self) -> str:
         self.imports.add("Callable").add("Any").add("TypeAlias")
         if self.can_be_inspected:
-            return f"{self.name}: TypeAlias = Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]"
+            return (
+                f"{self.name}: TypeAlias = Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]"
+            )
         return f"{self.name}: TypeAlias = Callable"
 
     @override
