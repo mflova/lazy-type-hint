@@ -25,4 +25,5 @@ class ListDataTypeTree(SequenceDataTypeTree):
             container = "Sequence"
         else:
             raise DataTypeTreeError(f"The chosen strategy ({self.strategies.list_strategy}) is not available.")
-        return f"{self.name} = {container}[{self.get_type_alias_children()}]"
+        self.imports.add("TypeAlias")
+        return f"{self.name}: TypeAlias = {container}[{self.get_type_alias_children()}]"

@@ -27,11 +27,11 @@ class SetDataTypeTree(GenericDataTypeTree):
     @override
     def _get_str_top_node(self) -> str:
         container: Literal["FrozenSet", "set"] = "FrozenSet" if self.holding_type is frozenset else "set"
-        self.imports.add(container)
+        self.imports.add(container).add("TypeAlias")
 
         if container == "FrozenSet":
-            return f"{self.name} = FrozenSet[{self.get_type_alias_children()}]"
-        return f"{self.name} = Set[{self.get_type_alias_children()}]"
+            return f"{self.name}: TypeAlias = FrozenSet[{self.get_type_alias_children()}]"
+        return f"{self.name}: TypeAlias = Set[{self.get_type_alias_children()}]"
 
     @override
     def _get_hash(self) -> Hashable:

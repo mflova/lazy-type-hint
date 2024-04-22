@@ -18,8 +18,8 @@ class TupleDataTypeTree(SequenceDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("tuple")
-        return f"{self.name} = Tuple[{self.get_type_alias_children()}]"
+        self.imports.add("tuple").add("TypeAlias")
+        return f"{self.name}: TypeAlias = Tuple[{self.get_type_alias_children()}]"
 
     @override
     def get_type_alias_children(self) -> str:

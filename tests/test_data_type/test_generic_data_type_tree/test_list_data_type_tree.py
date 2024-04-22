@@ -9,7 +9,7 @@ from lazy_type_hint.strategies import ParsingStrategies
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Sequence", "list", "Union", "Any")
+    imports_to_check: Final = ("Sequence", "list", "Union", "Any", "TypeAlias")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
@@ -23,16 +23,16 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "data, expected_output, expected_n_children",
         [
-            ([1], f"{NAME} = {{expected_container}}[int]", 1),
-            ([1, 2], f"{NAME} = {{expected_container}}[int]", 1),
-            ([1, 2.0], f"{NAME} = {{expected_container}}[float]", 2),
-            ([{1, 2}, 2], f"{NAME} = {{expected_container}}[Union[{NAME}Set, int]]", 2),
-            ([{1, 2}, [1, 2], {1, 3}, {1, 4}, [1, 2]], f"{NAME} = {{expected_container}}[Union[{NAME}List, {NAME}Set]]", 2),
-            ([{1, 2}, {3, 4}], f"{NAME} = {{expected_container}}[{NAME}Set]", 1),
-            ([{1, 2}, {3, 4.2}], f"{NAME} = {{expected_container}}[Union[{NAME}Set, {NAME}Set2]]", 2),
-            ([{1, 2}, "a"], f"{NAME} = {{expected_container}}[Union[{NAME}Set, str]]", 2),
-            ([{1, 2}, {"name": "Joan"}], f"{NAME} = {{expected_container}}[Union[{NAME}Dict, {NAME}Set]]", 2),
-            ([], f"{NAME} = {{expected_container}}[Any]", 0),
+            ([1], f"{NAME}: TypeAlias = {{expected_container}}[int]", 1),
+            ([1, 2], f"{NAME}: TypeAlias = {{expected_container}}[int]", 1),
+            ([1, 2.0], f"{NAME}: TypeAlias = {{expected_container}}[float]", 2),
+            ([{1, 2}, 2], f"{NAME}: TypeAlias = {{expected_container}}[Union[{NAME}Set, int]]", 2),
+            ([{1, 2}, [1, 2], {1, 3}, {1, 4}, [1, 2]], f"{NAME}: TypeAlias = {{expected_container}}[Union[{NAME}List, {NAME}Set]]", 2),
+            ([{1, 2}, {3, 4}], f"{NAME}: TypeAlias = {{expected_container}}[{NAME}Set]", 1),
+            ([{1, 2}, {3, 4.2}], f"{NAME}: TypeAlias = {{expected_container}}[Union[{NAME}Set, {NAME}Set2]]", 2),
+            ([{1, 2}, "a"], f"{NAME}: TypeAlias = {{expected_container}}[Union[{NAME}Set, str]]", 2),
+            ([{1, 2}, {"name": "Joan"}], f"{NAME}: TypeAlias = {{expected_container}}[Union[{NAME}Dict, {NAME}Set]]", 2),
+            ([], f"{NAME}: TypeAlias = {{expected_container}}[Any]", 0),
         ],
     )
     # fmt: on
@@ -80,11 +80,11 @@ class TestTypeAliasHeight:
     @pytest.mark.parametrize(
         "data, min_height, expected_str",
         [
-            ([1], 0, f"{NAME} = List[int]"),
-            ([1], 1, f"{NAME} = List[int]"),
-            ([1], 2, f"{NAME} = List[int]"),
-            ([1, [1]], 0, f"{NAME} = List[Union[{NAME}List, int]]"),
-            ([1, [1]], 1, f"{NAME} = List[Union[List[int], int]]"),
+            ([1], 0, f"{NAME}: TypeAlias = List[int]"),
+            ([1], 1, f"{NAME}: TypeAlias = List[int]"),
+            ([1], 2, f"{NAME}: TypeAlias = List[int]"),
+            ([1, [1]], 0, f"{NAME}: TypeAlias = List[Union[{NAME}List, int]]"),
+            ([1, [1]], 1, f"{NAME}: TypeAlias = List[Union[List[int], int]]"),
         ],
     )
     # fmt: on

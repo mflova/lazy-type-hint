@@ -22,7 +22,7 @@ class InstanceDataTypeTree(SimpleDataTypeTree):
                 return f"{self.name}: TypeAlias = {self.holding_type.__name__}"
             else:
                 return f"{self.name} = {self.holding_type.__name__}"
-        
+
         if self.parent is None:
             self.imports.add("TypeAlias")
             return f'{self.name}: TypeAlias = "{self.holding_type.__name__}"'

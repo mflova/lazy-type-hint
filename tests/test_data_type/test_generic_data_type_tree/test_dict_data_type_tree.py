@@ -274,9 +274,9 @@ class TestGetStrHeight:
     @pytest.mark.parametrize(
         "data, min_height, expected_output",
         [
-            ([2, {"name": "Joan", "kids": ["A", "B"]}], 0, f"{NAME} = List[Union[ExampleDict, int]]"),
-            ([2, {"name": "Joan", "kids": ["A", "B"]}], 1, f"{NAME} = List[Union[ExampleDict, int]]"),
-            ([2, {"name": "Joan", "kids": ["A", "B"]}], 2, f"{NAME} = List[Union[ExampleDict, int]]"),
+            ([2, {"name": "Joan", "kids": ["A", "B"]}], 0, f"{NAME}: TypeAlias = List[Union[ExampleDict, int]]"),
+            ([2, {"name": "Joan", "kids": ["A", "B"]}], 1, f"{NAME}: TypeAlias = List[Union[ExampleDict, int]]"),
+            ([2, {"name": "Joan", "kids": ["A", "B"]}], 2, f"{NAME}: TypeAlias = List[Union[ExampleDict, int]]"),
         ],
     )
     def test_permissions(self, data: object, min_height: int, expected_output: str) -> None:
@@ -285,6 +285,8 @@ class TestGetStrHeight:
             data, name=self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=min_height)
         )
         assert expected_output == tree.get_str_top_node(), error
+        assert "TypeAlias" in tree.imports
+        assert "list" in tree.imports
 
 
 class TestClassDocstringFromKey:
@@ -441,7 +443,7 @@ class TestSimilarityMerge:
 {TAB}name: str
 {TAB}age: int
 {TAB}optional_field: NotRequired[int]""",
-                    "Example = List[ExampleDict]",
+                    "Example: TypeAlias = List[ExampleDict]",
                 ),
             ),
             (
@@ -454,7 +456,7 @@ class TestSimilarityMerge:
                     f"""class ExampleDict(TypedDict):
 {TAB}a: str
 {TAB}b: int""",
-                    "Example = List[Union[ExampleDict, ExampleDict2]]",
+                    "Example: TypeAlias = List[Union[ExampleDict, ExampleDict2]]",
                 ),
             ),
         ],
@@ -481,7 +483,7 @@ class TestSimilarityMerge:
 {TAB}name: str
 {TAB}age: int
 {TAB}optional_field: NotRequired[int]""",
-                    "Example = Tuple[ExampleDict, ExampleDict]",
+                    "Example: TypeAlias = Tuple[ExampleDict, ExampleDict]",
                 ),
             ),
             (
@@ -494,7 +496,7 @@ class TestSimilarityMerge:
                     f"""class ExampleDict2(TypedDict):
 {TAB}c: str
 {TAB}d: int""",
-                    "Example = Tuple[ExampleDict, ExampleDict2]",
+                    "Example: TypeAlias = Tuple[ExampleDict, ExampleDict2]",
                 ),
             ),
         ],

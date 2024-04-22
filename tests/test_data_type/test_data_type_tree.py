@@ -93,7 +93,6 @@ class TestIntegration:
 
     @staticmethod
     def assert_no_unused_imports(strings: Tuple[str, ...]) -> None:
-        # TODO: Verify that TypeAlias is also added to all generic types (list, tuples...)
         imports: Set[str] = set()
         # Gather all imports
         for line in strings[0].splitlines():
@@ -105,7 +104,7 @@ class TestIntegration:
 
         # Search for those imports
         code = "\n".join(strings[1:])
-        assert all((var:=import_) in code for import_ in imports), f"Detected unused import: {var}"
+        assert all((var := import_) in code for import_ in imports), f"Detected unused import: {var}"
 
     @staticmethod
     def assert_input_object_is_not_modified(data_before: str, data_after: str) -> None:
