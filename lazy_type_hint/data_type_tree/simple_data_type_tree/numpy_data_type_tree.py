@@ -11,7 +11,5 @@ class NumpyDataTypeTree(SimpleDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("NDArray")
-        self.imports.add("numpy")
-        self.imports.add("TypeAlias")
+        self.imports.add("NDArray").add("numpy").add("TypeAlias")
         return f'{self.name}: TypeAlias = "NDArray[np.{self.data.dtype}]"'

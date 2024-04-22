@@ -12,17 +12,18 @@ class TestLambda:
     @pytest.mark.parametrize(
         "data, expected_str",
         [
-            [lambda: None, f"{NAME} = Callable[[], Any]"],
-            [lambda x: None, f"{NAME} = Callable[[Any], Any]"],
-            [lambda x, y: None, f"{NAME} = Callable[[Any, Any], Any]"],
-            [lambda x, y, z: None, f"{NAME} = Callable[[Any, Any, Any], Any]"],
-            [print, f"{NAME} = Callable"],
+            [lambda: None, f"{NAME}: TypeAlias = Callable[[], Any]"],
+            [lambda x: None, f"{NAME}: TypeAlias = Callable[[Any], Any]"],
+            [lambda x, y: None, f"{NAME}: TypeAlias = Callable[[Any, Any], Any]"],
+            [lambda x, y, z: None, f"{NAME}: TypeAlias = Callable[[Any, Any, Any], Any]"],
+            [print, f"{NAME}: TypeAlias = Callable"],
         ],
     )
     def test_get_str_top_node_lambda(self, data: object, expected_str: str) -> None:
         tree = FunctionDataTypeTree(data, self.NAME)
         assert expected_str == tree.get_str_top_node()
         assert "Callable" in tree.imports
+        assert "TypeAlias" in tree.imports
 
     @pytest.mark.parametrize(
         "func1, func2, expected_out",

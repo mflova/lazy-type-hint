@@ -15,11 +15,13 @@ class TestTypes:
     @pytest.mark.parametrize(
         "data, expected_str",
         [
-            (DummyClass, f'{NAME} = Type["DummyClass"]'),
-            (bool, f"{NAME} = Type[bool]"),
-            (int, f"{NAME} = Type[int]"),
+            (DummyClass, f'{NAME}: TypeAlias = Type["DummyClass"]'),
+            (bool, f"{NAME}: TypeAlias = Type[bool]"),
+            (int, f"{NAME}: TypeAlias = Type[int]"),
         ],
     )
     def test_types(self, data: Any, expected_str: str) -> None:
         data_type_tree = TypeDataTypeTree(data, self.NAME)
         assert expected_str == data_type_tree.get_str_top_node()
+        assert "type" in data_type_tree.imports
+        assert "TypeAlias" in data_type_tree.imports

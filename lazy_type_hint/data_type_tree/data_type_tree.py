@@ -2,7 +2,6 @@
 
 This data can then be parsed to a .py compatible file that will type hint your code.
 """
-
 from __future__ import annotations
 
 import re

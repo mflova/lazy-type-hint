@@ -10,5 +10,5 @@ class ModuleTypeDataTypeTree(SimpleDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("ModuleType")
-        return f"{self.name} = ModuleType"
+        self.imports.add("ModuleType").add("TypeAlias")
+        return f"{self.name}: TypeAlias = ModuleType"

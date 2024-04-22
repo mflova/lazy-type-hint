@@ -36,8 +36,8 @@ class FunctionDataTypeTree(SimpleDataTypeTree):
 
     def _get_str_top_node(self) -> str:
         if not self.can_be_inspected:
-            self.imports.add("Callable")
-            return f"{self.name} = Callable"
+            self.imports.add("Callable").add("TypeAlias")
+            return f"{self.name}: TypeAlias = Callable"
         if self.is_lambda:
             return self._get_lambda_str()
         return self._get_protocol_str()
@@ -59,10 +59,10 @@ class FunctionDataTypeTree(SimpleDataTypeTree):
         return signature.parameters
 
     def _get_lambda_str(self) -> str:
-        self.imports.add("Callable").add("Any")
+        self.imports.add("Callable").add("Any").add("TypeAlias")
         if self.can_be_inspected:
-            return f"{self.name} = Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]"
-        return f"{self.name} = Callable"
+            return f"{self.name}: TypeAlias = Callable[[{', '.join(['Any']*len(self.get_func_params().values()))}], Any]"
+        return f"{self.name}: TypeAlias = Callable"
 
     @override
     def _get_hash(self) -> Hashable:

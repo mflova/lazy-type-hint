@@ -10,5 +10,6 @@ class TestModuleType:
 
     def test_get_str_top_node(self) -> None:
         tree = ModuleTypeDataTypeTree(pytest, self.NAME)
-        assert f"{self.NAME} = ModuleType" == tree.get_str_top_node()
+        assert f"{self.NAME}: TypeAlias = ModuleType" == tree.get_str_top_node()
         assert "ModuleType" in tree.imports
+        assert "TypeAlias" in tree.imports
