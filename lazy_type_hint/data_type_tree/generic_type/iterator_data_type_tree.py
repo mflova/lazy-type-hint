@@ -17,6 +17,6 @@ class IteratorDataTypeTree(SequenceDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("Iterator")
+        self.imports.add("Iterator").add("TypeAlias")
         container = "Iterator"
-        return f"{self.name} = {container}[{self.get_type_alias_children()}]"
+        return f"{self.name}: TypeAlias = {container}[{self.get_type_alias_children()}]"

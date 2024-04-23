@@ -9,6 +9,5 @@ class PandasSeriesDataTypeTree(SimpleDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("pandas")
-        self.imports.add("TypeAlias")
+        self.imports.add("pandas").add("TypeAlias")
         return f"{self.name}: TypeAlias = pd.Series"

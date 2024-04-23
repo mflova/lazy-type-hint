@@ -87,7 +87,8 @@ class MappingDataTypeTree(GenericDataTypeTree):
         value_types = self.get_type_alias_children()
 
         container_ = "Dict" if container == "dict" else container
-        return f"{self.name} = {container_}[{keys_str}, {value_types}]"
+        self.imports.add("TypeAlias")
+        return f"{self.name}: TypeAlias = {container_}[{keys_str}, {value_types}]"
 
     @staticmethod
     def _to_camel_case(string: str) -> str:

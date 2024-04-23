@@ -10,5 +10,5 @@ class IoDataTypeTree(SimpleDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("TextIO")
-        return f"{self.name} = TextIO"
+        self.imports.add("TextIO").add("TypeAlias")
+        return f"{self.name}: TypeAlias = TextIO"

@@ -9,7 +9,7 @@ from lazy_type_hint.strategies import ParsingStrategies
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("tuple", "Union", "Any")
+    imports_to_check: Final = ("tuple", "Union", "Any", "TypeAlias")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
@@ -17,27 +17,27 @@ class TestGetStrPy:
         "tree, expected_output, expected_n_children",
         [
             # Fixed sice
-            (TupleDataTypeTree((1,), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[int]", 1),
-            (TupleDataTypeTree((1, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[int, int]", 2),
-            (TupleDataTypeTree((1, 2.0), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[int, float]", 2),
-            (TupleDataTypeTree(({1, 2}, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Set, int]", 2),
-            (TupleDataTypeTree(((1,2), (1,2), (1,2)), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Tuple, {NAME}Tuple, {NAME}Tuple]", 3),
-            (TupleDataTypeTree(({1, 2}, {3, 4}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Set, {NAME}Set]", 2),
-            (TupleDataTypeTree(({1, 2}, {3, 4.2}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Set, {NAME}Set2]", 2),
-            (TupleDataTypeTree(({1, 2}, "a"), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Set, str]", 2),
-            (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Set, {NAME}Dict]", 2),
-            (TupleDataTypeTree((), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Any, ...]", 0),
+            (TupleDataTypeTree((1,), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[int]", 1),
+            (TupleDataTypeTree((1, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[int, int]", 2),
+            (TupleDataTypeTree((1, 2.0), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[int, float]", 2),
+            (TupleDataTypeTree(({1, 2}, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Set, int]", 2),
+            (TupleDataTypeTree(((1,2), (1,2), (1,2)), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Tuple, {NAME}Tuple, {NAME}Tuple]", 3),
+            (TupleDataTypeTree(({1, 2}, {3, 4}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Set, {NAME}Set]", 2),
+            (TupleDataTypeTree(({1, 2}, {3, 4.2}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Set, {NAME}Set2]", 2),
+            (TupleDataTypeTree(({1, 2}, "a"), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Set, str]", 2),
+            (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Set, {NAME}Dict]", 2),
+            (TupleDataTypeTree((), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[Any, ...]", 0),
             # Non fixed size
-            (TupleDataTypeTree((1,), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[int, ...]", 1),
-            (TupleDataTypeTree((1, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[int, ...]", 1),
-            (TupleDataTypeTree((1, 2.0), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[float, ...]", 2),
-            (TupleDataTypeTree(({1, 2}, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Union[{NAME}Set, int], ...]", 2),
-            (TupleDataTypeTree(((1,2), (1,2), (1,3)), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Tuple, ...]", 1),
-            (TupleDataTypeTree(({1, 2}, {3, 4}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Set, ...]", 1),
-            (TupleDataTypeTree(({1, 2}, {3, 4.2}, {1}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Union[{NAME}Set, {NAME}Set2], ...]", 2),
-            (TupleDataTypeTree(({1, 2}, "a"), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Union[{NAME}Set, str], ...]", 2),
-            (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Union[{NAME}Dict, {NAME}Set], ...]", 2),
-            (TupleDataTypeTree((), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[Any, ...]", 0),
+            (TupleDataTypeTree((1,), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[int, ...]", 1),
+            (TupleDataTypeTree((1, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[int, ...]", 1),
+            (TupleDataTypeTree((1, 2.0), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[float, ...]", 2),
+            (TupleDataTypeTree(({1, 2}, 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[Union[{NAME}Set, int], ...]", 2),
+            (TupleDataTypeTree(((1,2), (1,2), (1,3)), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Tuple, ...]", 1),
+            (TupleDataTypeTree(({1, 2}, {3, 4}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Set, ...]", 1),
+            (TupleDataTypeTree(({1, 2}, {3, 4.2}, {1}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[Union[{NAME}Set, {NAME}Set2], ...]", 2),
+            (TupleDataTypeTree(({1, 2}, "a"), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[Union[{NAME}Set, str], ...]", 2),
+            (TupleDataTypeTree(({1, 2}, {"name": "Joan"}), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[Union[{NAME}Dict, {NAME}Set], ...]", 2),
+            (TupleDataTypeTree((), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="any size", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[Any, ...]", 0),
         ],
     )
     def test_get_str_top_node(
@@ -73,7 +73,7 @@ class TestTypeAliasHeight:
 class TestGetAliasHeight:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("tuple", "Union", "Any")
+    imports_to_check: Final = ("tuple", "Union", "Any", "TypeAlias")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
@@ -81,11 +81,11 @@ class TestGetAliasHeight:
         "tree, expected_str",
         [
             # Fixed sice
-            (TupleDataTypeTree(((1, 2), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[{NAME}Tuple, int]"),
-            (TupleDataTypeTree(((1, 2), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=1)), f"{NAME} = Tuple[Tuple[int, int], int]"),
-            (TupleDataTypeTree(((1, (1, "str")), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME} = Tuple[ExampleTuple, int]"),
-            (TupleDataTypeTree(((1, (1, "str")), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=1)), f"{NAME} = Tuple[ExampleTuple, int]"),
-            (TupleDataTypeTree(((1, (1, "str")), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=2)), f"{NAME} = Tuple[Tuple[int, Tuple[int, str]], int]"),
+            (TupleDataTypeTree(((1, 2), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[{NAME}Tuple, int]"),
+            (TupleDataTypeTree(((1, 2), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=1)), f"{NAME}: TypeAlias = Tuple[Tuple[int, int], int]"),
+            (TupleDataTypeTree(((1, (1, "str")), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=0)), f"{NAME}: TypeAlias = Tuple[ExampleTuple, int]"),
+            (TupleDataTypeTree(((1, (1, "str")), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=1)), f"{NAME}: TypeAlias = Tuple[ExampleTuple, int]"),
+            (TupleDataTypeTree(((1, (1, "str")), 2), name=NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed", min_height_to_define_type_alias=2)), f"{NAME}: TypeAlias = Tuple[Tuple[int, Tuple[int, str]], int]"),
         ],
     )
     def test_type_alias_based_on_height(

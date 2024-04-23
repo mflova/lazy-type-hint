@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lazy-type-hint"
-version = "2.2.0"
+version = "2.2.1"
 description = "Automate type hint generation in a single line."
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
@@ -54,7 +54,7 @@ line-length = 120
 target-version = "py38"
 exclude = ["*.pyi", "test_files"]
 lint.select = ["F", "E", "I", "N", "D", "UP", "YTT", "ASYNC", "BLE", "B", "A", "C4", "T10", "DJ", "EXE", "ISC", "ICN", "G", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "INT", "ARG", "FIX", "PD", "PGH", "PL", "FLY", "NPY", "AIR", "RUF", "TCH"]
-lint.ignore = ["SIM102", "EM101", "PLR", "D100", "D103", "C419", "D104", "D105", "D212", "PGH003", "RUF001", "D101", "PD901", "C405", "UP015", "PLC0414", "I001", "NPY002", "D102", "D107", "PT023", "B027", "UP007", "PIE808", "PD011", "SIM115", "PT006", "PT007", "F811", "UP006", "RET505", "PLW1510", "E731", "PLW2901", "SLF001"]
+lint.ignore = ["SIM102", "EM101", "PLR", "D100", "D103", "C419", "D104", "D105", "D212", "PGH003", "RUF001", "D101", "PD901", "C405", "UP015", "PLC0414", "I001", "NPY002", "D102", "D107", "PT023", "B027", "UP007", "PIE808", "PD011", "SIM115", "PT006", "PT007", "F811", "UP006", "RET505", "PLW1510", "E731", "PLW2901", "SLF001", "RUF018"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Docstring convention. Accepts: "google", "numpy", or "pep257".

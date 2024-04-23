@@ -39,20 +39,20 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "data, expected_output, expected_n_children",
         [
-            ({"name": "Joan"}, f"{NAME} = {{expected_container}}[str, str]", 1),
-            ({"age": 22}, f"{NAME} = {{expected_container}}[str, int]", 1),
-            ({"name": "Joan", "age": 22}, f"{NAME} = {{expected_container}}[str, Union[int, str]]", 2),
-            ({"name": "Joan", 21: 22}, f"{NAME} = {{expected_container}}[Union[int, str], Union[int, str]]", 2),
-            ({22: "Joan", 21.2: 22}, f"{NAME} = {{expected_container}}[float, Union[int, str]]", 2),
-            ({22: "Joan", 21.2: "number"}, f"{NAME} = {{expected_container}}[float, str]", 2),
-            ({}, f"{NAME} = {{expected_container}}[Any, Any]", 0),
-            (MappingProxyType({"name": "Joan"}), f"{NAME} = MappingProxyType[str, str]", 1),
-            (MappingProxyType({"age": 22}), f"{NAME} = MappingProxyType[str, int]", 1),
-            (MappingProxyType({"name": "Joan", "age": 22}), f"{NAME} = MappingProxyType[str, Union[int, str]]", 2),
-            (MappingProxyType({"name": "Joan", 21: 22}), f"{NAME} = MappingProxyType[Union[int, str], Union[int, str]]", 2),
-            (MappingProxyType({22: "Joan", 21.2: 22}), f"{NAME} = MappingProxyType[float, Union[int, str]]", 2),
-            (MappingProxyType({22: "Joan", 21.2: "number"}), f"{NAME} = MappingProxyType[float, str]", 2),
-            (MappingProxyType({}), f"{NAME} = MappingProxyType[Any, Any]", 0),
+            ({"name": "Joan"}, f"{NAME}: TypeAlias = {{expected_container}}[str, str]", 1),
+            ({"age": 22}, f"{NAME}: TypeAlias = {{expected_container}}[str, int]", 1),
+            ({"name": "Joan", "age": 22}, f"{NAME}: TypeAlias = {{expected_container}}[str, Union[int, str]]", 2),
+            ({"name": "Joan", 21: 22}, f"{NAME}: TypeAlias = {{expected_container}}[Union[int, str], Union[int, str]]", 2),
+            ({22: "Joan", 21.2: 22}, f"{NAME}: TypeAlias = {{expected_container}}[float, Union[int, str]]", 2),
+            ({22: "Joan", 21.2: "number"}, f"{NAME}: TypeAlias = {{expected_container}}[float, str]", 2),
+            ({}, f"{NAME}: TypeAlias = {{expected_container}}[Any, Any]", 0),
+            (MappingProxyType({"name": "Joan"}), f"{NAME}: TypeAlias = MappingProxyType[str, str]", 1),
+            (MappingProxyType({"age": 22}), f"{NAME}: TypeAlias = MappingProxyType[str, int]", 1),
+            (MappingProxyType({"name": "Joan", "age": 22}), f"{NAME}: TypeAlias = MappingProxyType[str, Union[int, str]]", 2),
+            (MappingProxyType({"name": "Joan", 21: 22}), f"{NAME}: TypeAlias = MappingProxyType[Union[int, str], Union[int, str]]", 2),
+            (MappingProxyType({22: "Joan", 21.2: 22}), f"{NAME}: TypeAlias = MappingProxyType[float, Union[int, str]]", 2),
+            (MappingProxyType({22: "Joan", 21.2: "number"}), f"{NAME}: TypeAlias = MappingProxyType[float, str]", 2),
+            (MappingProxyType({}), f"{NAME}: TypeAlias = MappingProxyType[Any, Any]", 0),
         ],
     )
     # fmt: on
@@ -95,9 +95,9 @@ class TestGetAliasHeight:
     @pytest.mark.parametrize(
         "data, min_height, expected_output",
         [
-            ({"name": {"unit": "dolar"}}, 0, f"{NAME} = Dict[str, ExampleName]"),
-            ({"name": {"unit": "dolar"}}, 1, f"{NAME} = Dict[str, Dict[str, str]]"),
-            ({"name": {"unit": "dolar"}}, 2, f"{NAME} = Dict[str, Dict[str, str]]"),
+            ({"name": {"unit": "dolar"}}, 0, f"{NAME}: TypeAlias = Dict[str, ExampleName]"),
+            ({"name": {"unit": "dolar"}}, 1, f"{NAME}: TypeAlias = Dict[str, Dict[str, str]]"),
+            ({"name": {"unit": "dolar"}}, 2, f"{NAME}: TypeAlias = Dict[str, Dict[str, str]]"),
         ],
     )
     # fmt: on

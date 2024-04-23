@@ -10,7 +10,7 @@
 #   contains any of these strings.
 
 - tool: codespell
-  path: tests lazy_type_hint
+  path: tests lazy_type_hint README.md
   tool_desc: Check for typos
   suggestions: Fix typos found by the tool
 

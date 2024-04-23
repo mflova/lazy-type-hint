@@ -89,6 +89,22 @@ class TestIntegration:
         self.assert_no_broken_string_representation(string, tmp_path=tmp_path)
         self.assert_python_38_compatible(string)
         self.assert_input_object_is_not_modified(data_before, str(data))
+        self.assert_no_unused_imports(strings_unformatted)
+
+    @staticmethod
+    def assert_no_unused_imports(strings: Tuple[str, ...]) -> None:
+        imports: Set[str] = set()
+        # Gather all imports
+        for line in strings[0].splitlines():
+            if line.startswith("from") and not line.endswith("("):
+                imports.update(k.strip().rstrip() for k in line.split("import")[-1].split(","))
+            else:
+                if line.endswith(","):
+                    imports.add(line[:-1].strip().rstrip())
+
+        # Search for those imports
+        code = "\n".join(strings[1:])
+        assert all((var := import_) in code for import_ in imports), f"Detected unused import: {var}"
 
     @staticmethod
     def assert_input_object_is_not_modified(data_before: str, data_after: str) -> None:

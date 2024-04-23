@@ -15,13 +15,13 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "data, expected_str",
         [
-            [range(1, 2), f"{NAME} = range"],
-            [slice(1, 2), f"{NAME} = slice"],
-            [True, f"{NAME} = bool"],
-            [False, f"{NAME} = bool"],
-            ["random_string", f"{NAME} = str"],
-            [5, f"{NAME} = int"],
-            [6.7, f"{NAME} = float"],
+            [range(1, 2), f"{NAME}: TypeAlias = range"],
+            [slice(1, 2), f"{NAME}: TypeAlias = slice"],
+            [True, f"{NAME}: TypeAlias = bool"],
+            [False, f"{NAME}: TypeAlias = bool"],
+            ["random_string", f"{NAME}: TypeAlias = str"],
+            [5, f"{NAME}: TypeAlias = int"],
+            [6.7, f"{NAME}: TypeAlias = float"],
         ],
     )
     def test_get_str_top_node(self, data: object, expected_str: str) -> None:
@@ -30,12 +30,14 @@ class TestGetStrPy:
 
     def test_none(self) -> None:
         data_type_tree = InstanceDataTypeTree(None, self.NAME)
-        assert f"{self.NAME} = Optional[object]" == data_type_tree.get_str_top_node()
+        assert f"{self.NAME}: TypeAlias = Optional[object]" == data_type_tree.get_str_top_node()
         assert "Optional" in data_type_tree.imports
+        assert "TypeAlias" in data_type_tree.imports
 
     def test_custom_class(self) -> None:
         data_type_tree = InstanceDataTypeTree(DummyClass(), self.NAME)
-        assert f'{self.NAME} = "DummyClass"' == data_type_tree.get_str_top_node()
+        assert f'{self.NAME}: TypeAlias = "DummyClass"' == data_type_tree.get_str_top_node()
+        assert "TypeAlias" in data_type_tree.imports
 
 
 class TestHash:
