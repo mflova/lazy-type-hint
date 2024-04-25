@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     )
 
     import numpy as np
-    from numpy.typing import NDArray
     import pandas as pd
+    from numpy.typing import NDArray
 
     from lazy_type_hint.data_type_tree.generic_type.dict_data_type_tree import DictDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.iterator_data_type_tree import IteratorDataTypeTree
@@ -28,15 +28,15 @@ if TYPE_CHECKING:
     from lazy_type_hint.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.mapping_proxy_data_type_tree import MappingProxyDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.pandas_data_frame_data_type_tree import PandasDataFrameDataTypeTree
+    from lazy_type_hint.data_type_tree.generic_type.pandas_series_data_type_tree import (
+        PandasSeriesDataTypeTree,
+    )
     from lazy_type_hint.data_type_tree.generic_type.sequence_data_type_tree import SequenceDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.set_data_type_tree import SetDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.tuple_data_type_tree import TupleDataTypeTree
     from lazy_type_hint.data_type_tree.simple_data_type_tree.io_data_type_tree import IoDataTypeTree
     from lazy_type_hint.data_type_tree.simple_data_type_tree.module_data_type_tree import ModuleTypeDataTypeTree
     from lazy_type_hint.data_type_tree.simple_data_type_tree.numpy_data_type_tree import NumpyDataTypeTree
-    from lazy_type_hint.data_type_tree.simple_data_type_tree.pandas_series_data_type_tree import (
-        PandasSeriesDataTypeTree,
-    )
     from lazy_type_hint.data_type_tree.simple_data_type_tree.simple_data_type_tree import SimpleDataTypeTree
     from lazy_type_hint.utils import ImportManager
 
@@ -108,7 +108,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 @overload
 def data_type_tree_factory(
-    data: "pd.Series",
+    data: "pd.Series[Any]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,

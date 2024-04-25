@@ -40,6 +40,7 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
     "NDArray",
     "ModuleType",
     "TextIO",
+    "annotations",
 ]
 
 
@@ -79,6 +80,7 @@ class ImportManager:
             "pd.Scalar": ("pandas._typing", "Scalar"),
             "TextIO": ("typing", "TextIO"),
             "Iterator": ("typing", "Iterator"),
+            "annotations": ("__future__", "annotations"),
         }
     )
 
@@ -137,6 +139,8 @@ class ImportManager:
         imports_lst: List[str] = []
         for package, imports in sorted(import_statements.items(), key=lambda x: x[0]):
             imports_lst.append(self._format_single_package(package, imports, line_length=line_length))
+        if imports_lst and "__future__" in imports_lst[0]:
+            imports_lst[0] += "\n"
         return "\n".join(imports_lst)
 
     def _format_single_package(self, package: str, imports: Sequence[str], *, line_length: int) -> str:

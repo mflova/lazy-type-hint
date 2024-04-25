@@ -10,6 +10,9 @@ with suppress(ImportError):
     from lazy_type_hint.data_type_tree.generic_type.pandas_data_frame_data_type_tree import (
         PandasDataFrameDataTypeTree as PandasDataFrameDataTypeTree,
     )
+    from lazy_type_hint.data_type_tree.generic_type.pandas_series_data_type_tree import (
+        PandasSeriesDataTypeTree as PandasSeriesDataTypeTree,
+    )
 from lazy_type_hint.data_type_tree.generic_type.iterator_data_type_tree import (
     IteratorDataTypeTree as IteratorDataTypeTree,
 )

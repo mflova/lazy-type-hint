@@ -36,7 +36,7 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({1: [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal[1]) -> pd.Series:
+    def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
         ...
 
     @overload
@@ -70,7 +70,7 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({"values": [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['values']) -> pd.Series:
+    def __getitem__(self, key: Literal['values']) -> pd.Series[int]:
         ...
 
     @overload
@@ -104,11 +104,11 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({"A": [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['A']) -> pd.Series:
+    def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
         ...
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['C']) -> pd.Series:
+    def __getitem__(self, key: Literal['C']) -> pd.Series[int]:
         ...
 
     @overload
@@ -332,7 +332,7 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({("A", "B"): [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['C']) -> pd.Series:
+    def __getitem__(self, key: Literal['C']) -> pd.Series[int]:
         ...
 
     @overload
@@ -404,11 +404,11 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({"A": [1], 2: [2]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['A']) -> pd.Series:
+    def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
         ...
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal[2]) -> pd.Series:
+    def __getitem__(self, key: Literal[2]) -> pd.Series[int]:
         ...
 
     @overload
@@ -442,7 +442,7 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({("A",): [1], 2: [2]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal[2]) -> pd.Series:
+    def __getitem__(self, key: Literal[2]) -> pd.Series[int]:
         ...
 
     @overload
@@ -510,7 +510,7 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame({1: [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal[1]) -> pd.Series:
+    def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
         ...
 
     def __getitem__(
@@ -528,7 +528,7 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame({"values": [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['values']) -> pd.Series:
+    def __getitem__(self, key: Literal['values']) -> pd.Series[int]:
         ...
 
     def __getitem__(
@@ -544,11 +544,11 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame({"A": [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['A']) -> pd.Series:
+    def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
         ...
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['C']) -> pd.Series:
+    def __getitem__(self, key: Literal['C']) -> pd.Series[int]:
         ...
 
     def __getitem__(
@@ -664,7 +664,7 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame({("A", "B"): [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['C']) -> pd.Series:
+    def __getitem__(self, key: Literal['C']) -> pd.Series[int]:
         ...
 
     def __getitem__(
@@ -700,11 +700,11 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame({"A": [1,2,3], 1: [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal['A']) -> pd.Series:
+    def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
         ...
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal[1]) -> pd.Series:
+    def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
         ...
 
     def __getitem__(
@@ -720,7 +720,7 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame({("A",): [1,2,3], 1: [1,2,3]}), """class Example(pd.DataFrame):
 
     @overload  # type: ignore
-    def __getitem__(self, key: Literal[1]) -> pd.Series:
+    def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
         ...
 
     def __getitem__(

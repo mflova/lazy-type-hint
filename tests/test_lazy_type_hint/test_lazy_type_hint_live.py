@@ -42,6 +42,7 @@ class TestLazyTypeHintLive:
             "ok_int.py",
             "ok_set.py",
             "ok_pandas_dataframe.py",
+            "ok_pandas_series.py",
             "ok_numpy.py",
             "ok_frozenset.py",
             "ok_nested_list.py",
@@ -52,6 +53,7 @@ class TestLazyTypeHintLive:
             "nok_list.py",
             "nok_modify_mapping.py",
             "nok_pandas_dataframe.py",
+            "nok_pandas_series.py",
             "nok_numpy.py",
         ),
     )
