@@ -1,5 +1,4 @@
 import os
-import pickle
 import re
 import shutil
 from pathlib import Path
@@ -97,16 +96,6 @@ class LazyTypeHintLive(LazyTypeHintABC):
                 )
             dct[match] = path
         return dct
-
-    def from_pickle(
-        self,
-        path: PathT,
-        *,
-        class_name: str,
-    ) -> object:
-        with open(path, "rb") as f:
-            data = pickle.load(f)
-        return self.from_data(data, class_name=class_name)
 
     @override
     def from_yaml_file(
