@@ -188,7 +188,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
                 if child.permission_to_be_created_as_type_alias:
                     overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=child.name))
                 else:
-                    rtype = "pd.Series" if isinstance(self.data[literal], pd.Series) else "pd.DataFrame"
+                    rtype = child.get_str_top_node_without_lvalue()
                     overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=rtype))
         if self.strategies.pandas_strategies == "Full type hint":
             literal_compatible_keys: List[str] = []

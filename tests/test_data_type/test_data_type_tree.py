@@ -104,7 +104,9 @@ class TestIntegration:
 
         # Search for those imports
         code = "\n".join(strings[1:])
-        assert all((var := import_) in code for import_ in imports), f"Detected unused import: {var}"
+        assert all(
+            (var := import_) in code for import_ in imports if import_ != "annotations"
+        ), f"Detected unused import: {var}"
 
     @staticmethod
     def assert_input_object_is_not_modified(data_before: str, data_after: str) -> None:
@@ -156,19 +158,19 @@ class TestIntegration:
         symbols = find_symbols(strings)
         referenced_symbols: Set[str] = set()
         for symbol in symbols:
-            if symbol == "ExampleNestedLevelsLevel1":
-                pass
             for declaration in strings:
-                if symbol in declaration:
-                    pass
-                if any(f"{symbol}{expr}" in declaration for expr in (",", ")", "]", "\n", ":")):
-                    referenced_symbols.add(symbol)
+                if any(f"{symbol}{(expr_:=expr)}" in declaration for expr in (",", ")", "]", "\n", ":")):
+                    # ":" is a corner case for detecting {symbol}: TypeAlias = "..."
+                    if expr_ == ":" and declaration.split(":")[0] != symbol or expr_ != ":":
+                        referenced_symbols.add(symbol)
                 if declaration.endswith(symbol):
                     referenced_symbols.add(symbol)
         unused_classes = symbols.keys() - referenced_symbols
+        string = "\n".join(strings)
+        assert unused_classes, f"Expected to find at least one symbol that is not used, but found none: \n{string}"
         assert (
             len(unused_classes) == 1
-        ), f"Only expected one unused class ({self.name}) but found others: {', '.join(unused_classes - {self.name})}"
+        ), f"Only expected one unused class ({self.name}) but found others: {', '.join(unused_classes - {self.name})} \n\n{string}"
 
     def assert_no_redefined_classes(self, string: str) -> None:
         all_types_defined: Set[str] = set()

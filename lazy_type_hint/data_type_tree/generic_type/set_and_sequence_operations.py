@@ -23,13 +23,14 @@ from lazy_type_hint.data_type_tree.generic_type.dict_data_type_tree import DictD
 
 if TYPE_CHECKING:
     from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
+    from lazy_type_hint.data_type_tree.generic_type.pandas_series_data_type_tree import PandasSeriesDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.sequence_data_type_tree import SequenceDataTypeTree
     from lazy_type_hint.data_type_tree.generic_type.set_data_type_tree import SetDataTypeTree
 
 
 @dataclass(frozen=True)
 class SetAndSequenceOperations:
-    data_type_tree: "Union[SetDataTypeTree, SequenceDataTypeTree]"
+    data_type_tree: "Union[SetDataTypeTree, SequenceDataTypeTree, PandasSeriesDataTypeTree]"
 
     def instantiate_children(self, data: Sequence[Any], *, allow_repeated_children: bool) -> Tuple["DataTypeTree", ...]:
         """Instantiate the children for sets and sequences.

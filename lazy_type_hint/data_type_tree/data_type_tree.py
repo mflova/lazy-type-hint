@@ -186,6 +186,7 @@ class DataTypeTree(ABC):
 
     @final
     def get_str_top_node_without_lvalue(self) -> str:
+        """This method will return either the type alias or its content depending on the permissions of the tree."""
         return self.get_str_top_node().split("=")[-1].strip()
 
     @final
