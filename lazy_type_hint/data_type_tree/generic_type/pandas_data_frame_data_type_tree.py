@@ -128,6 +128,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
 
     def _create_child(self, column: Hashable) -> DataTypeTree:
         suffix = self._to_camel_case(str(column))
+        suffix = suffix if suffix else "WSpace"
         return data_type_tree_factory(  # type: ignore
             data=self.data[column],
             name=f"{self.name}{suffix}",
