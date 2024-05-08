@@ -148,13 +148,13 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         if all(isinstance(column, tuple) and len(column) == 1 for column in self.data.columns):
             return {}
 
+        columns_processed: Set[Union[bool, str, int]] = set()
         for column in data.columns:
             if not self.can_be_accessed_multilevel:  # Here all columns will  be Hashable
                 column = cast(Hashable, column)
                 children[column] = self._create_child(column)
             else:  # Here all columns will be tuple
                 multi_column = cast(Tuple[Hashable, ...], column)
-                columns_processed: Set[Union[bool, str, int]] = set()
                 if multi_column[0] not in columns_processed:
                     if isinstance(multi_column[0], self.literal_compatible_types):
                         columns_processed.add(multi_column[0])
