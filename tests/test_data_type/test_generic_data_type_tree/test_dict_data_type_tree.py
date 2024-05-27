@@ -53,6 +53,14 @@ class TestGetStrPy:
         [
             (
                 DictDataTypeTree(
+                    {}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)
+                ),
+                f"""class {NAME}(TypedDict):
+{TAB}...""",
+                0,
+            ),
+            (
+                DictDataTypeTree(
                     {"name": "Joan"}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)
                 ),
                 f"""class {NAME}(TypedDict):
