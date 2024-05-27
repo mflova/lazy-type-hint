@@ -335,6 +335,8 @@ class DictDataTypeTree(MappingDataTypeTree):
                 if not docstring:
                     modified_line += "\n"
         lines[idx_to_repeat] = modified_line[:-1]
+        if not functional_syntax and not modified_line:
+            lines[idx_to_repeat] = f"{TAB}..."
 
         # Append class docstring if found
         if key_used_as_class_docstring in self.data and key_used_as_class_docstring:
