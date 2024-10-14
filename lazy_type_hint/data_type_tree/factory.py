@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Iterator, Union, overload
+from typing import TYPE_CHECKING, Any, Union, overload
+from collections.abc import Iterator
 
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.strategies import ParsingStrategies
@@ -6,17 +7,10 @@ from lazy_type_hint.strategies import ParsingStrategies
 if TYPE_CHECKING:
     from types import MappingProxyType, ModuleType
     from typing import (
-        Dict,
-        FrozenSet,
-        Iterator,
-        List,
-        Mapping,
         Optional,
-        Sequence,
-        Set,
         TextIO,
-        Tuple,
     )
+    from collections.abc import Iterator, Mapping, Sequence
 
     import numpy as np
     import pandas as pd
@@ -134,7 +128,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "List[Any]",
+    data: "list[Any]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -147,7 +141,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Union[Set[Any], FrozenSet[Any]]",
+    data: "Union[type[Any], frozenset[Any]]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -173,7 +167,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Tuple[Any, ...]",
+    data: "tuple[Any, ...]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -186,7 +180,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Dict[Any, Any]",
+    data: "dict[Any, Any]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,

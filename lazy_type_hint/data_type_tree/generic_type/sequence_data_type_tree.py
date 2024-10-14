@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Hashable, List
+from typing import TYPE_CHECKING
+from collections.abc import Hashable
 
 from typing_extensions import Self, override
 
@@ -22,7 +23,7 @@ class SequenceDataTypeTree(GenericDataTypeTree):
 
     @override
     def _get_hash(self) -> Hashable:
-        hashes: List[object] = []
+        hashes: list[object] = []
         for child in self:
             hashes.append(child._get_hash())
         return frozenset(hashes)

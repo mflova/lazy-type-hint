@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
-from typing import Dict, Final, Hashable, Iterator, List, Literal, Mapping, Set, Type
+from typing import Final, Literal, Optional
+from collections.abc import Hashable, Iterator, Mapping
 
 from typing_extensions import Self, override
 
@@ -20,8 +21,8 @@ class MappingDataTypeTree(GenericDataTypeTree):
 
     @override
     def _instantiate_children(self, data: Mapping[Hashable, object]) -> Mapping[Hashable, DataTypeTree]:  # type: ignore
-        children: Dict[Hashable, DataTypeTree] = {}
-        children_info: Dict[DataTypeTree, Set[Hashable]] = defaultdict(set)
+        children: dict[Hashable, DataTypeTree] = {}
+        children_info: dict[DataTypeTree, set[Hashable]] = defaultdict(set)
 
         for key, value in data.items():
             suffix = type(key).__name__ if not isinstance(key, str) else self._to_camel_case(key)
@@ -41,7 +42,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
         return children
 
     def _assign_same_data_type_tree_to_keys_with_same_value_type(
-        self, children: Dict[Hashable, DataTypeTree], *, children_info: Dict[DataTypeTree, Set[Hashable]]
+        self, children: dict[Hashable, DataTypeTree], *, children_info: dict[DataTypeTree, set[Hashable]]
     ) -> None:
         """
         Simplify the tree.
@@ -49,7 +50,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
         Find all values sharing the same data type tree, create a unique one and use this new one to replace all same
         values.
         """
-        last_name_added: Dict[Type[object], int] = {}
+        last_name_added: dict[type[object], int] = {}
         for data_type_tree, values in children_info.items():
             if len(values) > 1:  # Perform replacement if some values were detected to be the same in terms of types
                 parent_name = data_type_tree.parent.name if data_type_tree.parent is not None else ""
@@ -73,20 +74,21 @@ class MappingDataTypeTree(GenericDataTypeTree):
             - Mapping[str, Union[float, str]]
             - Mapping[str, str]
         """
-        container: Literal["dict", "TypedDict", "MappingProxyType", "Mapping"] = (
-            "dict" if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
+        container: Optional[Literal["TypedDict", "MappingProxyType", "Mapping"]] = (
+            None if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
         )
         if self.holding_type.__name__ == "mappingproxy":
             container = "MappingProxyType"
             self.imports.add(container)
         else:
-            self.imports.add(container)
+            if container:
+                self.imports.add(container)
 
         keys = self._get_types(iterable=children.keys(), remove_repeated=True)
         keys_str = self._format_types(keys)
         value_types = self.get_type_alias_children()
 
-        container_ = "Dict" if container == "dict" else container
+        container_ = "dict" if not container else container
         self.imports.add("TypeAlias")
         return f"{self.name}: TypeAlias = {container_}[{keys_str}, {value_types}]"
 
@@ -102,7 +104,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
             string = string[len(number) :]
 
         new_string = [""] * len(string)
-        idx_to_remove: Set[int] = set()
+        idx_to_remove: set[int] = set()
         removed = False
         for idx, char in enumerate(string):
             if not char.isalpha() and not char.isnumeric():
@@ -124,7 +126,7 @@ class MappingDataTypeTree(GenericDataTypeTree):
 
     @override
     def _get_hash(self) -> Hashable:
-        hashes: List[object] = []
+        hashes: list[object] = []
         for name, child in self.children.items():
             hashes.append(("mapping", hash(type(name)), child._get_hash()))
         return frozenset(hashes)

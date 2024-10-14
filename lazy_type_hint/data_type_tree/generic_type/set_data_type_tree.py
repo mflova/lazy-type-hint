@@ -1,4 +1,5 @@
-from typing import Any, Hashable, Literal, Sequence, Set, Tuple
+from typing import Any, Literal
+from collections.abc import Hashable, Sequence
 
 from typing_extensions import Self, override
 
@@ -21,21 +22,21 @@ class SetDataTypeTree(GenericDataTypeTree):
         self.operations = SetAndSequenceOperations(self)
 
     @override
-    def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
+    def _instantiate_children(self, data: Sequence[Any]) -> tuple[DataTypeTree, ...]:  # type: ignore
         return self.operations.instantiate_children(data, allow_repeated_children=False)
 
     @override
     def _get_str_top_node(self) -> str:
-        container: Literal["FrozenSet", "set"] = "FrozenSet" if self.holding_type is frozenset else "set"
-        self.imports.add(container).add("TypeAlias")
+        self.imports.add("TypeAlias")
 
-        if container == "FrozenSet":
-            return f"{self.name}: TypeAlias = FrozenSet[{self.get_type_alias_children()}]"
-        return f"{self.name}: TypeAlias = Set[{self.get_type_alias_children()}]"
+        container: Literal["frozenset", "set"] = "frozenset" if self.holding_type is frozenset else "set"
+        if container == "frozenset":
+            return f"{self.name}: TypeAlias = frozenset[{self.get_type_alias_children()}]"
+        return f"{self.name}: TypeAlias = set[{self.get_type_alias_children()}]"
 
     @override
     def _get_hash(self) -> Hashable:
-        hashes: Set[object] = set()
+        hashes: set[object] = set()
         for child in self:
             hashes.add(child._get_hash())
         return frozenset(hashes)

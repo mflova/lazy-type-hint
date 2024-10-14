@@ -9,7 +9,7 @@ import sys
 from argparse import Namespace
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, fields
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Final, Optional, Union
 
 import yaml
 from colorama import Fore, Style, init
@@ -37,7 +37,7 @@ PRE_PUSH_TEMPLATE: Final = """#!/bin/sh
 echo "\n"
 echo "---------------RUNNING AUTOMATED LINTING--------------------------"
 cd "{cwd}"
-python3 -m poetry run python "{file}" --single-tool 'all linters'
+poetry run python "{file}" --single-tool 'all linters'
 if [ $? -eq 0 ]; then
   echo 'Everything is OK! Code will be pushed.'
   echo "-----------------------------------------------------------------\n"
@@ -58,7 +58,7 @@ class Arguments:
     """`True/False to enable disable auto linting. `None` to ignore it."""
     disable_parallel: bool
     """Disable any parallel execution of the tools."""
-    only_run_tools: List[str]
+    only_run_tools: list[str]
     """Select multiple tools to run among the configured ones."""
     single_tool: str
     """Select a single tool to runa mong the configured ones."""
@@ -70,14 +70,14 @@ class Arguments:
             raise ValueError("Only either `single-tool` or `only-run-tools` can be used.")
 
     @property
-    def tools(self) -> Union[str, List[str]]:
+    def tools(self) -> Union[str, list[str]]:
         if self.single_tool:
             return self.single_tool
         return self.only_run_tools
 
     @classmethod
     def from_argparse(cls, args: Namespace) -> "Self":
-        attributes: Dict[str, Any] = {}
+        attributes: dict[str, Any] = {}
         for field in fields(cls):
             if hasattr(args, field.name):
                 attributes[field.name] = getattr(args, field.name)
@@ -212,7 +212,7 @@ def run_tool(
     Returns:
         bool: `True` if the tool succeeded.
     """
-    full_command = f"python3 -m poetry run {tool} {extra_args} {path}"
+    full_command = f"poetry run {tool} {extra_args} {path}"
     process = subprocess.Popen(
         full_command,
         shell=True,
@@ -324,19 +324,19 @@ def _setup_auto_run() -> None:
     )
 
 
-def read_and_parse_args(path: str = "") -> Tuple[Mapping[str, Any], ...]:
+def read_and_parse_args(path: str = "") -> tuple[Mapping[str, Any], ...]:
     """Read and parse the yaml file indicating tools to be run.
 
     Args:
         path (str, optional): Path to the yaml file.
 
     Returns:
-        Tuple[Mapping[str, Any], ...]: Tuple being each element one call.
+        tuple[Mapping[str, Any], ...]: Tuple being each element one call.
     """
     if not path:
         path = os.path.join(THIS_DIR, "check_code_args.yaml")
     with open(path) as f:
-        all_args: List[Dict[str, Any]] = yaml.load(f, Loader=yaml.SafeLoader)
+        all_args: list[dict[str, Any]] = yaml.load(f, Loader=yaml.SafeLoader)
 
     # Check format
     if not isinstance(all_args, list):
@@ -356,16 +356,16 @@ def read_and_parse_args(path: str = "") -> Tuple[Mapping[str, Any], ...]:
 
 
 def filter_tools_to_be_used(
-    args: Tuple[Mapping[str, Any], ...], *, only_use_tools: Union[str, Sequence[str]]
-) -> Tuple[Mapping[str, Any], ...]:
+    args: tuple[Mapping[str, Any], ...], *, only_use_tools: Union[str, Sequence[str]]
+) -> tuple[Mapping[str, Any], ...]:
     """From the configuration options, remove all those tools that will not be used.
 
     Args:
-        args (Tuple[Mapping[str, Any], ...]): Content of the configuration file.
+        args (tuple[Mapping[str, Any], ...]): Content of the configuration file.
         only_use_tools (Sequence[str]): Name of the only tools that will be used.
 
     Returns:
-        Tuple[Mapping[str, Any], ...]: Filtered content of the configuration file.
+        tuple[Mapping[str, Any], ...]: Filtered content of the configuration file.
     """
     if not only_use_tools:
         return args  # All tools
@@ -374,7 +374,7 @@ def filter_tools_to_be_used(
     if "all linters" in only_use_tools_:
         return tuple([arg for arg in args if arg["tool"] != "pytest"])
 
-    filtered_args: List[Mapping[str, Any]] = []
+    filtered_args: list[Mapping[str, Any]] = []
     for arg in args:
         if arg["tool"] in only_use_tools_:
             filtered_args.append(arg)
@@ -394,7 +394,7 @@ def main() -> None:
             _disable_auto_run()
         return
 
-    results: List[bool] = []
+    results: list[bool] = []
     args = read_and_parse_args()
     args = filter_tools_to_be_used(args, only_use_tools=cli_args.tools)
     num_workers = min(multiprocessing.cpu_count(), len(args))

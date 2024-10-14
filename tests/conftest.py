@@ -2,7 +2,8 @@ import contextlib
 import os
 import random
 from pathlib import Path
-from typing import Any, Callable, Generator, List
+from typing import Any, Callable
+from collections.abc import Generator
 
 import filelock
 import pytest
@@ -57,19 +58,19 @@ def _test_no_print_statements(
 
 
 @pytest.fixture
-def generate_tree_based_list() -> Callable[[int, int], List[Any]]:
-    def _generate_tree_based_list(depth: int, n_elements: int) -> List[Any]:
-        def append_elem(lst: List[Any], depth: int, n_elements: int, curr_depth: int = 0) -> None:
+def generate_tree_based_list() -> Callable[[int, int], list[Any]]:
+    def _generate_tree_based_list(depth: int, n_elements: int) -> list[Any]:
+        def append_elem(lst: list[Any], depth: int, n_elements: int, curr_depth: int = 0) -> None:
             if curr_depth >= depth:
                 lst.append(random.choice([{1, 2, 3}, {"a": 1, "b": 2}, [1, 2, 3], (1, 2, 3)]))
                 return
 
             for _ in range(n_elements):
-                new_lst: List[Any] = []
+                new_lst: list[Any] = []
                 append_elem(new_lst, depth=depth, n_elements=n_elements, curr_depth=curr_depth + 1)
                 lst.append(new_lst)
 
-        lst: List[Any] = []
+        lst: list[Any] = []
         append_elem(lst, depth=depth, n_elements=n_elements)
         return lst
 

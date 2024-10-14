@@ -1,4 +1,4 @@
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
@@ -30,7 +30,7 @@ class TestLongSetOrSequence:
 
 
 class TestDeepList:
-    def test(self, benchmark: BenchmarkFixture, generate_tree_based_list: Callable[[int, int], List[Any]]) -> None:
+    def test(self, benchmark: BenchmarkFixture, generate_tree_based_list: Callable[[int, int], list[Any]]) -> None:
         lst = generate_tree_based_list(depth=8, n_elements=3)  # type: ignore
         benchmark(
             lambda: data_type_tree_factory(

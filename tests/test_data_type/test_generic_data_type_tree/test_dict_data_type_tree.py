@@ -2,17 +2,9 @@ from copy import deepcopy
 from typing import (
     Any,
     Callable,
-    Dict,
     Final,
-    Hashable,
-    Iterable,
-    List,
-    Mapping,
-    Sequence,
-    Set,
-    Sized,
-    Tuple,
 )
+from collections.abc import Hashable, Iterable, Mapping, Sequence, Sized
 
 import pytest
 
@@ -52,9 +44,7 @@ class TestGetStrPy:
         "tree, expected_output, expected_n_children",
         [
             (
-                DictDataTypeTree(
-                    {}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)
-                ),
+                DictDataTypeTree({}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}...""",
                 0,
@@ -259,7 +249,7 @@ class TestGetStrHeight:
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
-{TAB}kids: List[str]""",
+{TAB}kids: list[str]""",
             ),
         ],
     )
@@ -282,9 +272,9 @@ class TestGetStrHeight:
     @pytest.mark.parametrize(
         "data, min_height, expected_output",
         [
-            ([2, {"name": "Joan", "kids": ["A", "B"]}], 0, f"{NAME}: TypeAlias = List[Union[ExampleDict, int]]"),
-            ([2, {"name": "Joan", "kids": ["A", "B"]}], 1, f"{NAME}: TypeAlias = List[Union[ExampleDict, int]]"),
-            ([2, {"name": "Joan", "kids": ["A", "B"]}], 2, f"{NAME}: TypeAlias = List[Union[ExampleDict, int]]"),
+            ([2, {"name": "Joan", "kids": ["A", "B"]}], 0, f"{NAME}: TypeAlias = list[Union[ExampleDict, int]]"),
+            ([2, {"name": "Joan", "kids": ["A", "B"]}], 1, f"{NAME}: TypeAlias = list[Union[ExampleDict, int]]"),
+            ([2, {"name": "Joan", "kids": ["A", "B"]}], 2, f"{NAME}: TypeAlias = list[Union[ExampleDict, int]]"),
         ],
     )
     def test_permissions(self, data: object, min_height: int, expected_output: str) -> None:
@@ -451,7 +441,7 @@ class TestSimilarityMerge:
 {TAB}name: str
 {TAB}age: int
 {TAB}optional_field: NotRequired[int]""",
-                    "Example: TypeAlias = List[ExampleDict]",
+                    "Example: TypeAlias = list[ExampleDict]",
                 ),
             ),
             (
@@ -464,13 +454,13 @@ class TestSimilarityMerge:
                     f"""class ExampleDict(TypedDict):
 {TAB}a: str
 {TAB}b: int""",
-                    "Example: TypeAlias = List[Union[ExampleDict, ExampleDict2]]",
+                    "Example: TypeAlias = list[Union[ExampleDict, ExampleDict2]]",
                 ),
             ),
         ],
     )
     def test_list_containing_dictionaries(
-        self, data: Sized, expected_merge: bool, expected_str_all_nodes: Tuple[str, ...]
+        self, data: Sized, expected_merge: bool, expected_str_all_nodes: tuple[str, ...]
     ) -> None:
         tree = data_type_tree_factory(
             data, name=self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=1)
@@ -491,7 +481,7 @@ class TestSimilarityMerge:
 {TAB}name: str
 {TAB}age: int
 {TAB}optional_field: NotRequired[int]""",
-                    "Example: TypeAlias = Tuple[ExampleDict, ExampleDict]",
+                    "Example: TypeAlias = tuple[ExampleDict, ExampleDict]",
                 ),
             ),
             (
@@ -504,13 +494,13 @@ class TestSimilarityMerge:
                     f"""class ExampleDict2(TypedDict):
 {TAB}c: str
 {TAB}d: int""",
-                    "Example: TypeAlias = Tuple[ExampleDict, ExampleDict2]",
+                    "Example: TypeAlias = tuple[ExampleDict, ExampleDict2]",
                 ),
             ),
         ],
     )
     def test_tuple_containing_dictionaries(
-        self, data: Sized, expected_merge: bool, expected_str_all_nodes: Tuple[str, ...]
+        self, data: Sized, expected_merge: bool, expected_str_all_nodes: tuple[str, ...]
     ) -> None:
         tree = data_type_tree_factory(data, name=self.NAME, strategies=ParsingStrategies(tuple_size_strategy="fixed"))
 
@@ -588,7 +578,7 @@ class TestKeyDocstring:
         ],
     )
     def test_hidden_key_docs_do_not_change_hash(
-        self, data1: Dict[Any, Any], data2: Dict[Any, Any], expected_same_hash: bool
+        self, data1: dict[Any, Any], data2: dict[Any, Any], expected_same_hash: bool
     ) -> None:
         tree1 = DictDataTypeTree(data1, name="Tree1")
         tree2 = DictDataTypeTree(data2, name="Tree2")
@@ -620,7 +610,7 @@ class TestOriginalDataNotMutated:
             [{"name": "Manu"}, {}],
         ],
     )
-    def test_mutation(self, input_data: List[Dict[Hashable, object]]) -> None:
+    def test_mutation(self, input_data: list[dict[Hashable, object]]) -> None:
         input_data_before = deepcopy(input_data)
         data_type_tree_factory(
             input_data, strategies=ParsingStrategies(merge_different_typed_dicts_if_similarity_above=1), name="Example"
@@ -775,7 +765,7 @@ class TestDictMetadata:
         ],
     )
     def test_get_keys(
-        self, data: Mapping[Hashable, object], expected_output: Set[str], include_hidden_keys: bool
+        self, data: Mapping[Hashable, object], expected_output: set[str], include_hidden_keys: bool
     ) -> None:
         assert expected_output == DictMetadata(
             data, hidden_key_prefix=self.PREFIX, strategies=ParsingStrategies(dict_strategy="TypedDict")

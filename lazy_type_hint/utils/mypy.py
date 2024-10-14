@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
-from typing import Iterable, List, NamedTuple, Union
+from typing import NamedTuple, Union
+from collections.abc import Iterable
 
 from lazy_type_hint.utils.utils import check_if_command_available
 
@@ -15,13 +16,13 @@ class Mypy:
 
     @staticmethod
     def is_available() -> bool:
-        return check_if_command_available("python3 -m poetry run mypy")
+        return check_if_command_available("poetry run mypy")
 
     class Result(NamedTuple):
         """Results returned by Mypy."""
 
         success: bool
-        errors: List[str]
+        errors: list[str]
         scanned: Union[Path, str]
 
         def errors_as_str(self) -> str:
@@ -30,7 +31,7 @@ class Mypy:
         def file_content_with_lineno(self) -> str:
             if isinstance(self.scanned, str):
                 raise ValueError("This method is only callable when a file has been scanned.")
-            lines: List[str] = []
+            lines: list[str] = []
             for idx, line in enumerate(self.scanned.read_text().splitlines()):
                 lines.append(f"{idx} {line}")
             return "\n".join(lines)
@@ -74,7 +75,7 @@ class Mypy:
         if result.stderr:
             return self.Result(success=False, errors=[str(result.stderr)], scanned=string)
         stdout = str(result.stdout)
-        errors: List[str] = []
+        errors: list[str] = []
         lines = stdout.split("error: ")
         for error in lines:
             error_str = error[: error.rfind("]") + 1]

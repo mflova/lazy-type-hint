@@ -1,4 +1,5 @@
-from typing import Any, Hashable, Sequence, Set, Tuple
+from typing import Any
+from collections.abc import Hashable, Sequence
 
 import pandas as pd
 from typing_extensions import Self, override
@@ -20,7 +21,7 @@ class PandasSeriesDataTypeTree(GenericDataTypeTree):
         self.operations = SetAndSequenceOperations(self)
 
     @override
-    def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
+    def _instantiate_children(self, data: Sequence[Any]) -> tuple[DataTypeTree, ...]:  # type: ignore
         return self.operations.instantiate_children(data, allow_repeated_children=False)
 
     @override
@@ -30,7 +31,7 @@ class PandasSeriesDataTypeTree(GenericDataTypeTree):
 
     @override
     def _get_hash(self) -> Hashable:
-        hashes: Set[object] = set()
+        hashes: set[object] = set()
         for child in self:
             hashes.add(child._get_hash())
         return frozenset(hashes)

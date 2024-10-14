@@ -1,4 +1,5 @@
-from typing import Any, Iterator, Sequence, Tuple
+from typing import Any
+from collections.abc import Iterator, Sequence
 
 from typing_extensions import override
 
@@ -12,7 +13,7 @@ class IteratorDataTypeTree(SequenceDataTypeTree):
     wraps = (Iterator,)
 
     @override
-    def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
+    def _instantiate_children(self, data: Sequence[Any]) -> tuple[DataTypeTree, ...]:  # type: ignore
         return self.operations.instantiate_children(data, allow_repeated_children=False)
 
     @override

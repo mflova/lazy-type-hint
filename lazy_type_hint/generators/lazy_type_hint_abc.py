@@ -6,10 +6,10 @@ from typing import (
     Any,
     Callable,
     Optional,
-    Sequence,
     TypeVar,
     Union,
 )
+from collections.abc import Sequence
 
 from lazy_type_hint.data_type_tree import data_type_tree_factory
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree

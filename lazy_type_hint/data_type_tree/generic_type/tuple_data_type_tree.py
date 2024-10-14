@@ -1,4 +1,5 @@
-from typing import Any, Hashable, List, Sequence, Tuple
+from typing import Any
+from collections.abc import Hashable, Sequence
 
 from typing_extensions import override
 
@@ -10,7 +11,7 @@ class TupleDataTypeTree(SequenceDataTypeTree):
     wraps = (tuple,)
 
     @override
-    def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
+    def _instantiate_children(self, data: Sequence[Any]) -> tuple[DataTypeTree, ...]:  # type: ignore
         if self.strategies.tuple_size_strategy == "fixed":
             return self.operations.instantiate_children(data, allow_repeated_children=True)
         else:
@@ -18,8 +19,8 @@ class TupleDataTypeTree(SequenceDataTypeTree):
 
     @override
     def _get_str_top_node(self) -> str:
-        self.imports.add("tuple").add("TypeAlias")
-        return f"{self.name}: TypeAlias = Tuple[{self.get_type_alias_children()}]"
+        self.imports.add("TypeAlias")
+        return f"{self.name}: TypeAlias = tuple[{self.get_type_alias_children()}]"
 
     @override
     def get_type_alias_children(self) -> str:
@@ -49,7 +50,7 @@ class TupleDataTypeTree(SequenceDataTypeTree):
         if self.strategies.tuple_size_strategy == "any size":
             return super()._get_hash()
         else:
-            hashes: List[object] = []
+            hashes: list[object] = []
             for child in self:
                 hashes.append(child._get_hash())
             return tuple(hashes)

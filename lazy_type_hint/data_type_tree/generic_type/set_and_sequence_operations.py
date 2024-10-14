@@ -8,15 +8,10 @@ from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    Iterable,
-    List,
-    Sequence,
-    Set,
-    Tuple,
     Union,
     cast,
 )
+from collections.abc import Iterable, Sequence
 
 from lazy_type_hint.data_type_tree.factory import data_type_tree_factory
 from lazy_type_hint.data_type_tree.generic_type.dict_data_type_tree import DictDataTypeTree
@@ -32,16 +27,16 @@ if TYPE_CHECKING:
 class SetAndSequenceOperations:
     data_type_tree: "Union[SetDataTypeTree, SequenceDataTypeTree, PandasSeriesDataTypeTree]"
 
-    def instantiate_children(self, data: Sequence[Any], *, allow_repeated_children: bool) -> Tuple["DataTypeTree", ...]:
+    def instantiate_children(self, data: Sequence[Any], *, allow_repeated_children: bool) -> tuple["DataTypeTree", ...]:
         """Instantiate the children for sets and sequences.
 
         If `allow_repeated_children` is set to True, all children will be returned even if they are repeated.
         """
         if allow_repeated_children:
-            children: Union[Set[DataTypeTree], List[DataTypeTree]] = []
+            children: Union[set[DataTypeTree], list[DataTypeTree]] = []
         else:
             children = set()
-        names_added: Dict[DataTypeTree, str] = {}  # Used to generate new and unique cnames in a quicker way.
+        names_added: dict[DataTypeTree, str] = {}  # Used to generate new and unique cnames in a quicker way.
 
         child: DataTypeTree
         n_elements_to_check = self.data_type_tree.strategies.check_max_n_elements_within_container
@@ -67,14 +62,14 @@ class SetAndSequenceOperations:
             )
             if allow_repeated_children:
                 # Tuple case
-                children = cast("List[DataTypeTree]", children)
+                children = cast("list[DataTypeTree]", children)
                 if child in names_added:
                     child.rename(names_added[child])
                 children.append(child)
                 names_added[child] = child.name
             else:
                 # List and Set cases
-                children = cast("Set[DataTypeTree]", children)
+                children = cast("set[DataTypeTree]", children)
                 if child in children and isinstance(child, DictDataTypeTree) and child.dict_metadata.is_typed_dict:
                     self._update_existing_typed_dict_child_from_another_equal_child(children, child)
                 if child not in children:
@@ -102,11 +97,11 @@ class SetAndSequenceOperations:
 
     @staticmethod
     def _merge_similar_typed_dicts(
-        children: "Union[Set[DataTypeTree], Sequence[DataTypeTree]]",
+        children: "Union[set[DataTypeTree], Sequence[DataTypeTree]]",
         *,
         merge_if_similarity_above: int,
         allow_repeated_children: bool,
-    ) -> "Tuple[DataTypeTree, ...]":
+    ) -> "tuple[DataTypeTree, ...]":
         """Merge similar TypedDicts.
 
         Only those TypedDict based children are taken into account. If the similarity is above the expected one,
@@ -119,7 +114,7 @@ class SetAndSequenceOperations:
         if not comparison.all_corresponding_value_types_are_same_type:
             return tuple(children)
 
-        dict_data_type_trees: List[DictDataTypeTree] = []
+        dict_data_type_trees: list[DictDataTypeTree] = []
         if allow_repeated_children:
             children = list(children)
             for child in list(children):
@@ -131,7 +126,7 @@ class SetAndSequenceOperations:
                     children[idx] = merged_child
             return tuple(children)
         else:
-            children = cast("Set[DataTypeTree]", children)
+            children = cast("set[DataTypeTree]", children)
             for child in children.copy():
                 if isinstance(child, DictDataTypeTree) and child.dict_metadata.is_typed_dict:
                     children.remove(child)

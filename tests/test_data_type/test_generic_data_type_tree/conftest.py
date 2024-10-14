@@ -1,4 +1,5 @@
-from typing import Callable, Iterable
+from typing import Callable
+from collections.abc import Iterable
 
 import pytest
 

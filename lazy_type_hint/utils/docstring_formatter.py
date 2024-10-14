@@ -1,7 +1,4 @@
-from typing import List, Tuple
-
-
-def _split_string(string: str, *, max_line_length: int) -> Tuple[str, ...]:
+def _split_string(string: str, *, max_line_length: int) -> tuple[str, ...]:
     """
     Splits a string into substrings based on a maximum line length.
 
@@ -10,10 +7,10 @@ def _split_string(string: str, *, max_line_length: int) -> Tuple[str, ...]:
         max_line_length (int): The maximum length of each line.
 
     Returns:
-        Tuple[str, ...]: A tuple of substrings, where each substring has a length less than or equal to the
+        tuple[str, ...]: A tuple of substrings, where each substring has a length less than or equal to the
             maximum line length.
     """
-    substrings: List[str] = []
+    substrings: list[str] = []
     for line in string.split("\n"):
         if not line:
             substrings.append("")

@@ -1,4 +1,5 @@
-from typing import Any, Callable, Final, Iterable, List
+from typing import Any, Callable, Final
+from collections.abc import Iterable
 
 import pytest
 
@@ -9,7 +10,7 @@ from lazy_type_hint.strategies import ParsingStrategies
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Sequence", "list", "Union", "Any", "TypeAlias")
+    imports_to_check: Final = ("Sequence", "Union", "Any", "TypeAlias")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
@@ -38,7 +39,7 @@ class TestGetStrPy:
     # fmt: on
     def test_get_str_top_node(
         self,
-        data: List[Any],
+        data: list[Any],
         strategies: ParsingStrategies,
         expected_output: str,
         expected_n_children: int,
@@ -48,7 +49,7 @@ class TestGetStrPy:
         Test the `get_str_top_node` method of the `ListDataTypeTree` class.
 
         Args:
-            data (List[Any]): The input data for the test.
+            data (list[Any]): The input data for the test.
             strategies (Strategies): The strategies object.
             expected_output (str): The expected output string.
             expected_n_children (int): The expected number of child nodes in the tree.
@@ -62,7 +63,7 @@ class TestGetStrPy:
         """
         tree = ListDataTypeTree(data, name=self.NAME, strategies=strategies)
 
-        expected_output = expected_output.format(expected_container=strategies.list_strategy.capitalize())
+        expected_output = expected_output.format(expected_container=strategies.list_strategy)
         assert expected_n_children == len(tree), "Not all children were correctly parsed"
         assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
@@ -80,17 +81,17 @@ class TestTypeAliasHeight:
     @pytest.mark.parametrize(
         "data, min_height, expected_str",
         [
-            ([1], 0, f"{NAME}: TypeAlias = List[int]"),
-            ([1], 1, f"{NAME}: TypeAlias = List[int]"),
-            ([1], 2, f"{NAME}: TypeAlias = List[int]"),
-            ([1, [1]], 0, f"{NAME}: TypeAlias = List[Union[{NAME}List, int]]"),
-            ([1, [1]], 1, f"{NAME}: TypeAlias = List[Union[List[int], int]]"),
+            ([1], 0, f"{NAME}: TypeAlias = list[int]"),
+            ([1], 1, f"{NAME}: TypeAlias = list[int]"),
+            ([1], 2, f"{NAME}: TypeAlias = list[int]"),
+            ([1, [1]], 0, f"{NAME}: TypeAlias = list[Union[{NAME}List, int]]"),
+            ([1, [1]], 1, f"{NAME}: TypeAlias = list[Union[int, list[int]]]"),
         ],
     )
     # fmt: on
     def test_type_alias_based_on_height(
         self,
-        data: List[Any],
+        data: list[Any],
         strategies: ParsingStrategies,
         expected_str: str,
         min_height: int,
@@ -99,7 +100,7 @@ class TestTypeAliasHeight:
         Test the `get_str_top_node` method of the `ListDataTypeTree` class.
 
         Args:
-            data (List[Any]): The input data for the test.
+            data (list[Any]): The input data for the test.
             strategies (Strategies): The strategies object.
             expected_str (str): The expected output string.
             min_height (int): The minimum height of the tree.

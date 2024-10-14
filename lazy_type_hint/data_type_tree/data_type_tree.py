@@ -6,17 +6,12 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Hashable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    FrozenSet,
-    Hashable,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     final,
@@ -40,7 +35,7 @@ class DataTypeTreeError(Exception):
 
 
 DataTypeT = TypeVar("DataTypeT", bound=object)
-ChildrenStructure = Union[FrozenSet[DataTypeT], Sequence[DataTypeT], Mapping[Hashable, DataTypeT]]
+ChildrenStructure = Union[frozenset[DataTypeT], Sequence[DataTypeT], Mapping[Hashable, DataTypeT]]
 """Different child structures that the Tree can hold."""
 
 
@@ -64,14 +59,14 @@ class DataTypeTree(ABC):
     """Parent node (if any)."""
     children: Optional[ChildrenStructure[DataTypeTree]]
     """All children available within the tree."""
-    holding_type: Type[object]
+    holding_type: type[object]
     """Type of input data given."""
     strategies: ParsingStrategies
     """Strategies to follow when parsing the data."""
 
-    subclasses: ClassVar[Mapping[Type[object], Type[DataTypeTree]]] = {}
+    subclasses: ClassVar[Mapping[type[object], type[DataTypeTree]]] = {}
     """Available subclasses according to the type they are able to parse."""
-    wraps: ClassVar[Sequence[Type[object]]] = (object,)
+    wraps: ClassVar[Sequence[type[object]]] = (object,)
     """Object type that the tree is able to parse."""
 
     @final
@@ -102,7 +97,7 @@ class DataTypeTree(ABC):
         self.__post_child_instantiation__()
 
     @classmethod
-    def get_subclass(cls, data: object) -> Type[DataTypeTree]:
+    def get_subclass(cls, data: object) -> type[DataTypeTree]:
         if type(data) in DataTypeTree.subclasses:
             return DataTypeTree.subclasses[type(data)]
 
@@ -209,7 +204,7 @@ class DataTypeTree(ABC):
     @cache_returned_value_per_instance
     def get_strs_all_nodes_unformatted(
         self, *, include_imports: bool = True, make_parent_class_inherit_from_original_type: bool = False
-    ) -> Tuple[str, ...]:
+    ) -> tuple[str, ...]:
         """Get, ordered by dependencies, all strings representing the whole tree."""
         strings: OrderedSet[str] = OrderedSet()
         self._get_strs_all_nodes_unformatted(types=strings)
@@ -226,7 +221,7 @@ class DataTypeTree(ABC):
         return tuple(strings_lst)
 
     @staticmethod
-    def rename_declaration(declaration: str, new_name: str) -> Tuple[str, str]:
+    def rename_declaration(declaration: str, new_name: str) -> tuple[str, str]:
         if "=" in declaration:
             declarations = declaration.split("=")
             old_name = declarations[0].rstrip().strip()

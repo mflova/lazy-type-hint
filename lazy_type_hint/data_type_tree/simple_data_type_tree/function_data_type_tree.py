@@ -3,7 +3,8 @@ import inspect
 import textwrap
 from inspect import Parameter
 from types import BuiltinFunctionType, FunctionType, MappingProxyType, MethodType
-from typing import Any, Callable, Hashable, Optional
+from typing import Any, Callable, Optional
+from collections.abc import Hashable
 
 from typing_extensions import override
 
@@ -43,7 +44,7 @@ class FunctionDataTypeTree(SimpleDataTypeTree):
         return self._get_protocol_str()
 
     def _get_protocol_str(self) -> str:
-        args = str(inspect.signature(self.data))
+        args = str(inspect.signature(self.data)).replace("collections.abc.", "")
         self.imports.add("Protocol")
         self.imports.import_all_unkown_symbols_from_signature(args)
 

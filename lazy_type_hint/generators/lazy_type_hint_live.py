@@ -5,18 +5,16 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
-    Dict,
     Final,
     Literal,
-    Mapping,
     Optional,
-    Sequence,
     TypeVar,
     Union,
     cast,
     final,
     overload,  # noqa: F401
 )
+from collections.abc import Mapping, Sequence
 
 from typing_extensions import TypeAlias, override
 
@@ -86,7 +84,7 @@ class LazyTypeHintLive(LazyTypeHintABC):
             return {}
         matches = re.findall(r'"(.*?)"', values[0])
 
-        dct: Dict[str, Path] = {}
+        dct: dict[str, Path] = {}
         for match in matches:
             path = Path(self._custom_class_dir_path / f"{match}.py")
             if not path.exists():

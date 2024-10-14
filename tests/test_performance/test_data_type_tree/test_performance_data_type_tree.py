@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, Final, List
+from typing import Any, Callable, Final
 
 import pytest
 import yaml
@@ -36,7 +36,7 @@ class TestBigFile:
 
 
 class TestHash:
-    def test(self, generate_tree_based_list: Callable[[int, int], List[Any]], benchmark: BenchmarkFixture) -> None:
+    def test(self, generate_tree_based_list: Callable[[int, int], list[Any]], benchmark: BenchmarkFixture) -> None:
         lst = generate_tree_based_list(depth=10, n_elements=3)  # type: ignore
 
         def launcher() -> None:

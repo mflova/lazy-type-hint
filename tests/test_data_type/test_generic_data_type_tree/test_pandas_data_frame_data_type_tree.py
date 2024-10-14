@@ -49,7 +49,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -63,7 +63,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 1),
@@ -83,7 +83,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -97,7 +97,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 1),
@@ -121,7 +121,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -135,7 +135,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -159,7 +159,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -173,7 +173,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -197,7 +197,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -211,7 +211,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -235,7 +235,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -249,7 +249,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -273,7 +273,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -287,7 +287,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -311,7 +311,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -325,7 +325,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -345,7 +345,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -359,7 +359,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -383,7 +383,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -397,7 +397,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -421,7 +421,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -435,7 +435,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -455,7 +455,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -469,7 +469,7 @@ class TestGetStrPyForAutocomplete:
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -519,7 +519,7 @@ class TestGetStrPyFullTypeHint:
             Literal[1],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 1),
@@ -537,7 +537,7 @@ class TestGetStrPyFullTypeHint:
             Literal['values'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 1),
@@ -557,7 +557,7 @@ class TestGetStrPyFullTypeHint:
             Literal['A', 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -577,7 +577,7 @@ class TestGetStrPyFullTypeHint:
             Literal['A', 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -597,7 +597,7 @@ class TestGetStrPyFullTypeHint:
             Literal[2, 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -617,7 +617,7 @@ class TestGetStrPyFullTypeHint:
             Literal[True, 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -637,7 +637,7 @@ class TestGetStrPyFullTypeHint:
             Literal['A', 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -657,7 +657,7 @@ class TestGetStrPyFullTypeHint:
             Literal['A', 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -673,7 +673,7 @@ class TestGetStrPyFullTypeHint:
             Literal['C'], Hashable,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -693,7 +693,7 @@ class TestGetStrPyFullTypeHint:
             Literal['A', 'C'],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -713,7 +713,7 @@ class TestGetStrPyFullTypeHint:
             Literal['A', 1],
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),
@@ -729,7 +729,7 @@ class TestGetStrPyFullTypeHint:
             Literal[1], Hashable,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)""", 2),

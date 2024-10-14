@@ -8,15 +8,10 @@ from types import MappingProxyType
 from typing import (
     Any,
     Callable,
-    Dict,
     Final,
-    Iterable,
-    List,
     Literal,
-    Mapping,
-    Set,
-    Tuple,
 )
+from collections.abc import Iterable, Mapping
 
 import pandas as pd
 import pytest
@@ -87,13 +82,12 @@ class TestIntegration:
         self.assert_no_double_whitespace(string)
         self.assert_basic_format(string)
         self.assert_no_broken_string_representation(string, tmp_path=tmp_path)
-        self.assert_python_38_compatible(string)
         self.assert_input_object_is_not_modified(data_before, str(data))
         self.assert_no_unused_imports(strings_unformatted)
 
     @staticmethod
-    def assert_no_unused_imports(strings: Tuple[str, ...]) -> None:
-        imports: Set[str] = set()
+    def assert_no_unused_imports(strings: tuple[str, ...]) -> None:
+        imports: set[str] = set()
         # Gather all imports
         for line in strings[0].splitlines():
             if line.startswith("from") and not line.endswith("("):
@@ -113,18 +107,6 @@ class TestIntegration:
         assert data_before == data_after
 
     @staticmethod
-    def assert_python_38_compatible(string: str) -> None:
-        """
-        Asserts that the given string is compatible with Python 3.8.
-
-        Args:
-            string (str): The string to check for compatibility.
-        """
-        to_check = ["dict", "list", "set", "tuple"]
-        for line in string.splitlines():
-            assert all(f"{check}[" not in line for check in to_check)
-
-    @staticmethod
     def assert_no_broken_string_representation(string: str, tmp_path: str) -> None:
         """Compile and call corresponding string representation.
 
@@ -133,14 +115,14 @@ class TestIntegration:
         file = "tmp.py"
         full_path_file = Path(tmp_path) / file
         full_path_file.write_text(data=string)
-        result = subprocess.run(f"python3 -m poetry run {full_path_file}", capture_output=True, text=True)
+        result = subprocess.run(f"poetry run {full_path_file}", capture_output=True, text=True)
 
         assert not result.stdout
         assert not result.stderr
 
-    def assert_no_unused_classes(self, strings: Tuple[str, ...]) -> None:
-        def find_symbols(strings: Tuple[str, ...]) -> Mapping[str, str]:
-            dct: Dict[str, str] = {}
+    def assert_no_unused_classes(self, strings: tuple[str, ...]) -> None:
+        def find_symbols(strings: tuple[str, ...]) -> Mapping[str, str]:
+            dct: dict[str, str] = {}
             for line in strings:
                 if "=" in line:
                     before_equal = line.split("=")[0].strip().rstrip()
@@ -156,7 +138,7 @@ class TestIntegration:
             return dct
 
         symbols = find_symbols(strings)
-        referenced_symbols: Set[str] = set()
+        referenced_symbols: set[str] = set()
         for symbol in symbols:
             for declaration in strings:
                 if any(f"{symbol}{(expr_:=expr)}" in declaration for expr in (",", ")", "]", "\n", ":")):
@@ -173,7 +155,7 @@ class TestIntegration:
         ), f"Only expected one unused class ({self.name}) but found others: {', '.join(unused_classes - {self.name})} \n\n{string}"
 
     def assert_no_redefined_classes(self, string: str) -> None:
-        all_types_defined: Set[str] = set()
+        all_types_defined: set[str] = set()
         for line in string.splitlines():
             name = self._get_name_type_alias(line)
             if name:
@@ -322,7 +304,7 @@ class TestCheckNMaxElementsFeature:
 
 
 class TestCachedHash:
-    def test(self, generate_tree_based_list: Callable[[int, int], List[Any]]) -> None:
+    def test(self, generate_tree_based_list: Callable[[int, int], list[Any]]) -> None:
         lst = generate_tree_based_list(depth=10, n_elements=3)  # type: ignore
         tree = data_type_tree_factory(lst, name="Example")
 
@@ -336,12 +318,12 @@ class TestRenameDeclaration:
     @pytest.mark.parametrize(
         "declaration, new_name, expected_output",
         [
-            ("MyList = List[str]", "New", ("New = List[str]", "MyList")),
-            ("MyDict = Dict[str, Any]", "New", ("New = Dict[str, Any]", "MyDict")),
+            ("MyList = list[str]", "New", ("New = list[str]", "MyList")),
+            ("MyDict = dict[str, Any]", "New", ("New = dict[str, Any]", "MyDict")),
             (f"class MyClass(Protocol):\n{TAB}...", "New", (f"class New(Protocol):\n{TAB}...", "MyClass")),
             (f"class MyClass():\n{TAB}...", "New", (f"class New():\n{TAB}...", "MyClass")),
             (f"class MyClass:\n{TAB}...", "New", (f"class New:\n{TAB}...", "MyClass")),
         ],
     )
-    def test(self, declaration: str, new_name: str, expected_output: Tuple[str, str]) -> None:
+    def test(self, declaration: str, new_name: str, expected_output: tuple[str, str]) -> None:
         assert expected_output == DataTypeTree.rename_declaration(declaration, new_name=new_name)

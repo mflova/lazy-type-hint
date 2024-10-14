@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import Union
 
 import pytest
 
@@ -25,7 +25,7 @@ def __init__(self) -> None:
     else:
         self.loaded_pyi_content = self.loader_pyi_path.read_text(encoding="utf-8")
 
-def get_classes_added(self) -> Set[str]:
+def get_classes_added(self) -> set[str]:
     to_find = "classes_created"
     for line in self.loaded_pyi_content.splitlines():
         if "classes_created" in line:
@@ -76,7 +76,7 @@ def run():
     def test_search_decorator(
         self,
         decorator_name: str,
-        expected_idx: List[int],
+        expected_idx: list[int],
         file_handler: PyFileModifier,
         method_name: str,
     ) -> None:
@@ -100,7 +100,7 @@ def run():
         file_handler: PyFileModifier,
         method_name: str,
         return_index_above_decorator: bool,
-        expected_idx: List[int],
+        expected_idx: list[int],
     ) -> None:
         assert expected_idx == file_handler.search_method(
             method_name, return_index_above_decorator=return_index_above_decorator
@@ -149,7 +149,7 @@ def run():
         self,
         file_handler: PyFileModifier,
         variable: str,
-        expected_output: List[Tuple[int, str]],
+        expected_output: list[tuple[int, str]],
     ) -> None:
         assert file_handler.search_assignment(variable) == expected_output
 
@@ -256,7 +256,7 @@ if TYPE_CHECKING:
             ["__init__", ("@final\ndef __init__(self) -> None:", slice(7, 9))],
             [
                 "get_classes_added",
-                ("def get_classes_added(self) -> Set[str]:", slice(15, 16)),
+                ("def get_classes_added(self) -> set[str]:", slice(15, 16)),
             ],
         ),
     )
@@ -264,7 +264,7 @@ if TYPE_CHECKING:
         self,
         file_handler: PyFileModifier,
         method_name: str,
-        expected_output: Tuple[str, slice],
+        expected_output: tuple[str, slice],
     ) -> None:
         assert expected_output == file_handler.get_signature(method_name)
 

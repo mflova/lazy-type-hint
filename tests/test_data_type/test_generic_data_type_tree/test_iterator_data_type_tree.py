@@ -1,4 +1,5 @@
-from typing import Any, Final, Iterator
+from typing import Any, Final
+from collections.abc import Iterator
 
 import pytest
 
