@@ -181,7 +181,7 @@ class PyFileModifier:
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 node.body = [ast.Ellipsis()]  # type: ignore
-        self.lines = ast.unparse(tree).strip().splitlines()  # type: ignore
+        self.lines = ast.unparse(tree).strip().splitlines()
 
     def remove_all_private_methods(self) -> None:
         """

@@ -1,16 +1,16 @@
-from typing import TYPE_CHECKING, Any, Union, overload
 from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Union, overload
 
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.strategies import ParsingStrategies
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping, Sequence
     from types import MappingProxyType, ModuleType
     from typing import (
         Optional,
         TextIO,
     )
-    from collections.abc import Iterator, Mapping, Sequence
 
     import numpy as np
     import pandas as pd
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "NDArray[np.generic]",
     name: str,
     *,
@@ -49,7 +49,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "MappingProxyType[Any, Any]",
     name: str,
     *,
@@ -62,7 +62,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "Iterator[Any]",
     name: str,
     *,
@@ -75,7 +75,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "ModuleType",
     name: str,
     *,
@@ -88,7 +88,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "TextIO",
     name: str,
     *,

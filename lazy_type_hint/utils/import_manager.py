@@ -1,8 +1,8 @@
 import re
 from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, Literal, Optional
-from collections.abc import Mapping, Sequence
 
 from typing_extensions import TypeGuard
 

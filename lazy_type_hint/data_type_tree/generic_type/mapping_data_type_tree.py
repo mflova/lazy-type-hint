@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
-from typing import Final, Literal, Optional
 from collections.abc import Hashable, Iterator, Mapping
+from typing import Final, Literal, Optional
 
 from typing_extensions import Self, override
 
@@ -74,21 +74,21 @@ class MappingDataTypeTree(GenericDataTypeTree):
             - Mapping[str, Union[float, str]]
             - Mapping[str, str]
         """
-        container: Optional[Literal["TypedDict", "MappingProxyType", "Mapping"]] = (
-            None if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
+        container: Optional[Literal["dict", "MappingProxyType", "Mapping"]] = (
+            "dict" if self.strategies.dict_strategy == "TypedDict" else self.strategies.dict_strategy
         )
         if self.holding_type.__name__ == "mappingproxy":
             container = "MappingProxyType"
             self.imports.add(container)
         else:
-            if container:
+            if container and container != "dict":
                 self.imports.add(container)
 
         keys = self._get_types(iterable=children.keys(), remove_repeated=True)
         keys_str = self._format_types(keys)
         value_types = self.get_type_alias_children()
 
-        container_ = "dict" if not container else container
+        container_ = container if container else "dict"
         self.imports.add("TypeAlias")
         return f"{self.name}: TypeAlias = {container_}[{keys_str}, {value_types}]"
 

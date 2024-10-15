@@ -28,14 +28,13 @@ class TestAdd:
 
 class TestFormatSinglePackage:
     def test_import_manager_format_single_package(self, import_manager: ImportManager) -> None:
-        import_manager.add("list").add("tuple").add("dict").add("MappingProxyType")
-        formatted_imports = import_manager._format_single_package("typing", ["List", "Tuple", "Dict"], line_length=80)
-        expected_output = "from typing import Dict, List, Tuple"
+        formatted_imports = import_manager._format_single_package("typing", ["Literal", "Protocol"], line_length=80)
+        expected_output = "from typing import Literal, Protocol"
         assert expected_output == formatted_imports
 
     def test_import_manager_format_single_package_long_line(self, import_manager: ImportManager) -> None:
-        formatted_imports = import_manager._format_single_package("typing", ["List", "Tuple", "Dict"], line_length=30)
-        expected_output = f"from typing import (\n{TAB}Dict,\n{TAB}List,\n{TAB}Tuple,\n)"
+        formatted_imports = import_manager._format_single_package("typing", ["Literal", "Protocol"], line_length=30)
+        expected_output = f"from typing import (\n{TAB}Literal,\n{TAB}Protocol,\n)"
         assert expected_output == formatted_imports
 
     def test_collections(self, import_manager: ImportManager) -> None:
@@ -54,7 +53,7 @@ class TestAllUnknownSymbolsFromSignature:
             ("def (a: float, *, b: float):", set()),
             ("def (a: Sequence[int]):", {"Sequence"}),
             ("def (a: Sequence[int]) -> int:", {"Sequence"}),
-            ("def (a: Sequence[int]) -> tuple[int, ...]:", {"Sequence", "tuple"}),
+            ("def (a: Sequence[int]) -> tuple[int, ...]:", {"Sequence"}),
         ],
     )
     def test_import_all_unknown_symbols_from_signature(
@@ -74,7 +73,7 @@ class TestFormat:
         import_manager.add("Protocol").add("Literal").add("overload").add("MappingProxyType")
         formatted_imports = import_manager.format(line_length=120)
         expected_output = """from types import MappingProxyType
-from typing import Protocol, Literal, overload"""
+from typing import Literal, Protocol, overload"""
         assert expected_output == formatted_imports
 
     def test_import_manager_format_long_line(self, import_manager: ImportManager) -> None:
@@ -82,8 +81,8 @@ from typing import Protocol, Literal, overload"""
         formatted_imports = import_manager.format(line_length=35)
         expected_output = """from types import MappingProxyType
 from typing import (
-    Protocol,
     Literal,
+    Protocol,
     overload,
 )"""
 
