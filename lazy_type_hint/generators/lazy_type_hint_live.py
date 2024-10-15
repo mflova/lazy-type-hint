@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import (
     Any,
@@ -14,7 +15,6 @@ from typing import (
     final,
     overload,  # noqa: F401
 )
-from collections.abc import Mapping, Sequence
 
 from typing_extensions import TypeAlias, override
 
