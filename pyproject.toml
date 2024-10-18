@@ -9,7 +9,7 @@ readme = "README.md"
 Source = "https://github.com/mflova/lazy-type-hint"
 
 [tool.poetry.dependencies]
-python = "^3.8, <=3.12"
+python = "^3.9, <=3.12"
 typing_extensions = "*"
 
 [tool.poetry.group.dev.dependencies]
