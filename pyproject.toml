@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lazy-type-hint"
-version = "2.2.4"
+version = "3.0.0"
 description = "Automate type hint generation in a single line."
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
