@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Generic, List, Set, Tuple, TypeVar
+from typing import Generic, TypeVar
 
 ObjectT = TypeVar("ObjectT")
 
@@ -8,8 +8,8 @@ ObjectT = TypeVar("ObjectT")
 class OrderedSet(Generic[ObjectT]):
     """A data structure that maintains the order of elements while ensuring uniqueness."""
 
-    _elements_added: Set[ObjectT] = field(default_factory=set)
-    _lst: List[ObjectT] = field(default_factory=list)
+    _elements_added: set[ObjectT] = field(default_factory=set)
+    _lst: list[ObjectT] = field(default_factory=list)
 
     def add(self, element: ObjectT) -> None:
         """
@@ -22,20 +22,20 @@ class OrderedSet(Generic[ObjectT]):
             self._elements_added.add(element)
             self._lst.append(element)
 
-    def as_tuple(self) -> Tuple[ObjectT, ...]:
+    def as_tuple(self) -> tuple[ObjectT, ...]:
         """
         Returns the elements of the ordered set as a tuple.
 
         Returns:
-            Tuple[ObjectT, ...]: The elements of the ordered set as a tuple.
+            tuple[ObjectT, ...]: The elements of the ordered set as a tuple.
         """
         return tuple(self._lst)
 
-    def as_list(self) -> List[ObjectT]:
+    def as_list(self) -> list[ObjectT]:
         """
         Returns the elements of the ordered set as a list.
 
         Returns:
-            List[ObjectT]: The elements of the ordered set as a list.
+            list[ObjectT]: The elements of the ordered set as a list.
         """
         return list(self._lst)

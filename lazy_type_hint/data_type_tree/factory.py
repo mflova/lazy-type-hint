@@ -1,21 +1,15 @@
-from typing import TYPE_CHECKING, Any, Iterator, Union, overload
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Union, overload
 
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.strategies import ParsingStrategies
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping, Sequence
     from types import MappingProxyType, ModuleType
     from typing import (
-        Dict,
-        FrozenSet,
-        Iterator,
-        List,
-        Mapping,
         Optional,
-        Sequence,
-        Set,
         TextIO,
-        Tuple,
     )
 
     import numpy as np
@@ -42,7 +36,7 @@ if TYPE_CHECKING:
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "NDArray[np.generic]",
     name: str,
     *,
@@ -55,7 +49,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "MappingProxyType[Any, Any]",
     name: str,
     *,
@@ -68,7 +62,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "Iterator[Any]",
     name: str,
     *,
@@ -81,7 +75,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "ModuleType",
     name: str,
     *,
@@ -94,7 +88,7 @@ def data_type_tree_factory(  # type: ignore[overload-overlap]
 
 
 @overload
-def data_type_tree_factory(  # type: ignore[overload-overlap]
+def data_type_tree_factory(
     data: "TextIO",
     name: str,
     *,
@@ -134,7 +128,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "List[Any]",
+    data: "list[Any]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -147,7 +141,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Union[Set[Any], FrozenSet[Any]]",
+    data: "Union[type[Any], frozenset[Any]]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -173,7 +167,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Tuple[Any, ...]",
+    data: "tuple[Any, ...]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,
@@ -186,7 +180,7 @@ def data_type_tree_factory(  # type: ignore[misc]
 
 @overload
 def data_type_tree_factory(  # type: ignore[misc]
-    data: "Dict[Any, Any]",
+    data: "dict[Any, Any]",
     name: str,
     *,
     imports: "Optional[ImportManager]" = None,

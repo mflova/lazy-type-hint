@@ -1,12 +1,8 @@
 from abc import abstractmethod
 from typing import (
-    Hashable,
-    Iterable,
-    List,
-    Sequence,
-    Tuple,
     final,
 )
+from collections.abc import Hashable, Iterable, Sequence
 
 from typing_extensions import override
 
@@ -44,7 +40,7 @@ class GenericDataTypeTree(DataTypeTree):
         return f"Union[{', '.join(child_types)}]"
 
     @final
-    def _get_types(self, iterable: Iterable[object] = (), *, remove_repeated: bool = True) -> Tuple[str, ...]:
+    def _get_types(self, iterable: Iterable[object] = (), *, remove_repeated: bool = True) -> tuple[str, ...]:
         """
         Get the types of the generic data type tree. Child ones by default.
 
@@ -55,9 +51,9 @@ class GenericDataTypeTree(DataTypeTree):
             remove_repeated (bool, optional): Whether to remove repeated child types. Defaults to True.
 
         Returns:
-            Tuple[str, ...]: A tuple containing the child types.
+            tuple[str, ...]: A tuple containing the child types.
         """
-        child_types: List[str] = []
+        child_types: list[str] = []
         if iterable:
             child_types = [type(element).__name__ for element in iterable]
         else:
@@ -79,7 +75,7 @@ class GenericDataTypeTree(DataTypeTree):
 
     @override
     def _get_hash(self) -> Hashable:
-        hashes: List[object] = []
+        hashes: list[object] = []
         for child in self:
             hashes.append(child._get_hash())
         return tuple(hashes)

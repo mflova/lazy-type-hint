@@ -1,7 +1,8 @@
 import re
 from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, Final, List, Literal, Mapping, Optional, Sequence, Set, Tuple
+from typing import TYPE_CHECKING, Final, Literal, Optional
 
 from typing_extensions import TypeGuard
 
@@ -11,13 +12,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
 KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
-    "list",
-    "set",
-    "tuple",
-    "dict",
-    "type",
     "Sequence",
-    "FrozenSet",
     "Hashable",
     "Mapping",
     "TypeAlias",
@@ -46,20 +41,14 @@ KEYWORDS_AVAILABLE: "TypeAlias" = Literal[
 
 @dataclass(frozen=True)
 class ImportManager:
-    _set: Set[KEYWORDS_AVAILABLE] = field(default_factory=set)
+    _set: set[KEYWORDS_AVAILABLE] = field(default_factory=set)
 
     TEMPLATE: Final[str] = field(init=False, default="from {package} import {name}")
-    PACKAGE: Mapping[KEYWORDS_AVAILABLE, Tuple[str, ...]] = field(
+    PACKAGE: Mapping[KEYWORDS_AVAILABLE, tuple[str, ...]] = field(
         default_factory=lambda: {
-            "list": ("typing", "List"),
-            "set": ("typing", "Set"),
-            "tuple": ("typing", "Tuple"),
-            "type": ("typing", "Type"),
-            "dict": ("typing", "Dict"),
-            "Sequence": ("typing", "Sequence"),
-            "Hashable": ("typing", "Hashable"),
-            "FrozenSet": ("typing", "FrozenSet"),
-            "Mapping": ("typing", "Mapping"),
+            "Sequence": ("collections.abc", "Sequence"),
+            "Hashable": ("collections.abc", "Hashable"),
+            "Mapping": ("collections.abc", "Mapping"),
             "MappingProxyType": ("types", "MappingProxyType"),
             "TypedDict": ("typing", "TypedDict"),
             "Any": ("typing", "Any"),
@@ -67,7 +56,7 @@ class ImportManager:
             "Optional": ("typing", "Optional"),
             "NotRequired": ("typing_extensions", "NotRequired"),
             "ReadOnly": ("typing_extensions", "ReadOnly"),
-            "Callable": ("typing", "Callable"),
+            "Callable": ("collections.abc", "Callable"),
             "ModuleType": ("types", "ModuleType"),
             "Protocol": ("typing", "Protocol"),
             "Literal": ("typing", "Literal"),
@@ -79,7 +68,7 @@ class ImportManager:
             "TypeAlias": ("typing_extensions", "TypeAlias"),
             "pd.Scalar": ("pandas._typing", "Scalar"),
             "TextIO": ("typing", "TextIO"),
-            "Iterator": ("typing", "Iterator"),
+            "Iterator": ("collections.abc", "Iterator"),
             "annotations": ("__future__", "annotations"),
         }
     )
@@ -125,7 +114,7 @@ class ImportManager:
         return symbol in self.PACKAGE
 
     def format(self, *, line_length: int = 90) -> str:
-        import_statements: Dict[str, List[str]] = defaultdict(list)
+        import_statements: dict[str, list[str]] = defaultdict(list)
         for keyword in self._set:
             try:
                 reference = self.PACKAGE[keyword]
@@ -136,7 +125,7 @@ class ImportManager:
                 ) from error
             import_statements[".".join(reference[:-1])].append(reference[-1])
 
-        imports_lst: List[str] = []
+        imports_lst: list[str] = []
         for package, imports in sorted(import_statements.items(), key=lambda x: x[0]):
             imports_lst.append(self._format_single_package(package, imports, line_length=line_length))
         if imports_lst and "__future__" in imports_lst[0]:

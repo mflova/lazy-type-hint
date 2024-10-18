@@ -1,4 +1,5 @@
-from typing import Any, Sequence, Tuple
+from typing import Any
+from collections.abc import Sequence
 
 from typing_extensions import override
 
@@ -12,14 +13,13 @@ class ListDataTypeTree(SequenceDataTypeTree):
     wraps = (list,)
 
     @override
-    def _instantiate_children(self, data: Sequence[Any]) -> Tuple[DataTypeTree, ...]:  # type: ignore
+    def _instantiate_children(self, data: Sequence[Any]) -> tuple[DataTypeTree, ...]:  # type: ignore
         return self.operations.instantiate_children(data, allow_repeated_children=False)
 
     @override
     def _get_str_top_node(self) -> str:
         if self.strategies.list_strategy == "list":
-            self.imports.add("list")
-            container = "List"
+            container = "list"
         elif self.strategies.list_strategy == "Sequence":
             self.imports.add("Sequence")
             container = "Sequence"

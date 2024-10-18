@@ -2,7 +2,7 @@ import ast
 import os
 import subprocess
 from itertools import zip_longest
-from typing import Any, Final, List, Protocol, TypeVar, Union, cast
+from typing import Any, Final, Protocol, TypeVar, Union, cast
 
 TAB: Final = "    "
 
@@ -21,8 +21,8 @@ def is_string_python_keyword_compatible(string: str) -> bool:
 
 
 def compare_ast(
-    node1: Union[ast.expr, List[ast.expr], ast.Module],
-    node2: Union[ast.expr, List[ast.expr], ast.Module],
+    node1: Union[ast.expr, list[ast.expr], ast.Module],
+    node2: Union[ast.expr, list[ast.expr], ast.Module],
     ignore_args: bool = False,
     ignore_imports: bool = False,
 ) -> bool:

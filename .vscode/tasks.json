@@ -16,10 +16,8 @@
         {
             "label": "Run black formatter",
             "type": "shell",
-            "command": "python3",
+            "command": "poetry",
             "args": [
-                "-m",
-                "poetry",
                 "run",
                 "black",
                 ".",
@@ -46,10 +44,8 @@
         {
             "label": "Run linting tools",
             "type": "shell",
-            "command": "python3",
+            "command": "poetry",
             "args": [
-                "-m",
-                "poetry",
                 "run",
                 "python",
                 "check_code.py",
@@ -88,10 +84,8 @@
         {
             "label": "Automated linting before pushing",
             "type": "shell",
-            "command": "python3",
+            "command": "poetry",
             "args": [
-                "-m",
-                "poetry",
                 "run",
                 "python",
                 "check_code.py",

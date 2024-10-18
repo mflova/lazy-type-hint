@@ -1,4 +1,5 @@
-from typing import Final, Hashable, Mapping, Sequence, Set, Union
+from typing import Final, Union
+from collections.abc import Hashable, Mapping, Sequence
 
 import pytest
 
@@ -80,7 +81,7 @@ class TestMergeSimilarTypedDicts:
     )
     def test_merge_similar_typed_dicts(
         self,
-        children: Union[Set[DataTypeTree], Sequence[DataTypeTree]],
+        children: Union[set[DataTypeTree], Sequence[DataTypeTree]],
         expected_key_info: Mapping[Hashable, KeyInfo],
         allow_repeated_children: bool,
     ) -> None:
@@ -172,7 +173,7 @@ class TestMergeSimilarTypedDicts:
     )
     def test_not_merge_similar_typed_dicts(
         self,
-        children: Union[Set[DataTypeTree], Sequence[DataTypeTree]],
+        children: Union[set[DataTypeTree], Sequence[DataTypeTree]],
         expected_key_info: Mapping[Hashable, KeyInfo],
         allow_repeated_children: bool,
     ) -> None:

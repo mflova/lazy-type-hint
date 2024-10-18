@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pytest
 
 from lazy_type_hint.utils.docstring_formatter import _split_string, format_string_as_docstring
@@ -17,7 +15,7 @@ from lazy_type_hint.utils.docstring_formatter import _split_string, format_strin
         ("This Thisisatest", 6, ("This", "Thisisatest")),
     ],
 )
-def test_split_string(string: str, expected_result: Tuple[str, ...], max_line_length: int) -> None:
+def test_split_string(string: str, expected_result: tuple[str, ...], max_line_length: int) -> None:
     assert expected_result == _split_string(string, max_line_length=max_line_length)
 
 

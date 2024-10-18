@@ -1,4 +1,5 @@
-from typing import Hashable, Union, final
+from typing import Union, final
+from collections.abc import Hashable
 
 from typing_extensions import Self, override
 

@@ -204,7 +204,7 @@ class MyClassDict2(TypedDict):
     age: int
     married: bool
 
-MyClass = Tuple[MyClassDict, MyClassDict2]
+MyClass = tuple[MyClassDict, MyClassDict2]
 """
 
 data = ({"name": "Peter", "age": 22}, {"name": "Keving", "age": 21, "married": True})
@@ -219,7 +219,7 @@ class MyClassDict(TypedDict):
     age: int
     married: NotRequired[bool]
 
-MyClass = Tuple[MyClassDict, MyClassDict]
+MyClass = tuple[MyClassDict, MyClassDict]
 """
 ```
 
@@ -233,7 +233,7 @@ from lazy_type_hint import LazyTypeHint, ParsingStrategies
 
 data = {"name": "Peter"}
 LazyTypeHint(ParsingStrategies(dict_strategy="dict")).from_data(data, class_name="MyClass").to_string()
-"""MyClass: TypeAlias = Dict[str, str]"""
+"""MyClass: TypeAlias = dict[str, str]"""
 LazyTypeHint(ParsingStrategies(dict_strategy="Mapping")).from_data(data, class_name="MyClass").to_string()
 """MyClass: TypeAlias = Mapping[str, str]"""
 LazyTypeHint(ParsingStrategies(dict_strategy="TypedDict")).from_data(data, class_name="MyClass").to_string()
@@ -257,7 +257,7 @@ from lazy_type_hint import LazyTypeHint, ParsingStrategies
 
 data = [1,2,3]
 LazyTypeHint(ParsingStrategies(list_strategy="list")).from_data(data, class_name="MyClass").to_string()
-"""MyClass: TypeAlias = List[int]"""
+"""MyClass: TypeAlias = list[int]"""
 LazyTypeHint(ParsingStrategies(list_strategy="Sequence")).from_data(data, class_name="MyClass").to_string()
 """MyClass: TypeAlias = Sequence[int]"""
 ```
@@ -271,9 +271,9 @@ from lazy_type_hint import LazyTypeHint, ParsingStrategies
 
 data = (1,2,3)
 LazyTypeHint(ParsingStrategies(tuple_size_strategy="any size")).from_data(data, class_name="MyClass").to_string()
-"""MyClass: TypeAlias = Tuple[int, ...]"""
+"""MyClass: TypeAlias = tuple[int, ...]"""
 LazyTypeHint(ParsingStrategies(tuple_size_strategy="fixed")).from_data(data, class_name="MyClass").to_string()
-"""MyClass: TypeAlias = Tuple[int, int, int]"""
+"""MyClass: TypeAlias = tuple[int, int, int]"""
 ```
 
 ### Type hinting Pandas based objects
@@ -309,11 +309,11 @@ from lazy_type_hint import LazyTypeHint, ParsingStrategies
 
 data = (1,2,3, [1, 2])
 LazyTypeHint(ParsingStrategies(min_height_to_define_type_alias=0)).from_data(data, class_name="MyClass").to_string()
-"""MyClass: TypeAlias = Tuple[int, int, int, List[int]]"""
+"""MyClass: TypeAlias = tuple[int, int, int, list[int]]"""
 LazyTypeHint(ParsingStrategies(min_height_to_define_type_alias=1)).from_data(data, class_name="MyClass").to_string()
 """
-MyClassList: TypeAlias = List[int]
-MyClass: TypeAlias = Tuple[int, int, int, MyClassList]
+MyClassList: TypeAlias = list[int]
+MyClass: TypeAlias = tuple[int, int, int, MyClassList]
 """
 ```
  

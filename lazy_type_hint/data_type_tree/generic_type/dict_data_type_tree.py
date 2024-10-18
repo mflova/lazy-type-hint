@@ -4,19 +4,11 @@ from dataclasses import dataclass, field
 from itertools import islice
 from typing import (
     Any,
-    Dict,
-    Hashable,
-    Iterable,
-    KeysView,
-    List,
-    Mapping,
     Optional,
-    Sequence,
-    Set,
-    Type,
     TypeVar,
     cast,
 )
+from collections.abc import Hashable, Iterable, KeysView, Mapping, Sequence
 
 from typing_extensions import Self, TypeGuard, override
 
@@ -35,9 +27,9 @@ ValueT = TypeVar("ValueT")
 
 @dataclass(frozen=True)
 class DictMetadataComparison:
-    common_keys: Set[Hashable] = field(default_factory=set)
-    non_common_keys: Set[Hashable] = field(default_factory=set)
-    value_types: Mapping[Hashable, Set[Type[object]]] = field(default_factory=lambda: defaultdict(set))
+    common_keys: set[Hashable] = field(default_factory=set)
+    non_common_keys: set[Hashable] = field(default_factory=set)
+    value_types: Mapping[Hashable, set[type[object]]] = field(default_factory=lambda: defaultdict(set))
 
     @property
     def percentage_similarity(self) -> int:
@@ -63,10 +55,10 @@ class DictMetadata:
 
     hidden_key_prefix: str
     """Prefix prepended to a key to indicate this one should be hidden when building its type alias."""
-    key_info: Dict[Hashable, KeyInfo]
+    key_info: dict[Hashable, KeyInfo]
     """Extra information associated to every key of the dictionary."""
 
-    _data: Dict[Hashable, object]
+    _data: dict[Hashable, object]
     _strategies: ParsingStrategies
     _initial_keys: KeysView[Hashable]
 
@@ -80,7 +72,7 @@ class DictMetadata:
         self.key_info = {}
         self._update_key_info(force_all_required_to_true=True)
 
-    def get_keys(self, *, include_hidden_prefix_keys: bool = False) -> Set[Hashable]:
+    def get_keys(self, *, include_hidden_prefix_keys: bool = False) -> set[Hashable]:
         """Get all keys within the wrapped dictionary."""
         if include_hidden_prefix_keys:
             return set(self._data.keys())
@@ -99,7 +91,7 @@ class DictMetadata:
         total_keys = set.union(*keys_per_dictionary)
         non_common_keys = total_keys - common_keys
 
-        value_types: Dict[Hashable, Set[Type[object]]] = defaultdict(set)
+        value_types: dict[Hashable, set[type[object]]] = defaultdict(set)
         for dct in dicts_metadata:
             for key, value in dct._data.items():
                 value_type = type(value)
@@ -186,7 +178,7 @@ class DictMetadata:
             docstring_keys_start_with = self.hidden_key_prefix
         if not self._all_keys_are_string(self._data):
             return {}
-        dct: Dict[Hashable, str] = {}
+        dct: dict[Hashable, str] = {}
         # Insert key docstrings
         for key in self._data:
             if not key.startswith(docstring_keys_start_with):  # Check key is not docstring based
@@ -207,7 +199,7 @@ class DictMetadata:
 
 class DictDataTypeTree(MappingDataTypeTree):
     wraps = (dict,)
-    data: Dict[Hashable, object]
+    data: dict[Hashable, object]
     dict_metadata: DictMetadata
 
     @staticmethod
@@ -256,7 +248,7 @@ class DictDataTypeTree(MappingDataTypeTree):
         """
         self.imports.add("TypedDict")
 
-        content: Dict[str, str] = {}
+        content: dict[str, str] = {}
         for key, value in children.items():
             if isinstance(value, dict):
                 type_value = f"{self.name}{self._to_camel_case(key)}"
@@ -347,7 +339,7 @@ class DictDataTypeTree(MappingDataTypeTree):
         """Given another child, this will update the current node with all the data and metadata."""
         self.data = dict(self.dict_metadata.update(other.dict_metadata))
 
-    def _insert_class_docstring(self, lines: Sequence[str], *, key_used_as_doc: str) -> List[str]:
+    def _insert_class_docstring(self, lines: Sequence[str], *, key_used_as_doc: str) -> list[str]:
         string = self.data[key_used_as_doc]
         lines = list(lines)
         if isinstance(string, str):
@@ -363,7 +355,7 @@ class DictDataTypeTree(MappingDataTypeTree):
     def _get_hash(self) -> Hashable:
         if not self.dict_metadata.is_typed_dict:
             return super()._get_hash()
-        hashes: List[object] = []
+        hashes: list[object] = []
         for name, child in self.children.items():
             hashes.append(("typed_dict", name, child._get_hash()))
         return frozenset(hashes)
@@ -391,7 +383,7 @@ class DictDataTypeTree(MappingDataTypeTree):
             - Update `data` that holds the dictionary
             - Override `DictMetadata` with new information relative to all new information
         """
-        merged_dict: Dict[Hashable, object] = {}
+        merged_dict: dict[Hashable, object] = {}
         for d in (tree.data for tree in trees):
             merged_dict.update(d)
 

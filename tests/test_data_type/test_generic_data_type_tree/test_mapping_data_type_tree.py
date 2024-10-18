@@ -1,5 +1,6 @@
 from types import MappingProxyType
-from typing import Any, Callable, Final, Iterable, Mapping
+from typing import Any, Callable, Final
+from collections.abc import Iterable, Mapping
 
 import pytest
 
@@ -25,7 +26,7 @@ def test_to_camel_case(string: str, expected_out: str) -> None:
 class TestGetStrPy:
     NAME: Final = "Example"
     """Name that will be used to create the class."""
-    imports_to_check: Final = ("Mapping", "Any", "dict", "TypedDict", "MappingProxyType")
+    imports_to_check: Final = ("Mapping", "Any", "TypedDict", "MappingProxyType")
     """Imports that will be checked in case they were needed."""
 
     # fmt: off
@@ -80,8 +81,7 @@ class TestGetStrPy:
         else:
             tree = MappingDataTypeTree(data, name=self.NAME, strategies=strategies)
 
-        expected_container = "Dict" if strategies.dict_strategy == "dict" else strategies.dict_strategy
-        expected_output = expected_output.format(expected_container=expected_container)
+        expected_output = expected_output.format(expected_container=strategies.dict_strategy)
         assert expected_n_children == len(tree), "Not all children were correctly parsed"
         assert expected_output == tree.get_str_top_node()
         assert_imports(tree, self.imports_to_check)
@@ -95,9 +95,9 @@ class TestGetAliasHeight:
     @pytest.mark.parametrize(
         "data, min_height, expected_output",
         [
-            ({"name": {"unit": "dolar"}}, 0, f"{NAME}: TypeAlias = Dict[str, ExampleName]"),
-            ({"name": {"unit": "dolar"}}, 1, f"{NAME}: TypeAlias = Dict[str, Dict[str, str]]"),
-            ({"name": {"unit": "dolar"}}, 2, f"{NAME}: TypeAlias = Dict[str, Dict[str, str]]"),
+            ({"name": {"unit": "dolar"}}, 0, f"{NAME}: TypeAlias = dict[str, ExampleName]"),
+            ({"name": {"unit": "dolar"}}, 1, f"{NAME}: TypeAlias = dict[str, dict[str, str]]"),
+            ({"name": {"unit": "dolar"}}, 2, f"{NAME}: TypeAlias = dict[str, dict[str, str]]"),
         ],
     )
     # fmt: on

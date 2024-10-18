@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Any, Final, Literal, Mapping, Union, cast
+from typing import Any, Final, Literal, Union, cast
+from collections.abc import Mapping
 
 import pytest
 import yaml
@@ -71,7 +72,7 @@ class TestLazyTypeHintLive:
         exec(file_content)
 
         result = mypy.scan_file(file_path, strict=True, ignore_errors=["Overloaded"])
-        assert result.success == expected_mypy_success, str(result)
+        assert expected_mypy_success == result.success, str(result)
 
 
 @pytest.mark.usefixtures("_serial")

@@ -1,5 +1,6 @@
 from types import MappingProxyType
-from typing import Any, Callable, List, Literal, Mapping, cast
+from typing import Any, Callable, Literal, cast
+from collections.abc import Mapping
 
 import numpy as np
 import pandas as pd
@@ -8,7 +9,7 @@ import pytest
 SAMPLE_TYPE = Literal["frozenset", "set", "list", "tuple", "dictionary", "mapping"]
 
 
-def random_func(a: int, b: Mapping[str, str]) -> List[bool]:  # type: ignore  # noqa: ARG001
+def random_func(a: int, b: Mapping[str, str]) -> list[bool]:  # type: ignore  # noqa: ARG001
     ...
 
 

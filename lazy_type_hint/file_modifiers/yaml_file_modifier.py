@@ -8,15 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Final,
-    FrozenSet,
-    List,
     Literal,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
     Union,
 )
+from collections.abc import Mapping, Sequence
 
 YAML_COMMENTS_POSITION = Literal["above", "below", "side"]
 """Possible locations where comments can be written."""
@@ -29,13 +25,13 @@ class Comment:
     full_string: str
     associated_with_key: str
     key_line: int
-    spacing_element: Tuple[Literal["spaces", "tabs", "none"], int]
+    spacing_element: tuple[Literal["spaces", "tabs", "none"], int]
     must_replace_its_key_as_first_element_of_list: bool = False
 
     @property
     def spacing(self) -> str:
         spacing_element = "\t" if self.spacing_element[0] == "tabs" else " "
-        lst: List[str] = [spacing_element] * self.spacing_element[1]
+        lst: list[str] = [spacing_element] * self.spacing_element[1]
         if self.must_replace_its_key_as_first_element_of_list:
             lst[-2] = "-"
             return "".join(lst)
@@ -49,9 +45,9 @@ class YamlFileModifierError(Exception):
 class YamlFileModifier:
     path: Path
     """Path where the file lies."""
-    lines: Tuple[str, ...]
+    lines: tuple[str, ...]
     """Content of the file parsed as multiple lines."""
-    comments_are: Tuple[YAML_COMMENTS_POSITION, ...]
+    comments_are: tuple[YAML_COMMENTS_POSITION, ...]
     """Potential location of the comments. Order matters."""
     prefix: Final = "___docstring_hidden_key_"
     """When reading the comments associated with a key, this prefix will be prepended to the key.
@@ -200,7 +196,7 @@ class YamlFileModifier:
 
         step: Final = -1 if comments_are == "above" else 1
         increment = step
-        multi_line_comments: List[str] = []
+        multi_line_comments: list[str] = []
         with suppress(IndexError):
             while self.lines[line_idx + increment][idx_first_char] == "#":
                 multi_line_comments.append(self.lines[line_idx + increment][idx_first_char + 1 :].strip())
@@ -217,7 +213,7 @@ class YamlFileModifier:
 
     @staticmethod
     def _find_first_occurrence_that_is_not_between(
-        line: str, occurrence: str, not_between: FrozenSet[str] = frozenset({"'", '"'})
+        line: str, occurrence: str, not_between: frozenset[str] = frozenset({"'", '"'})
     ) -> Optional[int]:
         """
         Finds the first occurrence of a character that is not between the given characters.
@@ -225,7 +221,7 @@ class YamlFileModifier:
         Args:
             line (str): The line to search for the occurrence.
             occurrence (str): The character to search for.
-            not_between (FrozenSet[str], optional): A set of characters that define the quotes.
+            not_between (frozenset[str], optional): A set of characters that define the quotes.
                 Defaults to frozenset({"'", '"'}).
 
         Returns:
@@ -312,7 +308,7 @@ class YamlFileModifier:
             return len(spaces_tabs)
         return 0
 
-    def _extract_comments(self) -> Tuple[Comment, ...]:
+    def _extract_comments(self) -> tuple[Comment, ...]:
         """
         Extracts comments associated with keys in the YAML file.
 
@@ -322,7 +318,7 @@ class YamlFileModifier:
         Returns:
             A tuple of Comment objects representing the extracted comments.
         """
-        comments: List[Comment] = []
+        comments: list[Comment] = []
         indentation = self._detect_indentation(self.lines)
         if indentation == "??":
             return ()
@@ -377,17 +373,17 @@ class YamlFileModifier:
         return f"\n{multiple_indentation}".join(lines)
 
     @staticmethod
-    def _merge_comments(comments: Sequence[Comment]) -> Tuple[Comment, ...]:
+    def _merge_comments(comments: Sequence[Comment]) -> tuple[Comment, ...]:
         """
         Merge comments that are associated with the same key.
 
         This can heppen if the user requests to read from "below" and "side" for example.
         """
-        comments_in_line: Mapping[int, List[Comment]] = defaultdict(list)
+        comments_in_line: Mapping[int, list[Comment]] = defaultdict(list)
         for comment in comments:
             comments_in_line[comment.key_line].append(comment)
 
-        merged_comments: List[Comment] = []
+        merged_comments: list[Comment] = []
         for comments_lst in comments_in_line.values():
             string = "\n\n".join(comment.full_string for comment in comments_lst)
             merged_comments.append(

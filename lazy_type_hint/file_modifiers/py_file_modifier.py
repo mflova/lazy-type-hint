@@ -1,12 +1,12 @@
 import ast
 from collections.abc import Sequence
-from typing import Any, List, Literal, Tuple, Union, overload
+from typing import Any, Literal, Union, overload
 
 from lazy_type_hint.utils import TAB
 
 
 class PyFileModifier:
-    lines: List[str]
+    lines: list[str]
 
     def __init__(self, representation: str) -> None:
         self.lines = representation.splitlines()
@@ -18,14 +18,14 @@ class PyFileModifier:
         return "\n".join(self.lines)
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> List[Tuple[int, str]]:
+    def search_assignment(self, variable: str, only_values: Literal[False] = False) -> list[tuple[int, str]]:
         ...
 
     @overload
-    def search_assignment(self, variable: str, only_values: Literal[True]) -> List[str]:
+    def search_assignment(self, variable: str, only_values: Literal[True]) -> list[str]:
         ...
 
-    def search_assignment(self, variable: str, only_values: bool = False) -> Union[List[Tuple[int, str]], List[str]]:
+    def search_assignment(self, variable: str, only_values: bool = False) -> Union[list[tuple[int, str]], list[str]]:
         """
         Searches for assignments of a given variable in the lines of the file.
 
@@ -34,10 +34,10 @@ class PyFileModifier:
             only_values (bool): Only return the values being assigned to that variable.
 
         Returns:
-            List[Tuple[int, str]]: A list of tuples containing the line index and the
+            list[tuple[int, str]]: A list of tuples containing the line index and the
                 assigned value.
         """
-        lst: List[Any] = []
+        lst: list[Any] = []
         for idx, line in enumerate(self.lines):
             if variable in line and "=" in line and not self.it_is_string(line, variable):
                 value = line.split("=")[-1].strip()
@@ -49,7 +49,7 @@ class PyFileModifier:
                     lst.append((idx, value))
         return lst
 
-    def search_decorator(self, *, decorator_name: str, method_name: str) -> List[int]:
+    def search_decorator(self, *, decorator_name: str, method_name: str) -> list[int]:
         """
         Searches for a specific decorator in the lines of code preceding a method.
 
@@ -58,10 +58,10 @@ class PyFileModifier:
             method_name (str): The name of the method to search for.
 
         Returns:
-            List[int]: A list of line numbers where the decorator is found.
+            list[int]: A list of line numbers where the decorator is found.
         """
         lst = self.search_method(method_name=method_name, return_index_above_decorator=False)
-        output: List[int] = []
+        output: list[int] = []
         for idx in lst:
             while "@" in self.lines[idx - 1]:
                 if f"@{decorator_name}" in self.lines[idx - 1]:
@@ -70,7 +70,7 @@ class PyFileModifier:
                 break
         return output
 
-    def search_method(self, method_name: str, *, return_index_above_decorator: bool = True) -> List[int]:
+    def search_method(self, method_name: str, *, return_index_above_decorator: bool = True) -> list[int]:
         """
         Search for a method in the lines of the file and return its location (indices).
 
@@ -80,9 +80,9 @@ class PyFileModifier:
                 above the decorator if found. Defaults to True.
 
         Returns:
-            List[int]: A list of indices where the method is found.
+            list[int]: A list of indices where the method is found.
         """
-        lst: List[int] = []
+        lst: list[int] = []
         for idx, line in enumerate(self.lines):
             if line.strip().startswith(f"def {method_name}") and not self.it_is_string(line, method_name):
                 if return_index_above_decorator:
@@ -181,7 +181,7 @@ class PyFileModifier:
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 node.body = [ast.Ellipsis()]  # type: ignore
-        self.lines = ast.unparse(tree).strip().splitlines()  # type: ignore
+        self.lines = ast.unparse(tree).strip().splitlines()
 
     def remove_all_private_methods(self) -> None:
         """
@@ -193,7 +193,7 @@ class PyFileModifier:
 
         Note: This method modifies the object in-place.
         """
-        lines_to_remove: List[int] = []
+        lines_to_remove: list[int] = []
         for idx, line in enumerate(self.lines):
             line_ = line.strip()
             if line_.startswith("def _") and not line_.startswith("def __"):
@@ -268,7 +268,7 @@ class PyFileModifier:
         for line in lines[::-1]:
             self.lines.insert(idx, line)
 
-    def get_signature(self, method_name: str) -> Tuple[str, slice]:
+    def get_signature(self, method_name: str) -> tuple[str, slice]:
         """
         Retrieves the signature of a method.
 
@@ -276,7 +276,7 @@ class PyFileModifier:
             method_name (str): The name of the method.
 
         Returns:
-            Tuple[str, slice]: A tuple containing the method signature as a string and a
+            tuple[str, slice]: A tuple containing the method signature as a string and a
                 slice object representing the range of lines in the file that contain
                 the signature.
         """

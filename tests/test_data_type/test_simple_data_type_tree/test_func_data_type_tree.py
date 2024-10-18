@@ -1,4 +1,5 @@
-from typing import Final, List, Sequence
+from typing import Final
+from collections.abc import Sequence
 
 import pytest
 
@@ -50,7 +51,7 @@ def func7(a: int, b: int, /, c: int): ...  # type: ignore
 def func8(a: int, b: int, /, c: int, *, d: int): ...  # type: ignore
 def func9(a, b, /, c, *, d): ...  # type: ignore
 def func10(a, b, /, c, *, d): return 2  # type: ignore
-def func11(a, b, /, c, *, d) -> Sequence[List[int]]: ...  # type: ignore
+def func11(a, b, /, c, *, d) -> Sequence[list[int]]: ...  # type: ignore
 def func12(a: "TestFunction"): ...  # type: ignore
 # fmt: on
 
@@ -135,8 +136,8 @@ class TestFunction:
             [
                 func11,
                 f"""class {NAME}(Protocol):
-{TAB}def __call__(a, b, /, c, *, d) -> Sequence[List[int]]: ...""",
-                {"Sequence", "list"},
+{TAB}def __call__(a, b, /, c, *, d) -> Sequence[list[int]]: ...""",
+                {"Sequence"},
             ],
             [
                 func12,

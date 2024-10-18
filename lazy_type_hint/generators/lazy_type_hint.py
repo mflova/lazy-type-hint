@@ -1,15 +1,16 @@
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
     Callable,
     Optional,
-    Sequence,
     TypeVar,
     Union,
 )
 
+from lazy_type_hint.data_type_tree import DataTypeTree
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
 from lazy_type_hint.file_modifiers.yaml_file_modifier import YAML_COMMENTS_POSITION
 from lazy_type_hint.generators.lazy_type_hint_abc import LazyTypeHintABC

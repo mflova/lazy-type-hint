@@ -1,15 +1,9 @@
 from typing import (
-    Dict,
     Final,
-    Hashable,
-    List,
-    Mapping,
-    Set,
-    Tuple,
-    Type,
     Union,
     cast,
 )
+from collections.abc import Hashable, Mapping
 
 import pandas as pd
 from typing_extensions import override
@@ -40,7 +34,7 @@ TEMPLATE: Final = """class {class_name}(pd.DataFrame):
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         ...
@@ -54,7 +48,7 @@ TEMPLATE: Final = """class {class_name}(pd.DataFrame):
             pd.Index,
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)"""
@@ -68,7 +62,7 @@ TEMPLATE_NO_PD: Final = """class {class_name}(pd.DataFrame):
             {allowed_types},
             npt.NDArray[np.bool_],
             npt.NDArray[np.str_],
-            List[Union[Scalar, Tuple[Hashable, ...]]],
+            list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
         return super().__getitem__(key)"""
@@ -109,11 +103,11 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
     def are_column_same_type(self) -> bool:
         return len({type(column) for column in self.data.columns}) == 1
 
-    def all_columns_are(self, type_: Type[object]) -> bool:
+    def all_columns_are(self, type_: type[object]) -> bool:
         return all(isinstance(column, type_) for column in self.data.columns)
 
     @property
-    def literal_compatible_types(self) -> Tuple[Type[str], Type[bool], Type[int]]:
+    def literal_compatible_types(self) -> tuple[type[str], type[bool], type[int]]:
         return str, bool, int
 
     @property
@@ -140,7 +134,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
 
     @override
     def _instantiate_children(self, data: pd.DataFrame) -> Mapping[Hashable, DataTypeTree]:
-        children: Dict[Hashable, DataTypeTree] = {}
+        children: dict[Hashable, DataTypeTree] = {}
         if not self.are_all_columns_literal_compatible:
             return {}
 
@@ -148,13 +142,13 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         if all(isinstance(column, tuple) and len(column) == 1 for column in self.data.columns):
             return {}
 
-        columns_processed: Set[Union[bool, str, int]] = set()
+        columns_processed: set[Union[bool, str, int]] = set()
         for column in data.columns:
             if not self.can_be_accessed_multilevel:  # Here all columns will  be Hashable
                 column = cast(Hashable, column)
                 children[column] = self._create_child(column)
             else:  # Here all columns will be tuple
-                multi_column = cast(Tuple[Hashable, ...], column)
+                multi_column = cast(tuple[Hashable, ...], column)
                 if multi_column[0] not in columns_processed:
                     if isinstance(multi_column[0], self.literal_compatible_types):
                         columns_processed.add(multi_column[0])
@@ -177,13 +171,11 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         self.imports.add("Union")
         self.imports.add("Literal")
         self.imports.add("npt")
-        self.imports.add("tuple")
-        self.imports.add("list")
         self.imports.add("Hashable")
         self.imports.add("numpy")
         self.imports.add("pd.Scalar")
 
-        overloads: List[str] = []
+        overloads: list[str] = []
         for literal, child in self.children.items():
             if isinstance(literal, self.literal_compatible_types):
                 if child.permission_to_be_created_as_type_alias:
@@ -192,7 +184,7 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
                     rtype = child.get_str_top_node_without_lvalue()
                     overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=rtype))
         if self.strategies.pandas_strategies == "Full type hint":
-            literal_compatible_keys: List[str] = []
+            literal_compatible_keys: list[str] = []
             extra_types = ""
             for key in self.children:
                 if isinstance(key, self.literal_compatible_types):

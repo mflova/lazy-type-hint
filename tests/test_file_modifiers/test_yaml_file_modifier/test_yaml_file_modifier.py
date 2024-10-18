@@ -1,6 +1,7 @@
 from contextlib import suppress
 from pathlib import Path
-from typing import Any, Final, Literal, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, Final, Literal, Optional, Union
+from collections.abc import Mapping, Sequence
 from unittest.mock import patch
 
 import pytest
@@ -532,7 +533,7 @@ class TestExtractComments:
         self,
         file: str,
         comments_are: Literal["above", "below"],
-        expected_output: Tuple[Comment, ...],
+        expected_output: tuple[Comment, ...],
     ) -> None:
         data_file_modifier = YamlFileModifier(TEST_FILES_DIR / file, comments_are=comments_are)
         assert expected_output == data_file_modifier._extract_comments()
