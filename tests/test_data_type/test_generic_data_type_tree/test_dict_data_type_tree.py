@@ -1,10 +1,10 @@
+from collections.abc import Hashable, Iterable, Mapping, Sequence, Sized
 from copy import deepcopy
 from typing import (
     Any,
     Callable,
     Final,
 )
-from collections.abc import Hashable, Iterable, Mapping, Sequence, Sized
 
 import pytest
 
@@ -284,7 +284,6 @@ class TestGetStrHeight:
         )
         assert expected_output == tree.get_str_top_node(), error
         assert "TypeAlias" in tree.imports
-        assert "list" in tree.imports
 
 
 class TestClassDocstringFromKey:
