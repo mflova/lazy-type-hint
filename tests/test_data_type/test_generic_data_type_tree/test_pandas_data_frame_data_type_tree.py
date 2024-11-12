@@ -35,6 +35,8 @@ class TestGetStrPyForAutocomplete:
             (pd.DataFrame({frozenset({1,2}): [1,2,3]}), f"{NAME}: TypeAlias = pd.DataFrame", 0),
             (pd.DataFrame({1: [1,2,3]}), """class Example(pd.DataFrame):
 
+    attrs: ExampleAttrs
+
     @overload  # type: ignore
     def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
         ...
@@ -66,8 +68,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 1),
+        return super().__getitem__(key)""", 2),
             (pd.DataFrame({"values": [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['values']) -> pd.Series[int]:
@@ -100,8 +104,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 1),
+        return super().__getitem__(key)""", 2),
             (pd.DataFrame({"A": [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
@@ -138,8 +144,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], ("C", "D"): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> {NAME}A:
@@ -176,8 +184,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], ("C",): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> {NAME}A:
@@ -214,8 +224,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", frozenset({1})): [1,2,3], ("C",): [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> pd.DataFrame:
@@ -252,8 +264,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({(2, "A"): [1,2,3], ("C",): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal[2]) -> {NAME}2:
@@ -290,8 +304,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({(True, "A"): [1,2,3], ("C",): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal[True]) -> {NAME}True:
@@ -328,8 +344,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['C']) -> pd.Series[int]:
@@ -362,8 +380,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], ("C", 1): [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> ExampleA:
@@ -400,8 +420,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({"A": [1], 2: [2]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
@@ -438,8 +460,10 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A",): [1], 2: [2]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal[2]) -> pd.Series[int]:
@@ -472,7 +496,7 @@ class TestGetStrPyForAutocomplete:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
         ],
     )
     # fmt: on
@@ -509,6 +533,8 @@ class TestGetStrPyFullTypeHint:
             (pd.DataFrame(), f"{NAME}: TypeAlias = pd.DataFrame", 0),
             (pd.DataFrame({1: [1,2,3]}), """class Example(pd.DataFrame):
 
+    attrs: ExampleAttrs
+
     @overload  # type: ignore
     def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
         ...
@@ -522,10 +548,12 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 1),
+        return super().__getitem__(key)""", 2),
             (pd.DataFrame({frozenset({1,2}): [1,2,3]}), f"{NAME}: TypeAlias = pd.DataFrame", 0),
             (pd.DataFrame({frozenset({1,2}): [1], "A": [1]}), f"{NAME}: TypeAlias = pd.DataFrame", 0),
             (pd.DataFrame({"values": [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['values']) -> pd.Series[int]:
@@ -540,8 +568,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 1),
+        return super().__getitem__(key)""", 2),
             (pd.DataFrame({"A": [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
@@ -560,8 +590,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], ("C", "D"): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> {NAME}A:
@@ -580,8 +612,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({(2, "B"): [1,2,3], ("C", "D"): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal[2]) -> {NAME}2:
@@ -600,8 +634,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({(True, "B"): [1,2,3], ("C", "D"): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal[True]) -> {NAME}True:
@@ -620,8 +656,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], ("C",): [1,2,3]}), f"""class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> {NAME}A:
@@ -640,8 +678,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", frozenset({1,2})): [1,2,3], ("C",): [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> pd.DataFrame:
@@ -660,8 +700,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], "C": [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['C']) -> pd.Series[int]:
@@ -676,8 +718,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A", "B"): [1,2,3], ("C", 1): [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> ExampleA:
@@ -696,8 +740,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({"A": [1,2,3], 1: [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal['A']) -> pd.Series[int]:
@@ -716,8 +762,10 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
             (pd.DataFrame({("A",): [1,2,3], 1: [1,2,3]}), """class Example(pd.DataFrame):
+
+    attrs: ExampleAttrs
 
     @overload  # type: ignore
     def __getitem__(self, key: Literal[1]) -> pd.Series[int]:
@@ -732,7 +780,7 @@ class TestGetStrPyFullTypeHint:
             list[Union[Scalar, tuple[Hashable, ...]]],
         ],
     ) -> Union[pd.Series, pd.DataFrame]:
-        return super().__getitem__(key)""", 2),
+        return super().__getitem__(key)""", 3),
         ],
     )
     # fmt: on
