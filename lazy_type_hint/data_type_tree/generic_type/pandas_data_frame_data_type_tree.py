@@ -1,15 +1,16 @@
+from collections.abc import Hashable, Mapping
 from typing import (
     Final,
     Union,
     cast,
 )
-from collections.abc import Hashable, Mapping
 
 import pandas as pd
 from typing_extensions import override
 
 from lazy_type_hint.data_type_tree import data_type_tree_factory
 from lazy_type_hint.data_type_tree.data_type_tree import DataTypeTree
+from lazy_type_hint.data_type_tree.generic_type.dict_data_type_tree import DictDataTypeTree
 from lazy_type_hint.data_type_tree.generic_type.mapping_data_type_tree import MappingDataTypeTree
 from lazy_type_hint.utils.utils import cache_returned_value_per_instance
 
@@ -22,6 +23,8 @@ OVERLOAD_TEMPLATE: Final = """    @overload  # type: ignore
         ...
 """
 TEMPLATE: Final = """class {class_name}(pd.DataFrame):
+
+    attrs: {class_name}Attrs
 
 {overloads}
     @overload
@@ -54,6 +57,8 @@ TEMPLATE: Final = """class {class_name}(pd.DataFrame):
         return super().__getitem__(key)"""
 
 TEMPLATE_NO_PD: Final = """class {class_name}(pd.DataFrame):
+
+    attrs: {class_name}Attrs
 
 {overloads}
     def __getitem__(
@@ -111,6 +116,10 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         return str, bool, int
 
     @property
+    def attrs_class_name(self) -> str:
+        return f"{self.name}Attrs"
+
+    @property
     def are_all_columns_literal_compatible(self) -> bool:
         column: Hashable
         for column in self.data.columns:
@@ -153,6 +162,9 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
                     if isinstance(multi_column[0], self.literal_compatible_types):
                         columns_processed.add(multi_column[0])
                         children[column[0]] = self._create_child(column[0])
+
+            
+        children["Attrs"] = data_type_tree_factory(self.data.attrs, name=self.attrs_class_name, imports=self.imports, depth=self.depth + 1, strategies=self.strategies, parent=self)
         return children
 
     @override
@@ -177,6 +189,8 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
 
         overloads: list[str] = []
         for literal, child in self.children.items():
+            if literal == "Attrs":
+                continue
             if isinstance(literal, self.literal_compatible_types):
                 if child.permission_to_be_created_as_type_alias:
                     overloads.append(LITERAL_OVERLOAD_TEMPLATE.format(literal=repr(literal), rtype=child.name))
@@ -187,6 +201,8 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
             literal_compatible_keys: list[str] = []
             extra_types = ""
             for key in self.children:
+                if key == "Attrs":
+                    continue
                 if isinstance(key, self.literal_compatible_types):
                     literal_compatible_keys.append(repr(key))
                 else:
@@ -198,4 +214,5 @@ class PandasDataFrameDataTypeTree(MappingDataTypeTree):
         else:
             allowed_types = "str"
             template = TEMPLATE
+        
         return template.format(class_name=self.name, overloads="\n".join(overloads), allowed_types=allowed_types)
