@@ -1,14 +1,15 @@
 # Standard API
 
-This API performs the type hint generation and allows its export into standard `.py` files.
+The Standard API facilitates the generation of type hints and allows exporting them as
+standard `.py` files.
 
-For more details about the fine-tuning of the type information, see
-[Configuration](./configuration.md)
+For detailed guidance on fine-tuning type information, refer to the
+[Configuration](./configuration.md) section.
 
 ## How to use it?
 
-Input data to be hinted can be given either as a Python object or from a yaml file:
-
+You can provide input data for type hinting either as a Python object or by loading it
+from a YAML file:
 
 === "From a Python object"
 
@@ -38,6 +39,9 @@ Input data to be hinted can be given either as a Python object or from a yaml fi
 
 === "From a YAML file"
 
+    Keep in mind that when information is loaded from a YAML file, comments starting with
+    `#` are parsed and used as docstrings for the corresponding data structures.
+
     ```py
     import yaml
 
@@ -57,7 +61,8 @@ Input data to be hinted can be given either as a Python object or from a yaml fi
     )
     ```
 
-This will generate the following type interface called `MyData` under `my_data.py`:
+The code above will generate the following type interface, named `MyData`, and save it to
+`my_data.py`:
 
 ```py
 from typing import TypedDict
@@ -77,21 +82,22 @@ class MyDataDict(TypedDict):
 MyData: TypeAlias = tuple[MyDataDict, MyDataDict]
 ```
 
-Hence this type information `MyData` can be used to type hint any data structure:
+With this generated type information, `MyData` can now be used to type-hint any compatible
+data structure:
 
-![Image](../images/example_standard_api.PNG)
+![Image](../images/example_standard_api.PNG){: .center}
 
 ## What are some of its potential use-cases?
 
-- Data structure validation: Considering that the tool generates type information that
-  defines the underlying structure, `Standard API` can also be used to export the results
-  as a string and compare whether two objects share the same data structure while ignoring
-  the change of its values.
-- Static validation: Having type information about the data structure will allow type
-  checkers to be more accurate and ensure type coherency along the data structure and its
-  uses.
-- Ease of development: Type information generated will be interpreted by the IDE. This
-  will make accessing the structure way easier due to its autocompletion features.
-- Data structure interface generation: Some data structures can be rather complex to type
-  hint. Most of the times it takes long time. This tool will generate these interfaces in
-  a matter of milliseconds.
+- **Data Structure Interface Generation**: Complex data structures can be difficult and
+  time-consuming to type-hint manually. This tool generates these interfaces in
+  milliseconds, saving significant development effort.
+- **Data Structure Validation**: The tool generates type information that defines the
+  underlying structure of a dataset. This feature allows exporting the results as a string
+  and comparing whether two objects share the same data structure, while ignoring value
+  differences.
+- **Static Validation**: Having detailed type information enables type checkers to perform
+  more accurate validations, ensuring type consistency across a data structure and its
+  usage.
+- **Enhanced Development Workflow**: Generated type information is recognized by IDEs,
+  providing autocompletion and simplifying access to complex data structures.

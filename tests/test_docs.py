@@ -27,7 +27,3 @@ def test_python_blocks_are_ok(tmp_path: Path) -> None:
     assert returncode == 0, (
         "There were errors reported by Mypy in at least one markdown file with a Python code snippet."
     )
-
-
-def test_strategies_are_documented() -> None:
-    raise NotImplementedError

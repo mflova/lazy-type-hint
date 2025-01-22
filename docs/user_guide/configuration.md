@@ -1,9 +1,9 @@
 # Configuration
 
-Although `lazy-type-hint` works by default without any extra configuration, this tool
-allows for a wide range of parameters that can be used to fine tune the type hint
-generation. These parameters can be passed to the initializer of both `LazyTypeHint` or `LazyTypeHintLive` via `ParsingStrategies`:
-
+Although `lazy-type-hint` works seamlessly without any additional configuration, the tool
+offers a variety of parameters for fine-tuning type hint generation. These parameters can
+be passed to the initializer of both `LazyTypeHint` and `LazyTypeHintLive` via the
+ParsingStrategies class:
 
 ```py
 from lazy_type_hint import LazyTypeHintLive, ParsingStrategies
@@ -70,6 +70,7 @@ It can be set as:
 
     # MyData: TypeAlias = tuple[Union[int, str], ...]
     ```
+
 ## Dict strategy
 
 === "Dict"
@@ -112,7 +113,8 @@ It can be set as:
 
 ## Pandas strategy
 
-Type hinting a pandas is not easy. Because of this, three different modes are available:
+Type hinting `Pandas` objects can be challenging. To address this, three modes are
+available:
 
 === "Do not type hint columns"
 
@@ -129,7 +131,8 @@ Type hinting a pandas is not easy. Because of this, three different modes are av
 
 ## Minimum depth to define type alias
 
-It defines the minimum depth that a type must have in order to be defined as a separate type alias.
+type alias. This parameter defines the minimum depth a type must have to be defined as a
+separate type alias.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -152,9 +155,10 @@ print(lazy_type_hint.from_data(obj, class_name="MyData").to_string(include_impor
 
 ## Key used as doc
 
-Some map-based data structures, specially those coming from JSON files, might contain
-documentation embedded inside a reserved keyword. This can be indicated via
-`key_used_as_doc` parameter. Note how the docstring it attached to the `TypedDict` defined below:
+Certain map-based data structures, especially those derived from JSON files, may include
+embedded documentation within a reserved keyword. This can be specified using the
+`key_used_as_doc` parameter. The example below demonstrates how the docstring is attached to
+the `TypedDict` definition:
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -173,12 +177,12 @@ print(lazy_type_hint.from_data(obj, class_name="MyDict").to_string(include_impor
 
 ## Merge different typed dicts if similarity is above
 
-When loading data from YAML files it is common to have a list-based structure with
-multiple dictionaries inside. Some of these dictionaries might have optional or missing
-keys, making the engine unsure whether to declare these as separate dictionaries or not.
-During the process of merging, all those keys that are not in all dictionaries will be
-labelled as `NotRequired`. The lower this parameter is set, the more dictionaries will be
-merged.
+When loading data from YAML files, it is common to encounter list-based structures
+containing multiple dictionaries. Some dictionaries may have optional or missing keys,
+making it challenging for the algorithm to determine whether they should be declared as
+separate dictionaries. During the merging process, keys not present in all dictionaries
+are labeled as `NotRequired`. Lowering this parameter's value increases the likelihood of
+dictionaries being merged.
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
@@ -248,10 +252,11 @@ print(lazy_type_hint.from_data(obj, class_name="MyDict").to_string(include_impor
 
 ## Check maximum n elements within container
 
-In order to type hint containers, it is needed to check the type of all of its elements.
-This operation can be time-consuming specially for elements with huge number of elements.
-Hence, if the user wants to reduce this computation time, it can be done by decreasing the
-`check_max_n_elements_within_container`. However, be aware that the type hints might be wrong if the number is too low:
+To generate type hints for containers, the tool needs to analyze the types of all elements
+within the container. This can be computationally expensive for containers with a large
+number of elements. To reduce computation time, you can lower the
+`check_max_n_elements_within_container` parameter. However, reducing it too much might
+result in incorrect type hints:
 
 ```py
 from lazy_type_hint import LazyTypeHint, ParsingStrategies
