@@ -1,0 +1,49 @@
+site_name: LazyTypeHint
+nav:
+  - Home: index.md
+  - User guide:
+    - Introduction: user_guide/introduction.md
+    - Configuration: user_guide/configuration.md
+    - Standard API: user_guide/standard_api.md
+    - Live API: user_guide/live_api.md
+
+theme: 
+  name: material
+  palette:
+    scheme: slate  # Dark theme
+    primary: black
+  navigation_depth: 1
+  features:
+    - search.suggest
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - toc.integrate
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition  # For blocks like warnings or notes
+  - tables
+  - toc:       
+      permalink: "#"
+      toc_depth: 10
+  - pymdownx.magiclink  # Clickable links from URLS
+  - pymdownx.inlinehilite  # Highlights inline code with specific syntax.
+  - pymdownx.snippets  # Embeds external content into Markdown documents.
+  - pymdownx.superfences  # Enhances code blocks with advanced features.
+  - pymdownx.details  # Allows for expandable blocks
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+
+plugins:
+  - git-revision-date-localized:
+      strict: false
+  - search
+  - htmlproofer

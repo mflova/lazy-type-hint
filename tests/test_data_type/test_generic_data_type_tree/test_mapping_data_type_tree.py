@@ -1,6 +1,6 @@
+from collections.abc import Iterable, Mapping
 from types import MappingProxyType
 from typing import Any, Callable, Final
-from collections.abc import Iterable, Mapping
 
 import pytest
 
@@ -33,8 +33,8 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "strategies",
         [
-            (ParsingStrategies(dict_strategy="dict", min_height_to_define_type_alias=0)),
-            (ParsingStrategies(dict_strategy="Mapping", min_height_to_define_type_alias=0)),
+            (ParsingStrategies(dict_strategy="dict", min_depth_to_define_type_alias=0)),
+            (ParsingStrategies(dict_strategy="Mapping", min_depth_to_define_type_alias=0)),
         ],
     )
     @pytest.mark.parametrize(
@@ -113,7 +113,7 @@ class TestGetAliasHeight:
         tree = DictDataTypeTree(
             data,
             name=self.NAME,
-            strategies=ParsingStrategies(min_height_to_define_type_alias=min_height, dict_strategy="dict"),
+            strategies=ParsingStrategies(min_depth_to_define_type_alias=min_height, dict_strategy="dict"),
         )
         assert expected_output == tree.get_str_top_node()
 

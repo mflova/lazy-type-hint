@@ -13,7 +13,7 @@ class ParsingStrategies:
     tuple_size_strategy: TUPLE_SIZE_STRATEGIES = "fixed"
     dict_strategy: MAPPING_STRATEGIES = "TypedDict"
     pandas_strategies: PANDAS_STRATEGIES = "Full type hint"
-    min_height_to_define_type_alias: int = 1
+    min_depth_to_define_type_alias: int = 1
     key_used_as_doc: str = ""
     merge_different_typed_dicts_if_similarity_above: int = 50
     typed_dict_read_only_values: bool = False
@@ -32,7 +32,7 @@ class ParsingStrategies:
                     f"Invalid value for {field.name}. Expected any of ({', '.join(map(str, allowed_values))}) but got "
                     f"{getattr(self, field.name)}"
                 )
-        if self.min_height_to_define_type_alias < 0:
+        if self.min_depth_to_define_type_alias < 0:
             raise ValueError("`min_height_to_define_type_alias` must be greater or equal than 0")
 
         if self.merge_different_typed_dicts_if_similarity_above <= 0:

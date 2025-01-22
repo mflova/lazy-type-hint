@@ -22,7 +22,7 @@ class TestSeries:
     )
     def test_get_str_top_node(self, data: object, expected_str: str) -> None:
         tree = PandasSeriesDataTypeTree(
-            data, self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)
+            data, self.NAME, strategies=ParsingStrategies(min_depth_to_define_type_alias=0)
         )
         assert expected_str == tree.get_str_top_node()
         assert "TypeAlias" in tree.imports

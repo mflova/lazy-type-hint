@@ -1,5 +1,5 @@
-from typing import Any, Callable, Final
 from collections.abc import Iterable
+from typing import Any, Callable, Final
 
 import pytest
 
@@ -17,8 +17,8 @@ class TestGetStrPy:
     @pytest.mark.parametrize(
         "strategies",
         [
-            (ParsingStrategies(list_strategy="list", min_height_to_define_type_alias=0)),
-            (ParsingStrategies(list_strategy="Sequence", min_height_to_define_type_alias=0)),
+            (ParsingStrategies(list_strategy="list", min_depth_to_define_type_alias=0)),
+            (ParsingStrategies(list_strategy="Sequence", min_depth_to_define_type_alias=0)),
         ],
     )
     @pytest.mark.parametrize(
@@ -75,7 +75,7 @@ class TestTypeAliasHeight:
 
     @pytest.fixture
     def strategies(self, min_height: int) -> ParsingStrategies:
-        return ParsingStrategies(min_height_to_define_type_alias=min_height)
+        return ParsingStrategies(min_depth_to_define_type_alias=min_height)
 
     # fmt: off
     @pytest.mark.parametrize(
