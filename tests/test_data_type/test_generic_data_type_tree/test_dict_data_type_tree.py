@@ -44,14 +44,14 @@ class TestGetStrPy:
         "tree, expected_output, expected_n_children",
         [
             (
-                DictDataTypeTree({}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)),
+                DictDataTypeTree({}, name=NAME, strategies=ParsingStrategies(min_depth_to_define_type_alias=0)),
                 f"""class {NAME}(TypedDict):
 {TAB}...""",
                 0,
             ),
             (
                 DictDataTypeTree(
-                    {"name": "Joan"}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)
+                    {"name": "Joan"}, name=NAME, strategies=ParsingStrategies(min_depth_to_define_type_alias=0)
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str""",
@@ -59,7 +59,7 @@ class TestGetStrPy:
             ),
             (
                 DictDataTypeTree(
-                    {"age": 22}, name=NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=0)
+                    {"age": 22}, name=NAME, strategies=ParsingStrategies(min_depth_to_define_type_alias=0)
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}age: int""",
@@ -69,7 +69,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"name": "Joan", "age": 21},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
@@ -80,7 +80,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"name": "Joan", "kids": ["A", "B"]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
@@ -91,7 +91,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"name": "Joan", "kids": ["A", "B"], "parents": ["C", "D"]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
@@ -103,7 +103,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"name": "Joan", "kids": ["A", "B"], "parents": ["C", "D", 2]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
@@ -140,7 +140,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"name and surname": "Joan B."},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""{NAME} = TypedDict(
     "{NAME}",
@@ -154,7 +154,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"$": 22.0, "own_list": [1, 2, 3]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""{NAME} = TypedDict(
     "{NAME}",
@@ -169,7 +169,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"$": 22, "my_list": [1, 2, 3], "my_list2": [2, 3]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""{NAME} = TypedDict(
     "{NAME}",
@@ -185,7 +185,7 @@ class TestGetStrPy:
                 DictDataTypeTree(
                     {"$": 22, "my_list": [1, 2, 3], "my_list2": [2, 3], "my_list3": ["a"], "my_list4": ["b"]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""{NAME} = TypedDict(
     "{NAME}",
@@ -235,7 +235,7 @@ class TestGetStrHeight:
                 DictDataTypeTree(
                     {"name": "Joan", "kids": ["A", "B"]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=0),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=0),
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
@@ -245,7 +245,7 @@ class TestGetStrHeight:
                 DictDataTypeTree(
                     {"name": "Joan", "kids": ["A", "B"]},
                     name=NAME,
-                    strategies=ParsingStrategies(min_height_to_define_type_alias=1),
+                    strategies=ParsingStrategies(min_depth_to_define_type_alias=1),
                 ),
                 f"""class {NAME}(TypedDict):
 {TAB}name: str
@@ -280,7 +280,7 @@ class TestGetStrHeight:
     def test_permissions(self, data: object, min_height: int, expected_output: str) -> None:
         error = "No matter the minimum height set up, `TypedDict` should always have preference"
         tree = data_type_tree_factory(
-            data, name=self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=min_height)
+            data, name=self.NAME, strategies=ParsingStrategies(min_depth_to_define_type_alias=min_height)
         )
         assert expected_output == tree.get_str_top_node(), error
         assert "TypeAlias" in tree.imports
@@ -462,7 +462,7 @@ class TestSimilarityMerge:
         self, data: Sized, expected_merge: bool, expected_str_all_nodes: tuple[str, ...]
     ) -> None:
         tree = data_type_tree_factory(
-            data, name=self.NAME, strategies=ParsingStrategies(min_height_to_define_type_alias=1)
+            data, name=self.NAME, strategies=ParsingStrategies(min_depth_to_define_type_alias=1)
         )
 
         if not expected_merge:

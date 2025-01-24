@@ -1,5 +1,5 @@
-from typing import Any, Final
 from collections.abc import Iterator
+from typing import Any, Final
 
 import pytest
 
@@ -20,7 +20,7 @@ class TestIterator:
     )
     def test_get_str_top_node(self, data: Iterator[Any], expected_str: str) -> None:
         tree = IteratorDataTypeTree(
-            data, name="Example", strategies=ParsingStrategies(min_height_to_define_type_alias=0)
+            data, name="Example", strategies=ParsingStrategies(min_depth_to_define_type_alias=0)
         )
         assert expected_str == tree.get_str_top_node()
         assert "Iterator" in tree.imports

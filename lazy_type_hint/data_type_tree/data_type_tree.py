@@ -177,7 +177,7 @@ class DataTypeTree(ABC):
         """
         if self.parent is None:
             return True
-        return bool(self.height > self.strategies.min_height_to_define_type_alias)
+        return bool(self.height > self.strategies.min_depth_to_define_type_alias)
 
     @final
     def get_str_top_node_without_lvalue(self) -> str:
