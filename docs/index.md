@@ -1,19 +1,9 @@
 # LazyTypeHint
 
-<!---
-Badge generated with:
-
-```
-python -c "import anybadge; anybadge.Badge('Python', '3.9 | 3.10 | 3.11 | 3.12', default_color='#14151a').write_badge('docs/images/pybadge.svg')"
-```
--->
-
-![Image](./images/pybadge.svg)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue.svg)](https://github.com/mflova/lazy-type-hint)
-[![Contact](https://img.shields.io/badge/Email-mflovaa%40gmail.com-brightgreen.svg)](mailto:mflovaa@gmail.com)
-![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen.svg)
-
-
+![Python](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-black.svg)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black.svg)](https://github.com/mflova/lazy-type-hint)
+[![Contact](https://img.shields.io/badge/Email-mflovaa%40gmail.com-black.svg)](mailto:mflovaa@gmail.com)
+![Coverage](https://img.shields.io/badge/Coverage-91%25-black.svg)
 
 
 `LazyTypeHint` allows you to quickly generate accurate, ready-to-use type hints for any
@@ -31,14 +21,14 @@ harder. Here’s why:
 - **Limited IDE Assistance**: Without prior knowledge of the data structure, IDE features like
 autocompletion and type checking are ineffective. Coding without these tools is
 cumbersome.
-- **Manual Type Hints are Impractical**:
+- **Manual Type Hints are sometimes impractical**:
 
-  - **Time-Consuming**: Extracting type hints from complex files, such as a 10,000-line
-    YAML file, is tedious.
-  - **Hard to Maintain**: Any structural change requires team-wide updates, risking
-    inconsistencies and bugs.
-  - **Comparison Challenges**: Verifying that two data structures share the same structure
-    is non-trivial.
+    - **Time-Consuming**: Extracting type hints from complex files, such as a 10,000-line
+      YAML file, is tedious.
+    - **Hard to Maintain**: Any structural change requires team-wide updates, risking
+      inconsistencies and bugs.
+    - **Comparison Challenges**: Verifying that two data structures share the same structure
+      is non-trivial.
 
 
 `LazyTypeHint` overcomes these challenges by automating type hint generation and creating

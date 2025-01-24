@@ -30,9 +30,9 @@ pytest-benchmark = "^4.0.0"
 # Docs related
 mkdocs-git-revision-date-localized-plugin = "^1.3.0"
 mkdocs-material = "^9.5.50"
-anybadge = "^1.16.0"
 pymdown-extensions = "^10.14"
 mkdocs-htmlproofer-plugin = "^1.3.0"
+pytest-cov = "^6.0.0"
 
 
 [build-system]
@@ -78,10 +78,11 @@ ignore-words-list = "bu"  # Comma separated
 
 [tool.pytest.ini_options]
 markers = "integration"
-addopts = "-vv"
+# addopts = "-vv"
 # addopts = ["-m", "not integration"]
 # addopts = ["-n", "auto", "-m", "not integration"]
 # addopts = ["-n", "auto"]  # All tests
+addopts = ["--cov", "lazy_type_hint"]  # All tests
 testpaths = ["tests"]
 
 # Commands:
