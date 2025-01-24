@@ -483,14 +483,10 @@
 
 
 <h1 id="lazytypehint">LazyTypeHint<a class="headerlink" href="#lazytypehint" title="Permanent link">#</a></h1>
-<!---
-Badge generated with:
-
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python -c &quot;import anybadge; anybadge.Badge(&#39;Python&#39;, &#39;3.9 | 3.10 | 3.11 | 3.12&#39;, default_color=&#39;#14151a&#39;).write_badge(&#39;docs/images/pybadge.svg&#39;)&quot;
-</span></code></pre></div>
--->
-
-<p><img alt="Image" class="center" src="images/pybadge.svg" /></p>
+<p><img alt="Python" src="https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-black.svg" />
+<a href="https://github.com/mflova/lazy-type-hint"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-Repository-black.svg" /></a>
+<a href="mailto:mflovaa@gmail.com"><img alt="Contact" src="https://img.shields.io/badge/Email-mflovaa%40gmail.com-black.svg" /></a>
+<img alt="Coverage" src="https://img.shields.io/badge/Coverage-91%25-black.svg" /></p>
 <p><code>LazyTypeHint</code> allows you to quickly generate accurate, ready-to-use type hints for any
 Python data structure. It supports a wide range of data types, including dictionaries,
 callables, Pandas DataFrames, NumPy arrays, YAML files, and more</p>
@@ -505,16 +501,16 @@ harder. Here’s why:</p>
 autocompletion and type checking are ineffective. Coding without these tools is
 cumbersome.</li>
 <li>
-<p><strong>Manual Type Hints are Impractical</strong>:</p>
-</li>
-<li>
-<p><strong>Time-Consuming</strong>: Extracting type hints from complex files, such as a 10,000-line
-    YAML file, is tedious.</p>
-</li>
+<p><strong>Manual Type Hints are sometimes impractical</strong>:</p>
+<ul>
+<li><strong>Time-Consuming</strong>: Extracting type hints from complex files, such as a 10,000-line
+  YAML file, is tedious.</li>
 <li><strong>Hard to Maintain</strong>: Any structural change requires team-wide updates, risking
-    inconsistencies and bugs.</li>
+  inconsistencies and bugs.</li>
 <li><strong>Comparison Challenges</strong>: Verifying that two data structures share the same structure
-    is non-trivial.</li>
+  is non-trivial.</li>
+</ul>
+</li>
 </ul>
 <p><code>LazyTypeHint</code> overcomes these challenges by automating type hint generation and creating
 reusable Python modules. This automation enhances IDE capabilities, allows static analysis
@@ -534,7 +530,7 @@ following example:</p>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <p>Install LazyTypeHint using your preferred package manager:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip install lazy-type-hint
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install lazy-type-hint
 </span></code></pre></div>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">#</a></h2>
 <p>The user can interact with the type hint generation via two main APIs:</p>
@@ -544,10 +540,10 @@ following example:</p>
 <p>Generate type hints that can be exported into a single file for reuse in your Python
 scripts. This approach is ideal when type hints need to be stored and tracked within a
 git repository. For more details, refer to the <a href="user_guide/standard_api/">Standard API</a></p>
-<div class="language-py highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span> <span class="nn">lazy_type_hint</span> <span class="kn">import</span> <span class="n">LazyTypeHint</span><span class="p">,</span> <span class="n">LazyTypeHintLive</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Peter&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">},)</span> <span class="c1"># (1)!</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">LazyTypeHint</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">&quot;MyData&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;file.py&quot;</span><span class="p">)</span> <span class="c1"># (2)!</span>
+<div class="language-py highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">lazy_type_hint</span> <span class="kn">import</span> <span class="n">LazyTypeHint</span><span class="p">,</span> <span class="n">LazyTypeHintLive</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Peter&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">},)</span> <span class="c1"># (1)!</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">LazyTypeHint</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">&quot;MyData&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;file.py&quot;</span><span class="p">)</span> <span class="c1"># (2)!</span>
 </span></code></pre></div>
 <ol>
 <li>Any data structure that requires type hinting.</li>
@@ -558,10 +554,10 @@ git repository. For more details, refer to the <a href="user_guide/standard_api/
 <div class="tabbed-block">
 <p>Generate type hints that are temporarily cached in the hard disk, ideal for quick data
 exploration. For more details, refer to the <a href="user_guide/live_api/">Live API</a>.</p>
-<div class="language-py highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span> <span class="nn">lazy_type_hint</span> <span class="kn">import</span> <span class="n">LazyTypeHint</span><span class="p">,</span> <span class="n">LazyTypeHintLive</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Peter&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">},)</span> <span class="c1"># (1)!</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">data_type_hinted</span> <span class="o">=</span> <span class="n">LazyTypeHintLive</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">&quot;MyData&quot;</span><span class="p">)</span> <span class="c1"># (2)!</span>
+<div class="language-py highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span> <span class="nn">lazy_type_hint</span> <span class="kn">import</span> <span class="n">LazyTypeHint</span><span class="p">,</span> <span class="n">LazyTypeHintLive</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Peter&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">},)</span> <span class="c1"># (1)!</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">data_type_hinted</span> <span class="o">=</span> <span class="n">LazyTypeHintLive</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">&quot;MyData&quot;</span><span class="p">)</span> <span class="c1"># (2)!</span>
 </span></code></pre></div>
 <ol>
 <li>Any data structure that requires type hinting.</li>
@@ -590,7 +586,7 @@ exploration. For more details, refer to the <a href="user_guide/live_api/">Live 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 22, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 24, 2025</span>
   </span>
 
     
